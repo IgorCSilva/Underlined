@@ -1,0 +1,29 @@
+# Elixir / Phoenix (api/)
+api/_build/
+api/deps/
+api/.elixir_ls/
+api/*.ez
+api/erl_crash.dump
+api/api-*.tar
+api/priv/static/
+api/.env
+api/.env.*
+
+# Node / Nuxt (web/)
+web/node_modules/
+web/.nuxt/
+web/.output/
+web/.env
+web/.env.*
+web/dist/
+
+# Playwright
+web/test-results/
+web/playwright-report/
+web/playwright/.cache/
+
+# General
+*.log
+.DS_Store
+.vscode/
+.idea/

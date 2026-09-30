@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --color-bg: #faf7f1;
+  --color-surface: #ffffff;
+  --color-border: #e8e1d4;
+  --color-ink: #22252b;
+  --color-text-secondary: #6b6f76;
+  --color-accent-primary: #e8734a;
+  --color-accent-secondary: #3b5ba9;
+  --color-highlight: #ffd75e;
+  --color-highlight-fill: #fbf3e4;
+  --color-success: #4f9d69;
+  --color-chip-fill: #f1ead9;
+  --color-chip-text: #8a6d3b;
+  --color-ai: #8c7fd6;
+  --color-ai-fill: #f3f0fc;
+
+  --font-serif: 'Source Serif 4', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  --radius-card: 14px;
+  --radius-tile: 10px;
+  --radius-pill: 999px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+.serif {
+  font-family: var(--font-serif);
+}
+
+a {
+  color: var(--color-accent-secondary);
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+.btn-primary {
+  display: inline-block;
+  background: var(--color-accent-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 12px 20px;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.field {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.field label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--color-accent-secondary);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.checkbox-row input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent-secondary);
+}
+
+.form-error {
+  color: var(--color-accent-primary);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.form-success {
+  color: var(--color-success);
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
