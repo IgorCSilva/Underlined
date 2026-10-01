@@ -46,6 +46,14 @@ services:
       - "1025:1025"
       - "8025:8025"
 
+  # Postgres web UI. Not pre-wired to any database — log in through its web
+  # form with whichever DATABASE_URL you need (dev's postgres service, or
+  # Gigalixir's production DB) so no credentials have to live in this file.
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8081:8080"
+
   api:
     build:
       context: ./api
