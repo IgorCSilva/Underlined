@@ -81,7 +81,7 @@ export const useAuthStore = defineStore('auth', {
       this.initialized = true
     },
 
-    async updateProfile(payload: { name: string; bio: string }) {
+    async updateProfile(payload: { name: string; bio: string; avatar_url?: string | null }) {
       const { request } = useApi()
       const res = await request<{ data: AuthUser }>('/api/me', {
         method: 'PUT',

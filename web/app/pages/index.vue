@@ -8,6 +8,7 @@
         <NuxtLink to="/login">Log in</NuxtLink>
       </template>
       <NuxtLink v-else to="/profile">Go to your profile</NuxtLink>
+      <NuxtLink to="/feed">See what people are reading</NuxtLink>
       <NuxtLink to="/books">Browse books</NuxtLink>
     </div>
   </div>

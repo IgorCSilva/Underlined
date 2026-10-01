@@ -30,12 +30,19 @@ defmodule Api.Accounts.User do
     |> validate_length(:name, min: 1, max: 100)
   end
 
+  # Real avatar uploads aren't wired up yet, so profile edits can only pick
+  # one of these fixed preset images (served from web/public/avatars) instead.
+  @avatar_choices for n <- 1..10, do: "/avatars/avatar#{n}.jpg"
+
+  def avatar_choices, do: @avatar_choices
+
   def profile_changeset(user, attrs) do
     user
-    |> cast(attrs, [:name, :bio])
+    |> cast(attrs, [:name, :bio, :avatar_url])
     |> validate_required([:name])
     |> validate_length(:name, min: 1, max: 100)
     |> validate_length(:bio, max: 500)
+    |> validate_inclusion(:avatar_url, @avatar_choices, message: "must be one of the preset avatars")
   end
 
   def avatar_changeset(user, avatar_url) do

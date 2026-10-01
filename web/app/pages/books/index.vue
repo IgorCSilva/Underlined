@@ -13,7 +13,14 @@
 
     <p v-if="pending" class="status-text">Searching…</p>
     <div v-else class="book-grid">
-      <BookTile v-for="book in books ?? []" :key="book.id" :book="book" />
+      <NuxtLink
+        v-for="book in books ?? []"
+        :key="book.id"
+        :to="`/posts/new?bookId=${book.id}`"
+        class="book-tile-link"
+      >
+        <BookTile :book="book" />
+      </NuxtLink>
       <NuxtLink to="/books/new" class="add-book-tile">
         <span class="add-book-plus" aria-hidden="true">+</span>
         <span>Add a book</span>
@@ -89,6 +96,11 @@ const { data: books, pending } = useApiFetch<Book[]>('/api/books', {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 24px;
+}
+
+.book-tile-link {
+  color: inherit;
+  text-decoration: none;
 }
 
 .add-book-tile {

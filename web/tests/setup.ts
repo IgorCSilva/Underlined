@@ -18,6 +18,8 @@ vi.stubGlobal('useRuntimeConfig', () => ({
   public: { apiBaseUrl: 'http://localhost:4000' },
 }))
 
+vi.stubGlobal('useRouter', () => ({ push: vi.fn(), replace: vi.fn() }))
+
 // Individual tests override this via `vi.stubGlobal('$fetch', ...)`.
 vi.stubGlobal('$fetch', vi.fn())
 
@@ -27,11 +29,13 @@ vi.stubGlobal('$fetch', vi.fn())
 const { useAuthStore } = await import('../app/stores/auth')
 const { useApi, apiBaseUrl } = await import('../app/composables/useApi')
 const { useBooksStore } = await import('../app/stores/books')
+const { usePostsStore } = await import('../app/stores/posts')
 
 vi.stubGlobal('useAuthStore', useAuthStore)
 vi.stubGlobal('useApi', useApi)
 vi.stubGlobal('apiBaseUrl', apiBaseUrl)
 vi.stubGlobal('useBooksStore', useBooksStore)
+vi.stubGlobal('usePostsStore', usePostsStore)
 
 beforeEach(() => {
   setActivePinia(createPinia())

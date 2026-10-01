@@ -80,6 +80,29 @@ defmodule Api.AccountsTest do
       assert {:error, changeset} = Accounts.update_profile(user, %{"bio" => String.duplicate("a", 501)})
       assert "should be at most 500 character(s)" in errors_on(changeset).bio
     end
+
+    test "sets the avatar to one of the fixed presets" do
+      user = register_user()
+      [preset | _] = User.avatar_choices()
+
+      assert {:ok, updated} = Accounts.update_profile(user, %{"avatar_url" => preset})
+      assert updated.avatar_url == preset
+    end
+
+    test "rejects an avatar_url that isn't one of the presets" do
+      user = register_user()
+
+      assert {:error, changeset} =
+               Accounts.update_profile(user, %{"avatar_url" => "https://evil.example/x.png"})
+
+      assert "must be one of the preset avatars" in errors_on(changeset).avatar_url
+    end
+
+    test "updating name/bio alone doesn't require an existing avatar_url to be a preset" do
+      user = register_user()
+      assert {:ok, updated} = Accounts.update_profile(user, %{"name" => "New Name"})
+      assert updated.avatar_url == nil
+    end
   end
 
   describe "update_avatar/3" do
