@@ -26,6 +26,9 @@ defmodule ApiWeb.Router do
     get "/books", BookController, :index
     get "/books/:id", BookController, :show
 
+    get "/posts", PostController, :index
+    get "/posts/:id", PostController, :show
+
     scope "/" do
       pipe_through :authenticated
 
@@ -34,6 +37,8 @@ defmodule ApiWeb.Router do
       put "/me/avatar", ProfileController, :update_avatar
 
       post "/books", BookController, :create
+
+      post "/posts", PostController, :create
     end
   end
 end

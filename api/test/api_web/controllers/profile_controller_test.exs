@@ -34,6 +34,28 @@ defmodule ApiWeb.ProfileControllerTest do
     end
   end
 
+  describe "PUT /api/me" do
+    test "picks one of the fixed preset avatars", %{conn: conn, access_token: token} do
+      [preset | _] = Api.Accounts.User.avatar_choices()
+
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> put(~p"/api/me", user: %{avatar_url: preset})
+
+      assert %{"data" => %{"avatar_url" => ^preset}} = json_response(conn, 200)
+    end
+
+    test "rejects an avatar_url outside the preset list", %{conn: conn, access_token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> put(~p"/api/me", user: %{avatar_url: "https://evil.example/x.png"})
+
+      assert json_response(conn, 422)
+    end
+  end
+
   describe "PUT /api/me/avatar" do
     test "uploads an avatar and updates the profile", %{conn: conn, user: user, access_token: token} do
       Api.ObjectStoreMock
