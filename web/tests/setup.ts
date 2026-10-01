@@ -4,7 +4,7 @@
 // tested exactly as written (no test-only imports scattered through app/**).
 import { beforeEach, vi } from 'vitest'
 import { createPinia, defineStore, setActivePinia } from 'pinia'
-import { computed, nextTick, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 
 vi.stubGlobal('defineStore', defineStore)
 vi.stubGlobal('ref', ref)
@@ -12,6 +12,8 @@ vi.stubGlobal('computed', computed)
 vi.stubGlobal('reactive', reactive)
 vi.stubGlobal('watch', watch)
 vi.stubGlobal('nextTick', nextTick)
+vi.stubGlobal('onMounted', onMounted)
+vi.stubGlobal('onUnmounted', onUnmounted)
 
 vi.stubGlobal('useRuntimeConfig', () => ({
   apiBaseUrl: 'http://api:4000',
@@ -19,6 +21,7 @@ vi.stubGlobal('useRuntimeConfig', () => ({
 }))
 
 vi.stubGlobal('useRouter', () => ({ push: vi.fn(), replace: vi.fn() }))
+vi.stubGlobal('useRoute', () => reactive({ fullPath: '/', params: {}, query: {} }))
 
 // Individual tests override this via `vi.stubGlobal('$fetch', ...)`.
 vi.stubGlobal('$fetch', vi.fn())

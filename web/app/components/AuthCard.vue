@@ -13,7 +13,7 @@ defineProps<{ title: string }>()
 
 <style scoped>
 .auth-shell {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--topbar-height));
   display: flex;
   align-items: center;
   justify-content: center;
