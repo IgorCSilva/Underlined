@@ -16,7 +16,7 @@
     </div>
 
     <div class="feed-icon-row">
-      <span class="feed-icon">♡ 0</span>
+      <LikeButton :post-id="post.id" :liked-by-user="post.liked_by_user" :like-count="post.like_count" />
       <span class="feed-icon">💬 0</span>
     </div>
   </NuxtLink>
@@ -63,7 +63,7 @@ defineProps<{ post: Post }>()
   margin: 0 0 8px;
   font-size: 1.05rem;
   line-height: 1.6;
-  text-decoration: underline wavy var(--color-highlight) 2px;
+  text-decoration: underline solid var(--color-highlight) 2px;
   text-underline-offset: 6px;
   display: -webkit-box;
   -webkit-line-clamp: 3;

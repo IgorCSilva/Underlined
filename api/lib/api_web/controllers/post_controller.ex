@@ -6,12 +6,12 @@ defmodule ApiWeb.PostController do
   action_fallback ApiWeb.FallbackController
 
   def index(conn, params) do
-    posts = Posts.list_posts(params["before"])
+    posts = Posts.list_posts(params["before"], current_user(conn))
     render(conn, :index, posts: posts)
   end
 
   def show(conn, %{"id" => id}) do
-    case Posts.get_post(id) do
+    case Posts.get_post(id, current_user(conn)) do
       nil -> {:error, :not_found}
       post -> render(conn, :show, post: post)
     end

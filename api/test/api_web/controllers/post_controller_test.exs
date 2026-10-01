@@ -110,12 +110,47 @@ defmodule ApiWeb.PostControllerTest do
       assert %{"data" => %{"id" => id}} = json_response(conn, 201)
 
       conn = get(build_conn(), ~p"/api/posts/#{id}")
-      assert %{"data" => %{"id" => ^id, "thinking" => "This changed how I think."}} = json_response(conn, 200)
+
+      assert %{
+               "data" => %{
+                 "id" => ^id,
+                 "thinking" => "This changed how I think.",
+                 "like_count" => 0,
+                 "liked_by_user" => false
+               }
+             } = json_response(conn, 200)
     end
 
     test "returns 404 for an unknown post", %{conn: conn} do
       conn = get(conn, ~p"/api/posts/#{Ecto.UUID.generate()}")
       assert json_response(conn, 404)
+    end
+
+    test "reports liked_by_user true for a user who liked the post, without requiring auth for others",
+         %{conn: conn, access_token: token, book: book} do
+      conn1 =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/posts", post: Map.put(@valid_post_params, "book_id", book.id))
+
+      %{"data" => %{"id" => id}} = json_response(conn1, 201)
+
+      like_conn =
+        build_conn()
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/posts/#{id}/likes")
+
+      assert json_response(like_conn, 200)
+
+      authed_show =
+        build_conn()
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> get(~p"/api/posts/#{id}")
+
+      assert %{"data" => %{"like_count" => 1, "liked_by_user" => true}} = json_response(authed_show, 200)
+
+      anon_show = get(build_conn(), ~p"/api/posts/#{id}")
+      assert %{"data" => %{"like_count" => 1, "liked_by_user" => false}} = json_response(anon_show, 200)
     end
   end
 end
