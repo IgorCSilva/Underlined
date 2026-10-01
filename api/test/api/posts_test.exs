@@ -168,4 +168,87 @@ defmodule Api.PostsTest do
       assert Posts.get_post("not-a-uuid") == nil
     end
   end
+
+  describe "list_posts/2 and get_post/2 liked_by_user annotation" do
+    test "flags liked_by_user per the given current_user" do
+      user = user_fixture()
+      liker = user_fixture(%{"email" => "liker@example.com"})
+      book = book_fixture()
+      {:ok, post} = Posts.create_post(user, Map.put(@valid_attrs, "book_id", book.id))
+
+      assert {:ok, _} = Posts.like_post(liker, post.id)
+
+      [listed] = Posts.list_posts(nil, liker)
+      assert listed.liked_by_user == true
+
+      [listed_as_author] = Posts.list_posts(nil, user)
+      assert listed_as_author.liked_by_user == false
+
+      [listed_anonymous] = Posts.list_posts()
+      assert listed_anonymous.liked_by_user == false
+
+      assert Posts.get_post(post.id, liker).liked_by_user == true
+      assert Posts.get_post(post.id, user).liked_by_user == false
+      assert Posts.get_post(post.id).liked_by_user == false
+    end
+  end
+
+  describe "like_post/2" do
+    test "likes a post and increments its like_count" do
+      user = user_fixture()
+      liker = user_fixture(%{"email" => "liker@example.com"})
+      book = book_fixture()
+      {:ok, post} = Posts.create_post(user, Map.put(@valid_attrs, "book_id", book.id))
+
+      assert {:ok, %{liked: true, like_count: 1}} = Posts.like_post(liker, post.id)
+      assert Posts.get_post(post.id).like_count == 1
+    end
+
+    test "liking an already-liked post is idempotent" do
+      user = user_fixture()
+      liker = user_fixture(%{"email" => "liker@example.com"})
+      book = book_fixture()
+      {:ok, post} = Posts.create_post(user, Map.put(@valid_attrs, "book_id", book.id))
+
+      assert {:ok, %{liked: true, like_count: 1}} = Posts.like_post(liker, post.id)
+      assert {:ok, %{liked: true, like_count: 1}} = Posts.like_post(liker, post.id)
+      assert Posts.get_post(post.id).like_count == 1
+    end
+
+    test "returns not_found for a missing or invalid post id" do
+      liker = user_fixture()
+
+      assert {:error, :not_found} = Posts.like_post(liker, Ecto.UUID.generate())
+      assert {:error, :not_found} = Posts.like_post(liker, "not-a-uuid")
+    end
+  end
+
+  describe "unlike_post/2" do
+    test "unlikes a previously-liked post and decrements its like_count" do
+      user = user_fixture()
+      liker = user_fixture(%{"email" => "liker@example.com"})
+      book = book_fixture()
+      {:ok, post} = Posts.create_post(user, Map.put(@valid_attrs, "book_id", book.id))
+
+      assert {:ok, %{liked: true, like_count: 1}} = Posts.like_post(liker, post.id)
+      assert {:ok, %{liked: false, like_count: 0}} = Posts.unlike_post(liker, post.id)
+      assert Posts.get_post(post.id).like_count == 0
+    end
+
+    test "unliking a post that wasn't liked is a no-op" do
+      user = user_fixture()
+      liker = user_fixture(%{"email" => "liker@example.com"})
+      book = book_fixture()
+      {:ok, post} = Posts.create_post(user, Map.put(@valid_attrs, "book_id", book.id))
+
+      assert {:ok, %{liked: false, like_count: 0}} = Posts.unlike_post(liker, post.id)
+    end
+
+    test "returns not_found for a missing or invalid post id" do
+      liker = user_fixture()
+
+      assert {:error, :not_found} = Posts.unlike_post(liker, Ecto.UUID.generate())
+      assert {:error, :not_found} = Posts.unlike_post(liker, "not-a-uuid")
+    end
+  end
 end

@@ -10,6 +10,10 @@ defmodule ApiWeb.Router do
     plug Api.Accounts.Pipeline
   end
 
+  pipeline :maybe_authenticated do
+    plug Api.Accounts.MaybeAuthPipeline
+  end
+
   scope "/api", ApiWeb do
     pipe_through :api
 
@@ -26,8 +30,12 @@ defmodule ApiWeb.Router do
     get "/books", BookController, :index
     get "/books/:id", BookController, :show
 
-    get "/posts", PostController, :index
-    get "/posts/:id", PostController, :show
+    scope "/" do
+      pipe_through :maybe_authenticated
+
+      get "/posts", PostController, :index
+      get "/posts/:id", PostController, :show
+    end
 
     scope "/" do
       pipe_through :authenticated
@@ -39,6 +47,9 @@ defmodule ApiWeb.Router do
       post "/books", BookController, :create
 
       post "/posts", PostController, :create
+
+      post "/posts/:post_id/likes", LikeController, :create
+      delete "/posts/:post_id/likes", LikeController, :delete
     end
   end
 end
