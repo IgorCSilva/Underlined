@@ -10,6 +10,7 @@
         <label for="bio">Bio</label>
         <textarea id="bio" v-model="bio" rows="4" maxlength="500" />
       </div>
+      <!--
       <div class="field">
         <label>Avatar</label>
         <div
@@ -30,6 +31,7 @@
           <span>📷 Drop an image here, or click to upload</span>
         </div>
       </div>
+      -->
       <p v-if="error" class="form-error">{{ error }}</p>
       <button class="btn-primary" type="submit" :disabled="saving">
         {{ saving ? 'Saving…' : 'Save changes' }}

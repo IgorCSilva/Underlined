@@ -23,12 +23,17 @@ defmodule ApiWeb.Router do
 
     get "/users/:id", ProfileController, :show
 
+    get "/books", BookController, :index
+    get "/books/:id", BookController, :show
+
     scope "/" do
       pipe_through :authenticated
 
       get "/me", ProfileController, :me
       put "/me", ProfileController, :update
       put "/me/avatar", ProfileController, :update_avatar
+
+      post "/books", BookController, :create
     end
   end
 end
