@@ -26,10 +26,12 @@ vi.stubGlobal('$fetch', vi.fn())
 // run) guarantees that ordering; a static import would not.
 const { useAuthStore } = await import('../app/stores/auth')
 const { useApi, apiBaseUrl } = await import('../app/composables/useApi')
+const { useBooksStore } = await import('../app/stores/books')
 
 vi.stubGlobal('useAuthStore', useAuthStore)
 vi.stubGlobal('useApi', useApi)
 vi.stubGlobal('apiBaseUrl', apiBaseUrl)
+vi.stubGlobal('useBooksStore', useBooksStore)
 
 beforeEach(() => {
   setActivePinia(createPinia())
