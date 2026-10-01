@@ -1,6 +1,7 @@
 defmodule ApiWeb.PostJSON do
   alias Api.Posts.Post
 
+  def index(%{posts: posts}), do: %{data: Enum.map(posts, &data/1)}
   def show(%{post: post}), do: %{data: data(post)}
 
   def data(%Post{} = post) do
@@ -21,7 +22,8 @@ defmodule ApiWeb.PostJSON do
       keywords: Enum.map(post.keywords, & &1.name),
       user: %{
         id: post.user.id,
-        name: post.user.name
+        name: post.user.name,
+        avatar_url: post.user.avatar_url
       }
     }
   end

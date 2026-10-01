@@ -10,6 +10,10 @@
         <label for="bio">Bio</label>
         <textarea id="bio" v-model="bio" rows="4" maxlength="500" />
       </div>
+      <div class="field">
+        <label>Avatar</label>
+        <AvatarPicker v-model="avatarUrl" />
+      </div>
       <!--
       <div class="field">
         <label>Avatar</label>
@@ -46,6 +50,7 @@ definePageMeta({ middleware: 'auth' })
 const auth = useAuthStore()
 const name = ref(auth.user?.name ?? '')
 const bio = ref(auth.user?.bio ?? '')
+const avatarUrl = ref(auth.user?.avatar_url ?? null)
 const saving = ref(false)
 const error = ref('')
 const dragOver = ref(false)
@@ -56,7 +61,7 @@ async function onSubmit() {
   saving.value = true
   error.value = ''
   try {
-    await auth.updateProfile({ name: name.value, bio: bio.value })
+    await auth.updateProfile({ name: name.value, bio: bio.value, avatar_url: avatarUrl.value })
     router.push('/profile')
   } catch (err) {
     error.value = extractErrorMessage(err)

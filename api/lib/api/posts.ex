@@ -11,6 +11,7 @@ defmodule Api.Posts do
   alias Api.Posts.{Post, Passage, Keyword}
 
   @preloads [:book, :passage, :keywords, :user]
+  @page_size 20
 
   def create_post(%User{} = user, attrs) do
     with %Catalog.Book{} = book <- Catalog.get_book(attrs["book_id"]) || {:error, :not_found} do
@@ -50,6 +51,29 @@ defmodule Api.Posts do
       end
     end
   end
+
+  @doc """
+  Chronological feed, newest first. `before` (an ISO8601 timestamp, usually the
+  `inserted_at` of the last post on the previous page) pages backward through
+  the feed; invalid/absent cursors just return the first page.
+  """
+  def list_posts(before \\ nil) do
+    Post
+    |> order_by(desc: :inserted_at)
+    |> maybe_before(before)
+    |> limit(^@page_size)
+    |> Repo.all()
+    |> Repo.preload(@preloads)
+  end
+
+  defp maybe_before(query, before) when is_binary(before) do
+    case DateTime.from_iso8601(before) do
+      {:ok, cutoff, _offset} -> where(query, [p], p.inserted_at < ^cutoff)
+      {:error, _reason} -> query
+    end
+  end
+
+  defp maybe_before(query, _before), do: query
 
   def get_post(id) do
     case Ecto.UUID.cast(id) do

@@ -3,7 +3,10 @@
     <div v-if="published" class="composer card success-card">
       <h2 class="serif">Published!</h2>
       <p class="status-text">Your post about "{{ published.book.title }}" is live.</p>
-      <button class="btn-primary btn-publish" type="button" @click="reset">Write another</button>
+      <div class="success-actions">
+        <NuxtLink :to="`/posts/${published.id}`" class="btn-primary btn-publish">View post</NuxtLink>
+        <button class="btn-publish-secondary" type="button" @click="reset">Write another</button>
+      </div>
     </div>
 
     <div v-else-if="!selectedBook" class="book-search">
@@ -336,7 +339,29 @@ function reset() {
   text-align: center;
 }
 
-.success-card .btn-publish {
-  margin: 16px auto 0;
+.success-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.success-actions .btn-publish {
+  width: auto;
+  padding: 12px 28px;
+}
+
+.btn-publish-secondary {
+  background: none;
+  border: none;
+  color: var(--color-accent-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-publish-secondary:hover {
+  text-decoration: underline;
 }
 </style>

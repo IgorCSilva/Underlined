@@ -74,6 +74,32 @@ defmodule ApiWeb.PostControllerTest do
     end
   end
 
+  describe "GET /api/posts" do
+    test "lists posts newest first without authentication", %{conn: conn, access_token: token, book: book} do
+      conn1 =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/posts", post: @valid_post_params |> Map.put("book_id", book.id) |> Map.put("passage_text", "First."))
+
+      %{"data" => %{"id" => first_id}} = json_response(conn1, 201)
+
+      conn2 =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/posts", post: @valid_post_params |> Map.put("book_id", book.id) |> Map.put("passage_text", "Second."))
+
+      %{"data" => %{"id" => second_id}} = json_response(conn2, 201)
+
+      conn = get(build_conn(), ~p"/api/posts")
+      assert %{"data" => [%{"id" => ^second_id}, %{"id" => ^first_id}]} = json_response(conn, 200)
+    end
+
+    test "returns an empty list when there are no posts", %{conn: conn} do
+      conn = get(conn, ~p"/api/posts")
+      assert json_response(conn, 200) == %{"data" => []}
+    end
+  end
+
   describe "GET /api/posts/:id" do
     test "returns a post", %{conn: conn, access_token: token, book: book} do
       conn =

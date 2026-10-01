@@ -26,6 +26,7 @@ defmodule ApiWeb.Router do
     get "/books", BookController, :index
     get "/books/:id", BookController, :show
 
+    get "/posts", PostController, :index
     get "/posts/:id", PostController, :show
 
     scope "/" do

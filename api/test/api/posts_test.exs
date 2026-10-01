@@ -109,6 +109,48 @@ defmodule Api.PostsTest do
     end
   end
 
+  describe "list_posts/1" do
+    test "returns posts newest first" do
+      user = user_fixture()
+      book = book_fixture()
+
+      {:ok, older} =
+        Posts.create_post(user, @valid_attrs |> Map.put("book_id", book.id) |> Map.put("passage_text", "Older."))
+
+      {:ok, newer} =
+        Posts.create_post(user, @valid_attrs |> Map.put("book_id", book.id) |> Map.put("passage_text", "Newer."))
+
+      assert Enum.map(Posts.list_posts(), & &1.id) == [newer.id, older.id]
+    end
+
+    test "before cursor excludes posts at or after that timestamp" do
+      user = user_fixture()
+      book = book_fixture()
+
+      {:ok, older} =
+        Posts.create_post(user, @valid_attrs |> Map.put("book_id", book.id) |> Map.put("passage_text", "Older."))
+
+      {:ok, newer} =
+        Posts.create_post(user, @valid_attrs |> Map.put("book_id", book.id) |> Map.put("passage_text", "Newer."))
+
+      cursor = DateTime.to_iso8601(newer.inserted_at)
+
+      assert Enum.map(Posts.list_posts(cursor), & &1.id) == [older.id]
+    end
+
+    test "ignores an invalid cursor and returns the first page" do
+      user = user_fixture()
+      book = book_fixture()
+      {:ok, post} = Posts.create_post(user, Map.put(@valid_attrs, "book_id", book.id))
+
+      assert Enum.map(Posts.list_posts("not-a-timestamp"), & &1.id) == [post.id]
+    end
+
+    test "returns an empty list when there are no posts" do
+      assert Posts.list_posts() == []
+    end
+  end
+
   describe "get_post/1" do
     test "returns the post with associations preloaded" do
       user = user_fixture()

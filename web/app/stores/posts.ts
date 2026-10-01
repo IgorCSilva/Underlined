@@ -7,7 +7,7 @@ export interface Post {
   book: Book
   passage: { id: string; text: string }
   keywords: string[]
-  user: { id: string; name: string }
+  user: { id: string; name: string; avatar_url: string | null }
 }
 
 interface PostResponse {
