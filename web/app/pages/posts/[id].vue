@@ -29,7 +29,7 @@
     </div>
 
     <div class="post-icon-row">
-      <span class="post-icon">♡ 0</span>
+      <LikeButton :post-id="post.id" :liked-by-user="post.liked_by_user" :like-count="post.like_count" />
       <span class="post-icon">💬 0</span>
     </div>
   </div>
@@ -42,6 +42,17 @@ import type { Post } from '~/stores/posts'
 const route = useRoute()
 
 const { data: post } = await useApiFetch<Post>(`/api/posts/${route.params.id}`)
+
+// SSR always renders anonymous (no access token is available server-side),
+// so a logged-in viewer's own like never shows up in the hydrated payload.
+// Once the client is ready, re-fetch with the auth header to correct it.
+const auth = useAuthStore()
+onMounted(async () => {
+  if (!auth.accessToken || !post.value) return
+  const { request } = useApi()
+  const fresh = await request<{ data: Post }>(`/api/posts/${route.params.id}`)
+  post.value = fresh.data
+})
 
 const formattedDate = computed(() => {
   if (!post.value) return ''
@@ -146,7 +157,7 @@ const formattedDate = computed(() => {
   margin: 0;
   font-size: 1.4rem;
   line-height: 1.6;
-  text-decoration: underline wavy var(--color-highlight) 2px;
+  text-decoration: underline solid var(--color-highlight) 2px;
   text-underline-offset: 8px;
 }
 

@@ -10,12 +10,15 @@ const post: Post = {
   book: { id: 'book-1', title: 'Sapiens', author: 'Yuval Noah Harari', cover_url: null },
   passage: { id: 'passage-1', text: 'The forest doesn’t end where the trees stop.' },
   keywords: ['attention', 'nature-writing'],
+  like_count: 2,
+  liked_by_user: false,
   user: { id: 'user-1', name: 'Reader One', avatar_url: null },
 }
 
 const stubs = {
   NuxtLink: { template: '<a><slot /></a>' },
   AvatarCircle: true,
+  LikeButton: true,
 }
 
 describe('PostFeedItem', () => {

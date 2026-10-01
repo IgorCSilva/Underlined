@@ -10,6 +10,8 @@ defmodule Api.Posts.Post do
   schema "posts" do
     field :thinking, :string
     field :keyword_names, {:array, :string}, virtual: true, default: []
+    field :like_count, :integer, default: 0
+    field :liked_by_user, :boolean, virtual: true, default: false
 
     belongs_to :user, Api.Accounts.User
     belongs_to :book, Api.Catalog.Book
