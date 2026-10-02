@@ -1,7 +1,24 @@
 defmodule ApiWeb.AuthController do
   use ApiWeb, :controller
 
-  alias Api.Accounts
+  alias Api.Adapters.Accounts
+  alias Api.Infrastructure.Repository.User.Postgres.User
+
+  alias Api.Usecases.EmailConfirmation.ConfirmUser.ConfirmUserUsecaseDto
+
+  alias Api.Usecases.PasswordReset.DeliverResetPasswordInstructions.DeliverResetPasswordInstructionsUsecaseDto
+
+  alias Api.Usecases.PasswordReset.GetUserByResetPasswordToken.GetUserByResetPasswordTokenUsecaseDto
+
+  alias Api.Usecases.PasswordReset.ResetUserPassword.ResetUserPasswordUsecaseDto
+
+  alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
+  alias Api.Usecases.Session.RefreshSession.RefreshSessionUsecaseDto
+  alias Api.Usecases.Session.RevokeRefreshToken.RevokeRefreshTokenUsecaseDto
+
+  alias Api.Usecases.User.GetUserByEmail.GetUserByEmailUsecaseDto
+  alias Api.Usecases.User.GetUserByEmailAndPassword.GetUserByEmailAndPasswordUsecaseDto
+  alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
 
   @refresh_cookie "refresh_token"
   @session_max_age 60 * 60 * 24
@@ -16,7 +33,7 @@ defmodule ApiWeb.AuthController do
   # token-based confirmation code below is kept for when real sending comes
   # back, it's just not invoked from here.
   def register(conn, %{"user" => user_params}) do
-    with {:ok, user} <- Accounts.register_user(user_params) do
+    with {:ok, user} <- Accounts.register_user(%RegisterUserUsecaseDto{attrs: user_params}) do
       conn
       |> put_status(:created)
       |> render(:session_user, user: user)
@@ -26,13 +43,15 @@ defmodule ApiWeb.AuthController do
   def login(conn, %{"email" => email, "password" => password} = params) do
     remember_me? = truthy?(params["remember_me"])
 
-    case Accounts.get_user_by_email_and_password(email, password) do
+    dto = %GetUserByEmailAndPasswordUsecaseDto{email: email, password: password}
+
+    case Accounts.get_user_by_email_and_password(dto) do
       nil ->
         conn
         |> put_status(:unauthorized)
         |> json(%{errors: %{detail: "invalid email or password"}})
 
-      %Accounts.User{enabled: false} ->
+      %User{enabled: false} ->
         conn
         |> put_status(:forbidden)
         |> json(%{errors: %{detail: "account pending confirmation"}})
@@ -48,8 +67,11 @@ defmodule ApiWeb.AuthController do
 
   def refresh(conn, _params) do
     with token when is_binary(token) <- conn.cookies[@refresh_cookie],
-         {:ok, access_token, refresh_token, remember_me?} <- Accounts.refresh_session(token) do
-      user = Api.Accounts.Guardian.Plug.current_resource(conn) || fetch_user_from_token(access_token)
+         {:ok, access_token, refresh_token, remember_me?} <-
+           Accounts.refresh_session(%RefreshSessionUsecaseDto{refresh_token: token}) do
+      user =
+        Api.Infrastructure.Guardian.Plug.current_resource(conn) ||
+          fetch_user_from_token(access_token)
 
       conn
       |> put_refresh_cookie(refresh_token, remember_me?)
@@ -65,8 +87,11 @@ defmodule ApiWeb.AuthController do
 
   def logout(conn, _params) do
     case conn.cookies[@refresh_cookie] do
-      token when is_binary(token) -> Accounts.revoke_refresh_token(token)
-      _ -> :ok
+      token when is_binary(token) ->
+        Accounts.revoke_refresh_token(%RevokeRefreshTokenUsecaseDto{refresh_token: token})
+
+      _ ->
+        :ok
     end
 
     conn
@@ -75,15 +100,20 @@ defmodule ApiWeb.AuthController do
   end
 
   def confirm(conn, %{"token" => token}) do
-    case Accounts.confirm_user(token) do
+    case Accounts.confirm_user(%ConfirmUserUsecaseDto{token: token}) do
       {:ok, user} -> render(conn, :session_user, user: user)
       {:error, :invalid_token} -> {:error, :invalid_token}
     end
   end
 
   def request_password_reset(conn, %{"email" => email}) do
-    if user = Accounts.get_user_by_email(email) do
-      Accounts.deliver_user_reset_password_instructions(user, &reset_password_url/1)
+    if user = Accounts.get_user_by_email(%GetUserByEmailUsecaseDto{email: email}) do
+      dto = %DeliverResetPasswordInstructionsUsecaseDto{
+        user: user,
+        reset_url_fun: &reset_password_url/1
+      }
+
+      Accounts.deliver_user_reset_password_instructions(dto)
     end
 
     # Always respond the same way, whether or not the email exists.
@@ -91,8 +121,15 @@ defmodule ApiWeb.AuthController do
   end
 
   def reset_password(conn, %{"token" => token, "password" => password}) do
-    with %Accounts.User{} = user <- Accounts.get_user_by_reset_password_token(token),
-         {:ok, user} <- Accounts.reset_user_password(user, %{"password" => password}) do
+    with %User{} = user <-
+           Accounts.get_user_by_reset_password_token(%GetUserByResetPasswordTokenUsecaseDto{
+             token: token
+           }),
+         {:ok, user} <-
+           Accounts.reset_user_password(%ResetUserPasswordUsecaseDto{
+             user: user,
+             attrs: %{"password" => password}
+           }) do
       render(conn, :session_user, user: user)
     else
       nil -> {:error, :invalid_token}
@@ -101,13 +138,15 @@ defmodule ApiWeb.AuthController do
   end
 
   defp issue_session!(user, remember_me?) do
-    {:ok, access_token, refresh_token} = Accounts.create_session(user, remember_me?)
+    {:ok, access_token, refresh_token} =
+      Accounts.create_session(%CreateSessionUsecaseDto{user: user, remember_me: remember_me?})
+
     {access_token, refresh_token}
   end
 
   defp fetch_user_from_token(access_token) do
-    {:ok, claims} = Api.Accounts.Guardian.decode_and_verify(access_token)
-    {:ok, user} = Api.Accounts.Guardian.resource_from_claims(claims)
+    {:ok, claims} = Api.Infrastructure.Guardian.decode_and_verify(access_token)
+    {:ok, user} = Api.Infrastructure.Guardian.resource_from_claims(claims)
     user
   end
 

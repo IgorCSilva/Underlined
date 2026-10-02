@@ -17,7 +17,7 @@ config :api, ApiWeb.Endpoint,
   secret_key_base: "dev_secret_key_base_change_me_dev_secret_key_base_change_me",
   watchers: []
 
-config :api, Api.Accounts.Guardian,
+config :api, Api.Infrastructure.Guardian,
   secret_key: "dev_guardian_secret_change_me_dev_guardian_secret_change_me"
 
 config :api, Api.Mailer,
@@ -38,7 +38,7 @@ config :ex_aws, :s3,
   host: "s3mock",
   port: 9090
 
-config :api, Api.Infra.S3ObjectStore,
+config :api, Api.Infrastructure.S3ObjectStore,
   bucket: "avatars",
   public_endpoint: "http://localhost:9000"
 

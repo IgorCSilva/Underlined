@@ -3,29 +3,46 @@ defmodule ApiWeb.LikeControllerTest do
 
   import Mox
 
-  alias Api.Accounts
-  alias Api.Catalog
-  alias Api.Posts
+  alias Api.Adapters.Accounts
+  alias Api.Adapters.Catalog
+  alias Api.Adapters.Posts
+  alias Api.Usecases.Book.AddBook.AddBookUsecaseDto
+  alias Api.Usecases.Post.CreatePost.CreatePostUsecaseDto
+  alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
+  alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
 
   setup :verify_on_exit!
 
   setup do
-    Api.MailerMock |> stub(:deliver_confirmation_instructions, fn _user, _url -> {:ok, :delivered} end)
+    Api.MailerMock
+    |> stub(:deliver_confirmation_instructions, fn _user, _url -> {:ok, :delivered} end)
 
     {:ok, author} =
-      Accounts.register_user(%{"email" => "author@example.com", "password" => "supersecret", "name" => "Author"})
+      Accounts.register_user(%RegisterUserUsecaseDto{
+        attrs: %{"email" => "author@example.com", "password" => "supersecret", "name" => "Author"}
+      })
 
     {:ok, liker} =
-      Accounts.register_user(%{"email" => "liker@example.com", "password" => "supersecret", "name" => "Liker"})
+      Accounts.register_user(%RegisterUserUsecaseDto{
+        attrs: %{"email" => "liker@example.com", "password" => "supersecret", "name" => "Liker"}
+      })
 
-    {:ok, access_token, _refresh_token} = Accounts.create_session(liker, false)
-    {:ok, book} = Catalog.add_book(%{"title" => "Sapiens", "author" => "Yuval Noah Harari"})
+    {:ok, access_token, _refresh_token} =
+      Accounts.create_session(%CreateSessionUsecaseDto{user: liker, remember_me: false})
+
+    {:ok, book} =
+      Catalog.add_book(%AddBookUsecaseDto{
+        attrs: %{"title" => "Sapiens", "author" => "Yuval Noah Harari"}
+      })
 
     {:ok, post} =
-      Posts.create_post(author, %{
-        "book_id" => book.id,
-        "passage_text" => "A short passage.",
-        "thinking" => "This changed how I think."
+      Posts.create_post(%CreatePostUsecaseDto{
+        user: author,
+        attrs: %{
+          "book_id" => book.id,
+          "passage_text" => "A short passage.",
+          "thinking" => "This changed how I think."
+        }
       })
 
     %{post: post, access_token: access_token}
