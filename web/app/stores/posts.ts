@@ -9,6 +9,7 @@ export interface Post {
   keywords: string[]
   like_count: number
   liked_by_user: boolean
+  comment_count: number
   user: { id: string; name: string; avatar_url: string | null }
 }
 

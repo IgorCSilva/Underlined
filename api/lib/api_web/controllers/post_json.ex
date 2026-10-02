@@ -22,6 +22,7 @@ defmodule ApiWeb.PostJSON do
       keywords: Enum.map(post.keywords, & &1.name),
       like_count: post.like_count,
       liked_by_user: post.liked_by_user,
+      comment_count: post.comment_count,
       user: %{
         id: post.user.id,
         name: post.user.name,
