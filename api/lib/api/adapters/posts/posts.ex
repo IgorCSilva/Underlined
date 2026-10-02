@@ -8,6 +8,7 @@ defmodule Api.Adapters.Posts do
 
   alias Api.Usecases.Comment.CreateComment.CreateCommentUsecase
   alias Api.Usecases.Comment.ListComments.ListCommentsUsecase
+  alias Api.Usecases.Comment.UpdateComment.UpdateCommentUsecase
   alias Api.Usecases.Like.LikePost.LikePostUsecase
   alias Api.Usecases.Like.UnlikePost.UnlikePostUsecase
   alias Api.Usecases.Post.CreatePost.CreatePostUsecase
@@ -45,6 +46,10 @@ defmodule Api.Adapters.Posts do
 
   def list_comments(dto) do
     ListCommentsUsecase.call(dto, %ListCommentsUsecase{repository: comment_repository()})
+  end
+
+  def update_comment(dto) do
+    UpdateCommentUsecase.call(dto, %UpdateCommentUsecase{repository: comment_repository()})
   end
 
   defp post_repository, do: Application.get_env(:api, :post_repository) |> Map.new()

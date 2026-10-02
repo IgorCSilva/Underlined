@@ -46,6 +46,7 @@ defmodule ApiWeb.Router do
       delete "/posts/:post_id/likes", LikeController, :delete
 
       post "/posts/:post_id/comments", CommentController, :create
+      put "/posts/:post_id/comments/:id", CommentController, :update
 
       post "/users/:id/follow", FollowController, :create
       delete "/users/:id/follow", FollowController, :delete

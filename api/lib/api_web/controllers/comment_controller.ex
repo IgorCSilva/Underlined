@@ -4,6 +4,7 @@ defmodule ApiWeb.CommentController do
   alias Api.Adapters.Posts
   alias Api.Usecases.Comment.CreateComment.CreateCommentUsecaseDto
   alias Api.Usecases.Comment.ListComments.ListCommentsUsecaseDto
+  alias Api.Usecases.Comment.UpdateComment.UpdateCommentUsecaseDto
 
   action_fallback ApiWeb.FallbackController
 
@@ -22,6 +23,18 @@ defmodule ApiWeb.CommentController do
       conn
       |> put_status(:created)
       |> render(:show, comment: comment)
+    end
+  end
+
+  def update(conn, %{"post_id" => post_id, "id" => id, "comment" => comment_params}) do
+    with {:ok, comment} <-
+           Posts.update_comment(%UpdateCommentUsecaseDto{
+             user: current_user(conn),
+             post_id: post_id,
+             comment_id: id,
+             attrs: comment_params
+           }) do
+      render(conn, :show, comment: comment)
     end
   end
 
