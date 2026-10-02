@@ -1,5 +1,5 @@
 defmodule ApiWeb.BookJSON do
-  alias Api.Catalog.Book
+  alias Api.Domain.Book
 
   def index(%{books: books}), do: %{data: Enum.map(books, &data/1)}
 

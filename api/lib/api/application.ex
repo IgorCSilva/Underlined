@@ -13,7 +13,7 @@ defmodule Api.Application do
       # Start the Ecto repository
       Api.Repo,
       # Start the comment-creation rate limiter
-      Api.Posts.CommentRateLimiter,
+      Api.Infrastructure.CommentRateLimiter,
       # Start the PubSub system
       {Phoenix.PubSub, name: Api.PubSub},
       # Start Finch

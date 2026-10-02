@@ -1,5 +1,5 @@
 defmodule ApiWeb.PostJSON do
-  alias Api.Posts.Post
+  alias Api.Domain.Post
 
   def index(%{posts: posts}), do: %{data: Enum.map(posts, &data/1)}
   def show(%{post: post}), do: %{data: data(post)}

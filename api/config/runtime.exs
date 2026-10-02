@@ -43,7 +43,7 @@ if config_env() == :dev do
 end
 
 if guardian_secret = System.get_env("GUARDIAN_SECRET_KEY") do
-  config :api, Api.Accounts.Guardian, secret_key: guardian_secret
+  config :api, Api.Infrastructure.Guardian, secret_key: guardian_secret
 end
 
 if cors_origin = System.get_env("CORS_ORIGIN") do
@@ -85,7 +85,7 @@ if s3_endpoint = System.get_env("S3_ENDPOINT") do
     host: uri.host,
     port: uri.port
 
-  config :api, Api.Infra.S3ObjectStore,
+  config :api, Api.Infrastructure.S3ObjectStore,
     bucket: System.get_env("S3_BUCKET") || "avatars",
     public_endpoint: System.get_env("S3_PUBLIC_ENDPOINT") || s3_endpoint
 end

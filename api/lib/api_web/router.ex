@@ -7,11 +7,11 @@ defmodule ApiWeb.Router do
   end
 
   pipeline :authenticated do
-    plug Api.Accounts.Pipeline
+    plug Api.Infrastructure.Pipeline
   end
 
   pipeline :maybe_authenticated do
-    plug Api.Accounts.MaybeAuthPipeline
+    plug Api.Infrastructure.MaybeAuthPipeline
   end
 
   scope "/api", ApiWeb do
