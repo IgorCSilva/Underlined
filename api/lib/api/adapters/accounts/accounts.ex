@@ -11,6 +11,9 @@ defmodule Api.Adapters.Accounts do
 
   alias Api.Usecases.EmailConfirmation.DeliverConfirmationInstructions.DeliverConfirmationInstructionsUsecase
 
+  alias Api.Usecases.Follow.FollowUser.FollowUserUsecase
+  alias Api.Usecases.Follow.UnfollowUser.UnfollowUserUsecase
+
   alias Api.Usecases.PasswordReset.DeliverResetPasswordInstructions.DeliverResetPasswordInstructionsUsecase
   alias Api.Usecases.PasswordReset.GetUserByResetPasswordToken.GetUserByResetPasswordTokenUsecase
   alias Api.Usecases.PasswordReset.ResetUserPassword.ResetUserPasswordUsecase
@@ -40,6 +43,16 @@ defmodule Api.Adapters.Accounts do
   def register_user(dto), do: RegisterUserUsecase.call(dto)
   def update_profile(dto), do: UpdateProfileUsecase.call(dto)
   def update_avatar(dto), do: UpdateAvatarUsecase.call(dto)
+
+  ## Follows
+
+  def follow_user(dto) do
+    FollowUserUsecase.call(dto, %FollowUserUsecase{repository: follow_repository()})
+  end
+
+  def unfollow_user(dto) do
+    UnfollowUserUsecase.call(dto, %UnfollowUserUsecase{repository: follow_repository()})
+  end
 
   ## Email confirmation
 
@@ -96,6 +109,7 @@ defmodule Api.Adapters.Accounts do
   end
 
   defp user_repository, do: Application.get_env(:api, :user_repository) |> Map.new()
+  defp follow_repository, do: Application.get_env(:api, :follow_repository) |> Map.new()
 
   defp user_token_repository,
     do: Application.get_env(:api, :user_token_repository) |> Map.new()

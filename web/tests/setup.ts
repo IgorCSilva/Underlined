@@ -34,6 +34,7 @@ const { useApi, apiBaseUrl } = await import('../app/composables/useApi')
 const { useBooksStore } = await import('../app/stores/books')
 const { usePostsStore } = await import('../app/stores/posts')
 const { useCommentsStore } = await import('../app/stores/comments')
+const { useFollowsStore } = await import('../app/stores/follows')
 const { extractErrorMessage } = await import('../app/utils/errors')
 
 vi.stubGlobal('useAuthStore', useAuthStore)
@@ -42,6 +43,7 @@ vi.stubGlobal('apiBaseUrl', apiBaseUrl)
 vi.stubGlobal('useBooksStore', useBooksStore)
 vi.stubGlobal('usePostsStore', usePostsStore)
 vi.stubGlobal('useCommentsStore', useCommentsStore)
+vi.stubGlobal('useFollowsStore', useFollowsStore)
 vi.stubGlobal('extractErrorMessage', extractErrorMessage)
 
 beforeEach(() => {

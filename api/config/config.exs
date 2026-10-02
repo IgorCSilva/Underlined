@@ -44,6 +44,10 @@ config :api, :comment_repository,
   adapter: Api.Adapters.Comment.CommentRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.Comment.Postgres.CommentRepository
 
+config :api, :follow_repository,
+  adapter: Api.Adapters.Follow.FollowRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Follow.Postgres.FollowRepository
+
 config :api, cors_origin: "http://localhost:3000"
 config :api, web_base_url: "http://localhost:3000"
 

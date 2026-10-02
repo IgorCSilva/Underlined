@@ -6,6 +6,9 @@ defmodule Api.Adapters.AccountsTest do
   alias Api.Adapters.Accounts
   alias Api.Infrastructure.Repository.User.Postgres.User
 
+  alias Api.Usecases.Follow.FollowUser.FollowUserUsecaseDto
+  alias Api.Usecases.Follow.UnfollowUser.UnfollowUserUsecaseDto
+
   alias Api.Usecases.EmailConfirmation.ConfirmUser.ConfirmUserUsecaseDto
 
   alias Api.Usecases.EmailConfirmation.DeliverConfirmationInstructions.DeliverConfirmationInstructionsUsecaseDto
@@ -20,6 +23,7 @@ defmodule Api.Adapters.AccountsTest do
   alias Api.Usecases.Session.RefreshSession.RefreshSessionUsecaseDto
   alias Api.Usecases.Session.RevokeRefreshToken.RevokeRefreshTokenUsecaseDto
 
+  alias Api.Usecases.User.GetUser.GetUserUsecaseDto
   alias Api.Usecases.User.GetUserByEmailAndPassword.GetUserByEmailAndPasswordUsecaseDto
   alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
   alias Api.Usecases.User.UpdateAvatar.UpdateAvatarUsecaseDto
@@ -42,6 +46,18 @@ defmodule Api.Adapters.AccountsTest do
 
   defp create_session(user, remember_me) do
     Accounts.create_session(%CreateSessionUsecaseDto{user: user, remember_me: remember_me})
+  end
+
+  defp follow_user(follower, followee_id) do
+    Accounts.follow_user(%FollowUserUsecaseDto{follower: follower, followee_id: followee_id})
+  end
+
+  defp unfollow_user(follower, followee_id) do
+    Accounts.unfollow_user(%UnfollowUserUsecaseDto{follower: follower, followee_id: followee_id})
+  end
+
+  defp get_user(id, current_user \\ nil) do
+    Accounts.get_user(%GetUserUsecaseDto{id: id, current_user: current_user})
   end
 
   describe "register_user/1" do
@@ -418,6 +434,67 @@ defmodule Api.Adapters.AccountsTest do
 
       assert :error =
                Accounts.refresh_session(%RefreshSessionUsecaseDto{refresh_token: refresh_token})
+    end
+  end
+
+  describe "follow_user/1" do
+    test "follows a user" do
+      follower = register_user()
+      followee = register_user(%{"email" => "followee@example.com"})
+
+      assert {:ok, %{following: true}} = follow_user(follower, followee.id)
+      assert get_user(followee.id, follower).followed_by_user == true
+    end
+
+    test "following twice is idempotent" do
+      follower = register_user()
+      followee = register_user(%{"email" => "followee2@example.com"})
+
+      assert {:ok, %{following: true}} = follow_user(follower, followee.id)
+      assert {:ok, %{following: true}} = follow_user(follower, followee.id)
+    end
+
+    test "rejects following yourself" do
+      user = register_user()
+      assert {:error, :cannot_follow_self} = follow_user(user, user.id)
+    end
+
+    test "returns not_found for a missing or invalid followee id" do
+      follower = register_user()
+
+      assert {:error, :not_found} = follow_user(follower, Ecto.UUID.generate())
+      assert {:error, :not_found} = follow_user(follower, "not-a-uuid")
+    end
+  end
+
+  describe "unfollow_user/1" do
+    test "unfollows a previously-followed user" do
+      follower = register_user()
+      followee = register_user(%{"email" => "followee3@example.com"})
+
+      assert {:ok, %{following: true}} = follow_user(follower, followee.id)
+      assert {:ok, %{following: false}} = unfollow_user(follower, followee.id)
+      assert get_user(followee.id, follower).followed_by_user == false
+    end
+
+    test "unfollowing a user that wasn't followed is a no-op" do
+      follower = register_user()
+      followee = register_user(%{"email" => "followee4@example.com"})
+
+      assert {:ok, %{following: false}} = unfollow_user(follower, followee.id)
+    end
+  end
+
+  describe "get_user/1 followed_by_user annotation" do
+    test "flags followed_by_user per the given current_user" do
+      follower = register_user()
+      followee = register_user(%{"email" => "followee5@example.com"})
+
+      assert {:ok, _} = follow_user(follower, followee.id)
+
+      assert get_user(followee.id, follower).followed_by_user == true
+      assert get_user(followee.id, followee).followed_by_user == false
+      assert get_user(followee.id).followed_by_user == false
     end
   end
 

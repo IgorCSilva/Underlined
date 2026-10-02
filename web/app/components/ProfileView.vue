@@ -13,13 +13,22 @@
         <NuxtLink to="/profile/edit" class="edit-link">Edit profile</NuxtLink>
         <button type="button" class="logout-link" @click="onLogout">Log out</button>
       </div>
+      <div v-else-if="canFollow" class="profile-actions">
+        <FollowButton :user-id="user.id" :followed-by-user="!!user.followed_by_user" />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 const props = defineProps<{
-  user: { name: string; bio: string | null; avatar_url: string | null }
+  user: {
+    id: string
+    name: string
+    bio: string | null
+    avatar_url: string | null
+    followed_by_user?: boolean
+  }
   own?: boolean
 }>()
 
@@ -27,6 +36,7 @@ const auth = useAuthStore()
 const router = useRouter()
 
 const initial = computed(() => props.user.name?.[0]?.toUpperCase() ?? '?')
+const canFollow = computed(() => !props.own && !!auth.user && auth.user.id !== props.user.id)
 
 async function onLogout() {
   await auth.logout()
