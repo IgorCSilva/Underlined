@@ -13,6 +13,7 @@ defmodule Api.Domain.User do
     :avatar_url,
     :confirmed_at,
     :enabled,
+    :followed_by_user,
     :inserted_at,
     :updated_at
   ]
@@ -26,6 +27,7 @@ defmodule Api.Domain.User do
           avatar_url: String.t() | nil,
           confirmed_at: DateTime.t() | nil,
           enabled: boolean(),
+          followed_by_user: boolean(),
           inserted_at: DateTime.t() | nil,
           updated_at: DateTime.t() | nil
         }

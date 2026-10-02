@@ -10,9 +10,9 @@ defmodule Api.Usecases.User.GetUser.GetUserUsecase do
 
   defstruct [:repository]
 
-  def call(%GetUserUsecaseDto{id: id}, %__MODULE__{
+  def call(%GetUserUsecaseDto{id: id, current_user: current_user}, %__MODULE__{
         repository: %{adapter: adapter, adaptee: adaptee}
       }) do
-    adapter.get_user(id, adaptee)
+    adapter.get_user(id, current_user, adaptee)
   end
 end

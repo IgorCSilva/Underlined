@@ -23,6 +23,10 @@ defmodule Api.Adapters.Post.PostRepositoryAdapter do
     adaptee.list_posts(before, current_user) |> Enum.map(&to_domain/1)
   end
 
+  def list_following_posts(user, before, adaptee) do
+    adaptee.list_following_posts(user, before) |> Enum.map(&to_domain/1)
+  end
+
   def get_post(id, current_user, adaptee) do
     case adaptee.get_post(id, current_user) do
       nil -> nil

@@ -13,7 +13,8 @@ defmodule ApiWeb.UserJSON do
       name: user.name,
       bio: user.bio,
       avatar_url: user.avatar_url,
-      confirmed: user.confirmed_at != nil
+      confirmed: user.confirmed_at != nil,
+      followed_by_user: user.followed_by_user
     }
   end
 end

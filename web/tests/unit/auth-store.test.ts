@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { useAuthStore } from '../../app/stores/auth'
 
 const fakeUser = {
-  id: 1,
+  id: '1',
   email: 'reader@example.com',
   name: 'Reader One',
   bio: null,

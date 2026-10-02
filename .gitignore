@@ -30,3 +30,6 @@ web/playwright/.cache/
 
 # Env files
 .env
+
+# DB backups (contain real user data/PII)
+backup/

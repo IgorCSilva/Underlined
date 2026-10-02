@@ -25,19 +25,10 @@ defmodule ApiWeb.Router do
     post "/auth/reset_password", AuthController, :request_password_reset
     put "/auth/reset_password/:token", AuthController, :reset_password
 
-    get "/users/:id", ProfileController, :show
-
     get "/books", BookController, :index
     get "/books/:id", BookController, :show
 
     get "/posts/:post_id/comments", CommentController, :index
-
-    scope "/" do
-      pipe_through :maybe_authenticated
-
-      get "/posts", PostController, :index
-      get "/posts/:id", PostController, :show
-    end
 
     scope "/" do
       pipe_through :authenticated
@@ -48,12 +39,24 @@ defmodule ApiWeb.Router do
 
       post "/books", BookController, :create
 
+      get "/posts/following", PostController, :following
       post "/posts", PostController, :create
 
       post "/posts/:post_id/likes", LikeController, :create
       delete "/posts/:post_id/likes", LikeController, :delete
 
       post "/posts/:post_id/comments", CommentController, :create
+
+      post "/users/:id/follow", FollowController, :create
+      delete "/users/:id/follow", FollowController, :delete
+    end
+
+    scope "/" do
+      pipe_through :maybe_authenticated
+
+      get "/users/:id", ProfileController, :show
+      get "/posts", PostController, :index
+      get "/posts/:id", PostController, :show
     end
   end
 end

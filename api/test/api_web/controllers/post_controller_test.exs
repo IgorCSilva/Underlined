@@ -5,7 +5,9 @@ defmodule ApiWeb.PostControllerTest do
 
   alias Api.Adapters.Accounts
   alias Api.Adapters.Catalog
+  alias Api.Adapters.Posts
   alias Api.Usecases.Book.AddBook.AddBookUsecaseDto
+  alias Api.Usecases.Post.CreatePost.CreatePostUsecaseDto
   alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
   alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
 
@@ -124,6 +126,59 @@ defmodule ApiWeb.PostControllerTest do
     test "returns an empty list when there are no posts", %{conn: conn} do
       conn = get(conn, ~p"/api/posts")
       assert json_response(conn, 200) == %{"data" => []}
+    end
+  end
+
+  describe "GET /api/posts/following" do
+    test "lists only posts from followed users", %{conn: conn, access_token: token, book: book} do
+      {:ok, followed} =
+        Accounts.register_user(%RegisterUserUsecaseDto{
+          attrs: %{
+            "email" => "followed@example.com",
+            "password" => "supersecret",
+            "name" => "Followed Author"
+          }
+        })
+
+      {:ok, post} =
+        Posts.create_post(%CreatePostUsecaseDto{
+          user: followed,
+          attrs: Map.put(@valid_post_params, "book_id", book.id)
+        })
+
+      conn
+      |> put_req_header("authorization", "Bearer #{token}")
+      |> post(~p"/api/users/#{followed.id}/follow")
+
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> get(~p"/api/posts/following")
+
+      assert %{"data" => [%{"id" => id}]} = json_response(conn, 200)
+      assert id == post.id
+    end
+
+    test "excludes posts from users not followed, including the caller's own posts", %{
+      conn: conn,
+      access_token: token,
+      book: book
+    } do
+      conn
+      |> put_req_header("authorization", "Bearer #{token}")
+      |> post(~p"/api/posts", post: Map.put(@valid_post_params, "book_id", book.id))
+
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> get(~p"/api/posts/following")
+
+      assert json_response(conn, 200) == %{"data" => []}
+    end
+
+    test "rejects an unauthenticated request", %{conn: conn} do
+      conn = get(conn, ~p"/api/posts/following")
+      assert json_response(conn, 401)
     end
   end
 

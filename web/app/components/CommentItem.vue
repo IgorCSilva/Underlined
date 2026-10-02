@@ -1,9 +1,11 @@
 <template>
   <div class="comment-item" :class="{ 'is-reply': isReply }">
-    <AvatarCircle :name="comment.user.name" :avatar-url="comment.user.avatar_url" :size="28" />
+    <NuxtLink :to="`/profile/${comment.user.id}`" class="comment-avatar-link">
+      <AvatarCircle :name="comment.user.name" :avatar-url="comment.user.avatar_url" :size="28" />
+    </NuxtLink>
     <div class="comment-body-col">
       <div class="comment-meta">
-        <span class="comment-username">{{ comment.user.name }}</span>
+        <NuxtLink :to="`/profile/${comment.user.id}`" class="comment-username">{{ comment.user.name }}</NuxtLink>
         <span class="comment-date">{{ formattedDate }}</span>
       </div>
       <p class="comment-text">{{ comment.body }}</p>
@@ -90,10 +92,20 @@ function onReplyPosted(reply: Comment) {
   margin-bottom: 4px;
 }
 
+.comment-avatar-link {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
 .comment-username {
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--color-ink);
+  text-decoration: none;
+}
+
+.comment-username:hover {
+  text-decoration: underline;
 }
 
 .comment-date {

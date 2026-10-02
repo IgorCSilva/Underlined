@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils'
 import CommentThread from '../../app/components/CommentThread.vue'
 import type { Comment } from '../../app/stores/comments'
 
-const stubs = { AvatarCircle: true }
+const stubs = { NuxtLink: { template: '<a><slot /></a>' }, AvatarCircle: true }
 
 function makeComment(overrides: Partial<Comment> = {}): Comment {
   return {
