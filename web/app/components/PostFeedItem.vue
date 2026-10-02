@@ -17,7 +17,7 @@
 
     <div class="feed-icon-row">
       <LikeButton :post-id="post.id" :liked-by-user="post.liked_by_user" :like-count="post.like_count" />
-      <span class="feed-icon">💬 0</span>
+      <span class="feed-icon">💬 {{ post.comment_count }}</span>
     </div>
   </NuxtLink>
 </template>

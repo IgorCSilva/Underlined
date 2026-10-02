@@ -251,4 +251,117 @@ defmodule Api.PostsTest do
       assert {:error, :not_found} = Posts.unlike_post(liker, "not-a-uuid")
     end
   end
+
+  describe "create_comment/3" do
+    test "creates a top-level comment and increments the post's comment_count" do
+      user = user_fixture()
+      commenter = user_fixture(%{"email" => "commenter1@example.com"})
+      book = book_fixture()
+      {:ok, post} = Posts.create_post(user, Map.put(@valid_attrs, "book_id", book.id))
+
+      assert {:ok, comment} = Posts.create_comment(commenter, post.id, %{"body" => "Great read!"})
+      assert comment.type == "comment"
+      assert comment.body == "Great read!"
+      assert comment.parent_comment_id == nil
+      assert comment.user.id == commenter.id
+      assert Posts.get_post(post.id).comment_count == 1
+    end
+
+    test "creates a reply tied to its parent top-level comment" do
+      user = user_fixture()
+      commenter = user_fixture(%{"email" => "commenter2@example.com"})
+      replier = user_fixture(%{"email" => "replier2@example.com"})
+      book = book_fixture()
+      {:ok, post} = Posts.create_post(user, Map.put(@valid_attrs, "book_id", book.id))
+      {:ok, parent} = Posts.create_comment(commenter, post.id, %{"body" => "Great read!"})
+
+      assert {:ok, reply} =
+               Posts.create_comment(replier, post.id, %{
+                 "body" => "Agreed!",
+                 "parent_comment_id" => parent.id
+               })
+
+      assert reply.type == "reply"
+      assert reply.parent_comment_id == parent.id
+      assert Posts.get_post(post.id).comment_count == 2
+    end
+
+    test "rejects replying to a reply" do
+      user = user_fixture()
+      commenter = user_fixture(%{"email" => "commenter3@example.com"})
+      replier = user_fixture(%{"email" => "replier3@example.com"})
+      other = user_fixture(%{"email" => "other3@example.com"})
+      book = book_fixture()
+      {:ok, post} = Posts.create_post(user, Map.put(@valid_attrs, "book_id", book.id))
+      {:ok, parent} = Posts.create_comment(commenter, post.id, %{"body" => "Great read!"})
+      {:ok, reply} = Posts.create_comment(replier, post.id, %{"body" => "Agreed!", "parent_comment_id" => parent.id})
+
+      assert {:error, :invalid_parent} =
+               Posts.create_comment(other, post.id, %{
+                 "body" => "Me too!",
+                 "parent_comment_id" => reply.id
+               })
+    end
+
+    test "returns not_found for a missing or invalid post id" do
+      commenter = user_fixture()
+
+      assert {:error, :not_found} = Posts.create_comment(commenter, Ecto.UUID.generate(), %{"body" => "Hi"})
+      assert {:error, :not_found} = Posts.create_comment(commenter, "not-a-uuid", %{"body" => "Hi"})
+    end
+
+    test "requires a non-blank body" do
+      user = user_fixture()
+      commenter = user_fixture(%{"email" => "commenter4@example.com"})
+      book = book_fixture()
+      {:ok, post} = Posts.create_post(user, Map.put(@valid_attrs, "book_id", book.id))
+
+      assert {:error, changeset} = Posts.create_comment(commenter, post.id, %{"body" => ""})
+      assert %{body: ["can't be blank"]} = errors_on(changeset)
+    end
+
+    test "rate limits comment creation per user" do
+      user = user_fixture()
+      commenter = user_fixture(%{"email" => "commenter5@example.com"})
+      book = book_fixture()
+      {:ok, post} = Posts.create_post(user, Map.put(@valid_attrs, "book_id", book.id))
+
+      for n <- 1..5 do
+        assert {:ok, _comment} = Posts.create_comment(commenter, post.id, %{"body" => "Comment #{n}"})
+      end
+
+      assert {:error, :rate_limited} = Posts.create_comment(commenter, post.id, %{"body" => "One too many"})
+    end
+  end
+
+  describe "list_comments/1" do
+    test "returns top-level comments oldest first, each with its replies oldest first" do
+      user = user_fixture()
+      commenter = user_fixture(%{"email" => "commenter6@example.com"})
+      replier = user_fixture(%{"email" => "replier6@example.com"})
+      book = book_fixture()
+      {:ok, post} = Posts.create_post(user, Map.put(@valid_attrs, "book_id", book.id))
+
+      {:ok, first} = Posts.create_comment(commenter, post.id, %{"body" => "First comment"})
+      {:ok, second} = Posts.create_comment(commenter, post.id, %{"body" => "Second comment"})
+
+      {:ok, reply_a} =
+        Posts.create_comment(replier, post.id, %{"body" => "Reply A", "parent_comment_id" => first.id})
+
+      {:ok, reply_b} =
+        Posts.create_comment(replier, post.id, %{"body" => "Reply B", "parent_comment_id" => first.id})
+
+      [listed_first, listed_second] = Posts.list_comments(post.id)
+
+      assert listed_first.id == first.id
+      assert listed_second.id == second.id
+      assert Enum.map(listed_first.replies, & &1.id) == [reply_a.id, reply_b.id]
+      assert listed_second.replies == []
+    end
+
+    test "returns an empty list for a missing or invalid post id" do
+      assert Posts.list_comments(Ecto.UUID.generate()) == []
+      assert Posts.list_comments("not-a-uuid") == []
+    end
+  end
 end
