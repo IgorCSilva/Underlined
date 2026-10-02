@@ -30,6 +30,8 @@ defmodule ApiWeb.Router do
     get "/books", BookController, :index
     get "/books/:id", BookController, :show
 
+    get "/posts/:post_id/comments", CommentController, :index
+
     scope "/" do
       pipe_through :maybe_authenticated
 
@@ -50,6 +52,8 @@ defmodule ApiWeb.Router do
 
       post "/posts/:post_id/likes", LikeController, :create
       delete "/posts/:post_id/likes", LikeController, :delete
+
+      post "/posts/:post_id/comments", CommentController, :create
     end
   end
 end

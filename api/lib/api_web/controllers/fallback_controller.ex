@@ -38,6 +38,18 @@ defmodule ApiWeb.FallbackController do
     |> json(%{errors: %{detail: "forbidden"}})
   end
 
+  def call(conn, {:error, :invalid_parent}) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> json(%{errors: %{detail: "can only reply to a top-level comment"}})
+  end
+
+  def call(conn, {:error, :rate_limited}) do
+    conn
+    |> put_status(:too_many_requests)
+    |> json(%{errors: %{detail: "you're commenting too fast, please slow down"}})
+  end
+
   # Catch-all for unexpected port failures (e.g. the object store being
   # unreachable) so they surface as a clean 502 instead of a 500 crash page.
   def call(conn, {:error, reason}) do
