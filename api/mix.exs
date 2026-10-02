@@ -51,6 +51,7 @@ defmodule Api.MixProject do
       {:hackney, "~> 1.20"},
       {:sweet_xml, "~> 0.7"},
       {:gen_smtp, "~> 1.2"},
+      {:hammer, "~> 7.0"},
       {:mox, "~> 1.1", only: :test}
     ]
   end

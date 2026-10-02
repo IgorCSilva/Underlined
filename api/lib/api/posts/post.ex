@@ -12,6 +12,7 @@ defmodule Api.Posts.Post do
     field :keyword_names, {:array, :string}, virtual: true, default: []
     field :like_count, :integer, default: 0
     field :liked_by_user, :boolean, virtual: true, default: false
+    field :comment_count, :integer, default: 0
 
     belongs_to :user, Api.Accounts.User
     belongs_to :book, Api.Catalog.Book

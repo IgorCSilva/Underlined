@@ -33,12 +33,16 @@ const { useAuthStore } = await import('../app/stores/auth')
 const { useApi, apiBaseUrl } = await import('../app/composables/useApi')
 const { useBooksStore } = await import('../app/stores/books')
 const { usePostsStore } = await import('../app/stores/posts')
+const { useCommentsStore } = await import('../app/stores/comments')
+const { extractErrorMessage } = await import('../app/utils/errors')
 
 vi.stubGlobal('useAuthStore', useAuthStore)
 vi.stubGlobal('useApi', useApi)
 vi.stubGlobal('apiBaseUrl', apiBaseUrl)
 vi.stubGlobal('useBooksStore', useBooksStore)
 vi.stubGlobal('usePostsStore', usePostsStore)
+vi.stubGlobal('useCommentsStore', useCommentsStore)
+vi.stubGlobal('extractErrorMessage', extractErrorMessage)
 
 beforeEach(() => {
   setActivePinia(createPinia())

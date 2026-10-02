@@ -30,18 +30,22 @@
 
     <div class="post-icon-row">
       <LikeButton :post-id="post.id" :liked-by-user="post.liked_by_user" :like-count="post.like_count" />
-      <span class="post-icon">💬 0</span>
+      <span class="post-icon">💬 {{ post.comment_count }}</span>
     </div>
+
+    <CommentThread :post-id="post.id" :comments="comments ?? []" @comment-added="onCommentAdded" />
   </div>
   <p v-else class="status-text">Post not found.</p>
 </template>
 
 <script setup lang="ts">
 import type { Post } from '~/stores/posts'
+import type { Comment } from '~/stores/comments'
 
 const route = useRoute()
 
 const { data: post } = await useApiFetch<Post>(`/api/posts/${route.params.id}`)
+const { data: comments } = await useApiFetch<Comment[]>(`/api/posts/${route.params.id}/comments`)
 
 // SSR always renders anonymous (no access token is available server-side),
 // so a logged-in viewer's own like never shows up in the hydrated payload.
@@ -53,6 +57,14 @@ onMounted(async () => {
   const fresh = await request<{ data: Post }>(`/api/posts/${route.params.id}`)
   post.value = fresh.data
 })
+
+// `post` is a shallowRef (Nuxt's useFetch), so an in-place mutation like
+// `post.value.comment_count++` would not trigger reactivity — reassign
+// `.value` instead.
+function onCommentAdded() {
+  if (!post.value) return
+  post.value = { ...post.value, comment_count: post.value.comment_count + 1 }
+}
 
 const formattedDate = computed(() => {
   if (!post.value) return ''

@@ -15,6 +15,15 @@ interface UserResponse {
   data: AuthUser
 }
 
+// Dedupes concurrent ensureInitialized() callers (the client auth plugin and
+// any route middleware that lands before it resolves) so they share a single
+// /api/auth/refresh call instead of racing — the backend rotates the refresh
+// token on each call, so a second concurrent call would fail and wrongly
+// clear a session the first call just established. Keyed by store instance
+// (via WeakMap) rather than a plain module variable so each fresh Pinia
+// instance (e.g. one per test) starts with no cached promise.
+const initPromises = new WeakMap<object, Promise<void>>()
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null as AuthUser | null,
@@ -77,8 +86,14 @@ export const useAuthStore = defineStore('auth', {
 
     async ensureInitialized() {
       if (this.initialized) return
-      await this.refresh()
-      this.initialized = true
+      let promise = initPromises.get(this)
+      if (!promise) {
+        promise = this.refresh().then(() => {
+          this.initialized = true
+        })
+        initPromises.set(this, promise)
+      }
+      await promise
     },
 
     async updateProfile(payload: { name: string; bio: string; avatar_url?: string | null }) {
