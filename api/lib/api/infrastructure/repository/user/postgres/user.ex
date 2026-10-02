@@ -19,6 +19,7 @@ defmodule Api.Infrastructure.Repository.User.Postgres.User do
     field :avatar_url, :string
     field :confirmed_at, :utc_datetime
     field :enabled, :boolean, default: false
+    field :followed_by_user, :boolean, virtual: true, default: false
 
     timestamps(type: :utc_datetime)
   end

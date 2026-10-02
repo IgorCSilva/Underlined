@@ -6,12 +6,19 @@ defmodule Api.Adapters.User.UserRepositoryAdapter do
   """
 
   alias Api.Domain.User, as: DomainUser
+  alias Api.Infrastructure.Repository.Follow.Postgres.FollowRepository
 
-  def get_user(id, adaptee) do
+  def get_user(id, current_user, adaptee) do
     case adaptee.get_user(id) do
       nil -> nil
-      db_user -> to_domain(db_user)
+      db_user -> db_user |> annotate_followed(current_user) |> to_domain()
     end
+  end
+
+  defp annotate_followed(db_user, nil), do: db_user
+
+  defp annotate_followed(db_user, current_user) do
+    %{db_user | followed_by_user: FollowRepository.following?(current_user, db_user.id)}
   end
 
   @doc """
@@ -33,6 +40,7 @@ defmodule Api.Adapters.User.UserRepositoryAdapter do
       avatar_url: db_user.avatar_url,
       confirmed_at: db_user.confirmed_at,
       enabled: db_user.enabled,
+      followed_by_user: db_user.followed_by_user,
       inserted_at: db_user.inserted_at,
       updated_at: db_user.updated_at
     }

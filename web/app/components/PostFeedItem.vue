@@ -1,15 +1,19 @@
 <template>
-  <NuxtLink :to="`/posts/${post.id}`" class="feed-item">
+  <div class="feed-item">
     <div class="feed-meta">
-      <AvatarCircle :name="post.user.name" :avatar-url="post.user.avatar_url" :size="28" />
+      <NuxtLink :to="`/profile/${post.user.id}`" class="feed-avatar-link">
+        <AvatarCircle :name="post.user.name" :avatar-url="post.user.avatar_url" :size="28" />
+      </NuxtLink>
       <span class="feed-meta-text">
-        <span class="feed-username">{{ post.user.name }}</span>
+        <NuxtLink :to="`/profile/${post.user.id}`" class="feed-username">{{ post.user.name }}</NuxtLink>
         on <span class="feed-book-title">{{ post.book.title }}</span>
       </span>
     </div>
 
-    <p class="feed-passage serif">{{ post.passage.text }}</p>
-    <p class="feed-thinking serif">{{ post.thinking }}</p>
+    <NuxtLink :to="`/posts/${post.id}`" class="feed-content-link">
+      <p class="feed-passage serif">{{ post.passage.text }}</p>
+      <p class="feed-thinking serif">{{ post.thinking }}</p>
+    </NuxtLink>
 
     <div v-if="post.keywords.length" class="feed-keywords">
       <span v-for="keyword in post.keywords" :key="keyword" class="feed-keyword-chip">{{ keyword }}</span>
@@ -17,9 +21,9 @@
 
     <div class="feed-icon-row">
       <LikeButton :post-id="post.id" :liked-by-user="post.liked_by_user" :like-count="post.like_count" />
-      <span class="feed-icon">💬 {{ post.comment_count }}</span>
+      <NuxtLink :to="`/posts/${post.id}`" class="feed-icon">💬 {{ post.comment_count }}</NuxtLink>
     </div>
-  </NuxtLink>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -33,8 +37,6 @@ defineProps<{ post: Post }>()
   display: block;
   padding: 24px 0;
   border-bottom: 1px solid var(--color-border);
-  color: inherit;
-  text-decoration: none;
 }
 
 .feed-item:last-child {
@@ -50,13 +52,28 @@ defineProps<{ post: Post }>()
   color: var(--color-text-secondary);
 }
 
+.feed-avatar-link {
+  display: inline-flex;
+}
+
 .feed-username {
   font-weight: 600;
   color: var(--color-ink);
+  text-decoration: none;
+}
+
+.feed-username:hover {
+  text-decoration: underline;
 }
 
 .feed-book-title {
   font-weight: 600;
+}
+
+.feed-content-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
 }
 
 .feed-passage {
@@ -102,5 +119,10 @@ defineProps<{ post: Post }>()
   gap: 16px;
   color: var(--color-accent-secondary);
   font-size: 0.85rem;
+}
+
+.feed-icon {
+  color: inherit;
+  text-decoration: none;
 }
 </style>

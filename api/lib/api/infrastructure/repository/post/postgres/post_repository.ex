@@ -6,6 +6,7 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
   import Ecto.Query, warn: false
 
   alias Api.Infrastructure.Repository.Book.Postgres.{Book, BookRepository}
+  alias Api.Infrastructure.Repository.Follow.Postgres.Follow
   alias Api.Infrastructure.Repository.Keyword.Postgres.Keyword
   alias Api.Infrastructure.Repository.Like.Postgres.LikeRepository
   alias Api.Infrastructure.Repository.Passage.Postgres.Passage
@@ -78,6 +79,24 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
   end
 
   defp maybe_before(query, _before), do: query
+
+  @doc """
+  Chronological feed of posts by users that `user` follows, newest first.
+  Same `before`-cursor pagination as `list_posts/2`, and likewise annotates
+  `liked_by_user` for `user`.
+  """
+  def list_following_posts(user, before \\ nil) do
+    Post
+    |> join(:inner, [p], f in Follow,
+      on: f.followee_id == p.user_id and f.follower_id == ^user.id
+    )
+    |> order_by([p], desc: p.inserted_at)
+    |> maybe_before(before)
+    |> limit(^@page_size)
+    |> Repo.all()
+    |> Repo.preload(@preloads)
+    |> annotate_liked(user)
+  end
 
   def get_post(id, current_user \\ nil) do
     case fetch_post(id) do

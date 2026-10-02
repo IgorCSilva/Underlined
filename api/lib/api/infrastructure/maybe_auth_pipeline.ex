@@ -7,8 +7,8 @@ defmodule Api.Infrastructure.MaybeAuthPipeline do
   use Guardian.Plug.Pipeline,
     otp_app: :api,
     module: Api.Infrastructure.Guardian,
-    error_handler: Api.Infrastructure.ErrorHandler
+    error_handler: Api.Infrastructure.MaybeAuthErrorHandler
 
-  plug Guardian.Plug.VerifyHeader, scheme: "Bearer"
+  plug Guardian.Plug.VerifyHeader, scheme: "Bearer", halt: false
   plug Guardian.Plug.LoadResource, allow_blank: true
 end

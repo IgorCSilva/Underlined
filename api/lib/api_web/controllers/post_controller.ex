@@ -4,6 +4,7 @@ defmodule ApiWeb.PostController do
   alias Api.Adapters.Posts
   alias Api.Usecases.Post.CreatePost.CreatePostUsecaseDto
   alias Api.Usecases.Post.GetPost.GetPostUsecaseDto
+  alias Api.Usecases.Post.ListFollowingPosts.ListFollowingPostsUsecaseDto
   alias Api.Usecases.Post.ListPosts.ListPostsUsecaseDto
 
   action_fallback ApiWeb.FallbackController
@@ -13,6 +14,16 @@ defmodule ApiWeb.PostController do
       Posts.list_posts(%ListPostsUsecaseDto{
         before: params["before"],
         current_user: current_user(conn)
+      })
+
+    render(conn, :index, posts: posts)
+  end
+
+  def following(conn, params) do
+    posts =
+      Posts.list_following_posts(%ListFollowingPostsUsecaseDto{
+        user: current_user(conn),
+        before: params["before"]
       })
 
     render(conn, :index, posts: posts)

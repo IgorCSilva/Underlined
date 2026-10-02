@@ -36,4 +36,12 @@ defmodule Api.Infrastructure.Repository.Comment.Postgres.Comment do
     |> foreign_key_constraint(:post_id)
     |> foreign_key_constraint(:parent_comment_id)
   end
+
+  @doc "Editing a comment may only ever change its body — not its author, post, or place in the thread."
+  def update_changeset(comment, attrs) do
+    comment
+    |> cast(attrs, [:body])
+    |> validate_required([:body])
+    |> validate_length(:body, min: 1, max: 1000)
+  end
 end

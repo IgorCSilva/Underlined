@@ -19,7 +19,7 @@ describe('TopBar', () => {
   it('shows authenticated-only links and hides login/signup when logged in', () => {
     const wrapper = mount(TopBar, { global: { stubs } })
     const auth = useAuthStore()
-    auth.user = { id: 1, email: 'a@example.com', name: 'Reader', bio: null, avatar_url: null, confirmed: true }
+    auth.user = { id: '1', email: 'a@example.com', name: 'Reader', bio: null, avatar_url: null, confirmed: true }
 
     return wrapper.vm.$nextTick().then(() => {
       // expect(wrapper.text()).toContain('New post')

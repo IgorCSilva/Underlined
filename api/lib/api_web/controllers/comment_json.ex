@@ -10,6 +10,7 @@ defmodule ApiWeb.CommentJSON do
       type: comment.type,
       body: comment.body,
       inserted_at: comment.inserted_at,
+      updated_at: comment.updated_at,
       parent_comment_id: comment.parent_comment_id,
       user: %{
         id: comment.user.id,
