@@ -12,9 +12,37 @@ config :api,
   env: config_env(),
   generators: [binary_id: true]
 
-config :api, Api.Accounts.Guardian,
+config :api, Api.Infrastructure.Guardian,
   issuer: "underlined_api",
   ttl: {15, :minutes}
+
+config :api, :user_repository,
+  adapter: Api.Adapters.User.UserRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.User.Postgres.UserRepository
+
+config :api, :user_token_repository,
+  adapter: Api.Adapters.UserToken.UserTokenRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.UserToken.Postgres.UserTokenRepository
+
+config :api, :refresh_token_repository,
+  adapter: Api.Adapters.RefreshToken.RefreshTokenRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.RefreshToken.Postgres.RefreshTokenRepository
+
+config :api, :book_repository,
+  adapter: Api.Adapters.Book.BookRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Book.Postgres.BookRepository
+
+config :api, :post_repository,
+  adapter: Api.Adapters.Post.PostRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Post.Postgres.PostRepository
+
+config :api, :like_repository,
+  adapter: Api.Adapters.Like.LikeRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Like.Postgres.LikeRepository
+
+config :api, :comment_repository,
+  adapter: Api.Adapters.Comment.CommentRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Comment.Postgres.CommentRepository
 
 config :api, cors_origin: "http://localhost:3000"
 config :api, web_base_url: "http://localhost:3000"

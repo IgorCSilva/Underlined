@@ -3,23 +3,34 @@ defmodule ApiWeb.PostControllerTest do
 
   import Mox
 
-  alias Api.Accounts
-  alias Api.Catalog
+  alias Api.Adapters.Accounts
+  alias Api.Adapters.Catalog
+  alias Api.Usecases.Book.AddBook.AddBookUsecaseDto
+  alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
+  alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
 
   setup :verify_on_exit!
 
   setup do
-    Api.MailerMock |> stub(:deliver_confirmation_instructions, fn _user, _url -> {:ok, :delivered} end)
+    Api.MailerMock
+    |> stub(:deliver_confirmation_instructions, fn _user, _url -> {:ok, :delivered} end)
 
     {:ok, user} =
-      Accounts.register_user(%{
-        "email" => "reader@example.com",
-        "password" => "supersecret",
-        "name" => "Reader One"
+      Accounts.register_user(%RegisterUserUsecaseDto{
+        attrs: %{
+          "email" => "reader@example.com",
+          "password" => "supersecret",
+          "name" => "Reader One"
+        }
       })
 
-    {:ok, access_token, _refresh_token} = Accounts.create_session(user, false)
-    {:ok, book} = Catalog.add_book(%{"title" => "Sapiens", "author" => "Yuval Noah Harari"})
+    {:ok, access_token, _refresh_token} =
+      Accounts.create_session(%CreateSessionUsecaseDto{user: user, remember_me: false})
+
+    {:ok, book} =
+      Catalog.add_book(%AddBookUsecaseDto{
+        attrs: %{"title" => "Sapiens", "author" => "Yuval Noah Harari"}
+      })
 
     %{user: user, access_token: access_token, book: book}
   end
@@ -59,7 +70,9 @@ defmodule ApiWeb.PostControllerTest do
       conn =
         conn
         |> put_req_header("authorization", "Bearer #{token}")
-        |> post(~p"/api/posts", post: @valid_post_params |> Map.put("book_id", book.id) |> Map.put("thinking", ""))
+        |> post(~p"/api/posts",
+          post: @valid_post_params |> Map.put("book_id", book.id) |> Map.put("thinking", "")
+        )
 
       assert json_response(conn, 422)
     end
@@ -68,25 +81,39 @@ defmodule ApiWeb.PostControllerTest do
       conn =
         conn
         |> put_req_header("authorization", "Bearer #{token}")
-        |> post(~p"/api/posts", post: Map.put(@valid_post_params, "book_id", Ecto.UUID.generate()))
+        |> post(~p"/api/posts",
+          post: Map.put(@valid_post_params, "book_id", Ecto.UUID.generate())
+        )
 
       assert json_response(conn, 404)
     end
   end
 
   describe "GET /api/posts" do
-    test "lists posts newest first without authentication", %{conn: conn, access_token: token, book: book} do
+    test "lists posts newest first without authentication", %{
+      conn: conn,
+      access_token: token,
+      book: book
+    } do
       conn1 =
         conn
         |> put_req_header("authorization", "Bearer #{token}")
-        |> post(~p"/api/posts", post: @valid_post_params |> Map.put("book_id", book.id) |> Map.put("passage_text", "First."))
+        |> post(~p"/api/posts",
+          post:
+            @valid_post_params |> Map.put("book_id", book.id) |> Map.put("passage_text", "First.")
+        )
 
       %{"data" => %{"id" => first_id}} = json_response(conn1, 201)
 
       conn2 =
         conn
         |> put_req_header("authorization", "Bearer #{token}")
-        |> post(~p"/api/posts", post: @valid_post_params |> Map.put("book_id", book.id) |> Map.put("passage_text", "Second."))
+        |> post(~p"/api/posts",
+          post:
+            @valid_post_params
+            |> Map.put("book_id", book.id)
+            |> Map.put("passage_text", "Second.")
+        )
 
       %{"data" => %{"id" => second_id}} = json_response(conn2, 201)
 
@@ -147,10 +174,13 @@ defmodule ApiWeb.PostControllerTest do
         |> put_req_header("authorization", "Bearer #{token}")
         |> get(~p"/api/posts/#{id}")
 
-      assert %{"data" => %{"like_count" => 1, "liked_by_user" => true}} = json_response(authed_show, 200)
+      assert %{"data" => %{"like_count" => 1, "liked_by_user" => true}} =
+               json_response(authed_show, 200)
 
       anon_show = get(build_conn(), ~p"/api/posts/#{id}")
-      assert %{"data" => %{"like_count" => 1, "liked_by_user" => false}} = json_response(anon_show, 200)
+
+      assert %{"data" => %{"like_count" => 1, "liked_by_user" => false}} =
+               json_response(anon_show, 200)
     end
   end
 end

@@ -3,40 +3,61 @@ defmodule ApiWeb.CommentControllerTest do
 
   import Mox
 
-  alias Api.Accounts
-  alias Api.Catalog
-  alias Api.Posts
+  alias Api.Adapters.Accounts
+  alias Api.Adapters.Catalog
+  alias Api.Adapters.Posts
+  alias Api.Usecases.Book.AddBook.AddBookUsecaseDto
+  alias Api.Usecases.Post.CreatePost.CreatePostUsecaseDto
+  alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
+  alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
 
   setup :verify_on_exit!
 
   setup do
-    Api.MailerMock |> stub(:deliver_confirmation_instructions, fn _user, _url -> {:ok, :delivered} end)
+    Api.MailerMock
+    |> stub(:deliver_confirmation_instructions, fn _user, _url -> {:ok, :delivered} end)
 
     {:ok, author} =
-      Accounts.register_user(%{"email" => "author@example.com", "password" => "supersecret", "name" => "Author"})
-
-    {:ok, commenter} =
-      Accounts.register_user(%{
-        "email" => "commenter@example.com",
-        "password" => "supersecret",
-        "name" => "Commenter"
+      Accounts.register_user(%RegisterUserUsecaseDto{
+        attrs: %{"email" => "author@example.com", "password" => "supersecret", "name" => "Author"}
       })
 
-    {:ok, access_token, _refresh_token} = Accounts.create_session(commenter, false)
-    {:ok, book} = Catalog.add_book(%{"title" => "Sapiens", "author" => "Yuval Noah Harari"})
+    {:ok, commenter} =
+      Accounts.register_user(%RegisterUserUsecaseDto{
+        attrs: %{
+          "email" => "commenter@example.com",
+          "password" => "supersecret",
+          "name" => "Commenter"
+        }
+      })
+
+    {:ok, access_token, _refresh_token} =
+      Accounts.create_session(%CreateSessionUsecaseDto{user: commenter, remember_me: false})
+
+    {:ok, book} =
+      Catalog.add_book(%AddBookUsecaseDto{
+        attrs: %{"title" => "Sapiens", "author" => "Yuval Noah Harari"}
+      })
 
     {:ok, post} =
-      Posts.create_post(author, %{
-        "book_id" => book.id,
-        "passage_text" => "A short passage.",
-        "thinking" => "This changed how I think."
+      Posts.create_post(%CreatePostUsecaseDto{
+        user: author,
+        attrs: %{
+          "book_id" => book.id,
+          "passage_text" => "A short passage.",
+          "thinking" => "This changed how I think."
+        }
       })
 
     %{post: post, commenter: commenter, access_token: access_token}
   end
 
   describe "POST /api/posts/:post_id/comments" do
-    test "creates a top-level comment when authenticated", %{conn: conn, post: post, access_token: token} do
+    test "creates a top-level comment when authenticated", %{
+      conn: conn,
+      post: post,
+      access_token: token
+    } do
       conn =
         conn
         |> put_req_header("authorization", "Bearer #{token}")
@@ -49,10 +70,16 @@ defmodule ApiWeb.CommentControllerTest do
       assert data["replies"] == []
     end
 
-    test "creates a reply when given a parent_comment_id", %{conn: conn, post: post, access_token: token} do
+    test "creates a reply when given a parent_comment_id", %{
+      conn: conn,
+      post: post,
+      access_token: token
+    } do
       conn = conn |> put_req_header("authorization", "Bearer #{token}")
 
-      parent_conn = post(conn, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Great read!"})
+      parent_conn =
+        post(conn, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Great read!"})
+
       %{"data" => %{"id" => parent_id}} = json_response(parent_conn, 201)
 
       reply_conn =
@@ -82,7 +109,9 @@ defmodule ApiWeb.CommentControllerTest do
     test "returns 422 when replying to a reply", %{conn: conn, post: post, access_token: token} do
       conn = conn |> put_req_header("authorization", "Bearer #{token}")
 
-      parent_conn = post(conn, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Great read!"})
+      parent_conn =
+        post(conn, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Great read!"})
+
       %{"data" => %{"id" => parent_id}} = json_response(parent_conn, 201)
 
       reply_conn =
@@ -109,11 +138,17 @@ defmodule ApiWeb.CommentControllerTest do
       assert json_response(conn, 404)
     end
 
-    test "returns 429 after exceeding the rate limit", %{conn: conn, post: post, access_token: token} do
+    test "returns 429 after exceeding the rate limit", %{
+      conn: conn,
+      post: post,
+      access_token: token
+    } do
       conn = conn |> put_req_header("authorization", "Bearer #{token}")
 
       for n <- 1..5 do
-        resp = post(conn, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Comment #{n}"})
+        resp =
+          post(conn, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Comment #{n}"})
+
         assert json_response(resp, 201)
       end
 
@@ -123,10 +158,16 @@ defmodule ApiWeb.CommentControllerTest do
   end
 
   describe "GET /api/posts/:post_id/comments" do
-    test "lists top-level comments with nested replies", %{conn: conn, post: post, access_token: token} do
+    test "lists top-level comments with nested replies", %{
+      conn: conn,
+      post: post,
+      access_token: token
+    } do
       authed = conn |> put_req_header("authorization", "Bearer #{token}")
 
-      parent_conn = post(authed, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Great read!"})
+      parent_conn =
+        post(authed, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Great read!"})
+
       %{"data" => %{"id" => parent_id}} = json_response(parent_conn, 201)
 
       post(authed, ~p"/api/posts/#{post.id}/comments",

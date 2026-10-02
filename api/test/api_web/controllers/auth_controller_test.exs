@@ -1,8 +1,9 @@
 defmodule ApiWeb.AuthControllerTest do
   use ApiWeb.ConnCase, async: true
 
-  alias Api.Accounts
+  alias Api.Adapters.Accounts
   alias Api.Repo
+  alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
 
   @user_attrs %{
     "email" => "reader@example.com",
@@ -18,7 +19,7 @@ defmodule ApiWeb.AuthControllerTest do
   # this simulates the responsible party's manual DB flip after confirming
   # the email address by hand.
   defp create_enabled_user(attrs \\ @user_attrs) do
-    {:ok, user} = Accounts.register_user(attrs)
+    {:ok, user} = Accounts.register_user(%RegisterUserUsecaseDto{attrs: attrs})
     user |> Ecto.Changeset.change(enabled: true) |> Repo.update!()
   end
 
@@ -61,7 +62,8 @@ defmodule ApiWeb.AuthControllerTest do
     end
 
     test "returns 403 for an account that hasn't been enabled yet", %{conn: conn} do
-      {:ok, _user} = Accounts.register_user(%{@user_attrs | "email" => "pending@example.com"})
+      attrs = %{@user_attrs | "email" => "pending@example.com"}
+      {:ok, _user} = Accounts.register_user(%RegisterUserUsecaseDto{attrs: attrs})
 
       conn =
         post(conn, ~p"/api/auth/login", email: "pending@example.com", password: "supersecret")
@@ -165,7 +167,10 @@ defmodule ApiWeb.AuthControllerTest do
       assert json_response(conn, 401)
     end
 
-    test "returns the current user's profile when authenticated", %{conn: conn, access_token: token} do
+    test "returns the current user's profile when authenticated", %{
+      conn: conn,
+      access_token: token
+    } do
       conn =
         conn
         |> put_req_header("authorization", "Bearer #{token}")
@@ -181,7 +186,8 @@ defmodule ApiWeb.AuthControllerTest do
         |> put_req_header("authorization", "Bearer #{token}")
         |> put(~p"/api/me", user: %{"name" => "New Name", "bio" => "Avid reader"})
 
-      assert %{"data" => %{"name" => "New Name", "bio" => "Avid reader"}} = json_response(conn, 200)
+      assert %{"data" => %{"name" => "New Name", "bio" => "Avid reader"}} =
+               json_response(conn, 200)
     end
   end
 end

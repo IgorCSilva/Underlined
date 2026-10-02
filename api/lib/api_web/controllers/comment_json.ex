@@ -1,5 +1,5 @@
 defmodule ApiWeb.CommentJSON do
-  alias Api.Posts.Comment
+  alias Api.Domain.Comment
 
   def index(%{comments: comments}), do: %{data: Enum.map(comments, &data/1)}
   def show(%{comment: comment}), do: %{data: data(comment)}
