@@ -12,6 +12,7 @@ const post: Post = {
   keywords: ['attention', 'nature-writing'],
   like_count: 2,
   liked_by_user: false,
+  comment_count: 3,
   user: { id: 'user-1', name: 'Reader One', avatar_url: null },
 }
 

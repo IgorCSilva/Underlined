@@ -15,7 +15,7 @@ config :api, ApiWeb.Endpoint,
   secret_key_base: "nxj4Gil1/JFRXLfLYfrpgtgjxyG98nYLhcfeXYZxbxEvEiKpF2OAbEF+5+IM75w6",
   server: false
 
-config :api, Api.Accounts.Guardian,
+config :api, Api.Infrastructure.Guardian,
   secret_key: "test_guardian_secret_test_guardian_secret_test_guardian_secret"
 
 # In test we don't send emails or hit real object storage — the Accounts

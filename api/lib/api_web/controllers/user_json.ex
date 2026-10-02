@@ -1,16 +1,19 @@
 defmodule ApiWeb.UserJSON do
-  alias Api.Accounts.User
+  @moduledoc """
+  Renders either the pure Api.Domain.User or the Postgres user entity, since
+  callers are mid-migration from one to the other.
+  """
 
   def show(%{user: user}), do: %{data: data(user)}
 
-  def data(%User{} = user) do
+  def data(user) do
     %{
       id: user.id,
       email: user.email,
       name: user.name,
       bio: user.bio,
       avatar_url: user.avatar_url,
-      confirmed: User.confirmed?(user)
+      confirmed: user.confirmed_at != nil
     }
   end
 end
