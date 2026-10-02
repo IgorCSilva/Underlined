@@ -69,4 +69,16 @@ describe('auth store', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(auth.accessToken).toBe('token-789')
   })
+
+  it('concurrent ensureInitialized calls share a single refresh request', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ data: { access_token: 'token-789', user: fakeUser } })
+    vi.stubGlobal('$fetch', fetchMock)
+
+    const auth = useAuthStore()
+    await Promise.all([auth.ensureInitialized(), auth.ensureInitialized()])
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(auth.accessToken).toBe('token-789')
+    expect(auth.initialized).toBe(true)
+  })
 })
