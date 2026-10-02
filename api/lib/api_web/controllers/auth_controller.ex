@@ -155,7 +155,7 @@ defmodule ApiWeb.AuthController do
 
     put_resp_cookie(conn, @refresh_cookie, refresh_token,
       http_only: true,
-      same_site: "Lax",
+      same_site: same_site_policy(),
       secure: secure_cookies?(),
       max_age: max_age,
       path: "/api/auth"
@@ -163,10 +163,21 @@ defmodule ApiWeb.AuthController do
   end
 
   defp delete_refresh_cookie(conn) do
-    delete_resp_cookie(conn, @refresh_cookie, path: "/api/auth")
+    delete_resp_cookie(conn, @refresh_cookie,
+      path: "/api/auth",
+      same_site: same_site_policy(),
+      secure: secure_cookies?()
+    )
   end
 
   defp secure_cookies?, do: Application.get_env(:api, :env) == :prod
+
+  # The frontend and API are served from different origins in production, so
+  # the refresh cookie needs SameSite=None (which browsers only honor when
+  # Secure is also set) to survive cross-site fetch requests. Locally both
+  # run on localhost (same "site", just different ports), and requiring
+  # Secure there would mean dev needs HTTPS just to keep a session.
+  defp same_site_policy, do: if(secure_cookies?(), do: "None", else: "Lax")
 
   defp truthy?(value), do: value in [true, "true", "1", 1]
 
