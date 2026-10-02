@@ -11,7 +11,7 @@ defmodule ApiWeb.ProfileController do
   @allowed_content_types ~w(image/png image/jpeg image/webp)
 
   def show(conn, %{"id" => id}) do
-    case Accounts.get_user(%GetUserUsecaseDto{id: id}) do
+    case Accounts.get_user(%GetUserUsecaseDto{id: id, current_user: current_user(conn)}) do
       nil -> {:error, :not_found}
       user -> render(conn, :show, user: user)
     end

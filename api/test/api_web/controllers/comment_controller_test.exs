@@ -49,7 +49,7 @@ defmodule ApiWeb.CommentControllerTest do
         }
       })
 
-    %{post: post, commenter: commenter, access_token: access_token}
+    %{post: post, author: author, commenter: commenter, access_token: access_token}
   end
 
   describe "POST /api/posts/:post_id/comments" do
@@ -154,6 +154,118 @@ defmodule ApiWeb.CommentControllerTest do
 
       conn2 = post(conn, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "One too many"})
       assert json_response(conn2, 429)
+    end
+  end
+
+  describe "PUT /api/posts/:post_id/comments/:id" do
+    test "lets the author edit the comment body", %{conn: conn, post: post, access_token: token} do
+      authed = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      create_conn =
+        post(authed, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Great read!"})
+
+      %{"data" => %{"id" => comment_id}} = json_response(create_conn, 201)
+
+      update_conn =
+        put(authed, ~p"/api/posts/#{post.id}/comments/#{comment_id}",
+          comment: %{"body" => "Even better read!"}
+        )
+
+      assert %{"data" => data} = json_response(update_conn, 200)
+      assert data["id"] == comment_id
+      assert data["body"] == "Even better read!"
+    end
+
+    test "lets the author edit a parent comment that already has replies", %{
+      conn: conn,
+      post: post,
+      access_token: token
+    } do
+      authed = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      create_conn =
+        post(authed, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Great read!"})
+
+      %{"data" => %{"id" => comment_id}} = json_response(create_conn, 201)
+
+      post(authed, ~p"/api/posts/#{post.id}/comments",
+        comment: %{"body" => "Agreed!", "parent_comment_id" => comment_id}
+      )
+
+      update_conn =
+        put(authed, ~p"/api/posts/#{post.id}/comments/#{comment_id}",
+          comment: %{"body" => "Even better read!"}
+        )
+
+      assert %{"data" => data} = json_response(update_conn, 200)
+      assert data["body"] == "Even better read!"
+      assert [reply] = data["replies"]
+      assert reply["body"] == "Agreed!"
+    end
+
+    test "rejects an edit from a user who didn't write the comment", %{
+      conn: conn,
+      post: post,
+      access_token: token,
+      author: author
+    } do
+      authed = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      create_conn =
+        post(authed, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Great read!"})
+
+      %{"data" => %{"id" => comment_id}} = json_response(create_conn, 201)
+
+      {:ok, author_token, _refresh_token} =
+        Accounts.create_session(%CreateSessionUsecaseDto{user: author, remember_me: false})
+
+      other_conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{author_token}")
+        |> put(~p"/api/posts/#{post.id}/comments/#{comment_id}",
+          comment: %{"body" => "Hijacked!"}
+        )
+
+      assert json_response(other_conn, 403)
+    end
+
+    test "rejects an unauthenticated request", %{conn: conn, post: post, access_token: token} do
+      authed = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      create_conn =
+        post(authed, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Great read!"})
+
+      %{"data" => %{"id" => comment_id}} = json_response(create_conn, 201)
+
+      conn =
+        put(conn, ~p"/api/posts/#{post.id}/comments/#{comment_id}", comment: %{"body" => "Nope"})
+
+      assert json_response(conn, 401)
+    end
+
+    test "returns 404 for an unknown comment", %{conn: conn, post: post, access_token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> put(~p"/api/posts/#{post.id}/comments/#{Ecto.UUID.generate()}",
+          comment: %{"body" => "Nope"}
+        )
+
+      assert json_response(conn, 404)
+    end
+
+    test "returns 422 for a blank body", %{conn: conn, post: post, access_token: token} do
+      authed = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      create_conn =
+        post(authed, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Great read!"})
+
+      %{"data" => %{"id" => comment_id}} = json_response(create_conn, 201)
+
+      update_conn =
+        put(authed, ~p"/api/posts/#{post.id}/comments/#{comment_id}", comment: %{"body" => ""})
+
+      assert json_response(update_conn, 422)
     end
   end
 

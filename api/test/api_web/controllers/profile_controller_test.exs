@@ -31,13 +31,47 @@ defmodule ApiWeb.ProfileControllerTest do
   describe "GET /api/users/:id" do
     test "returns a user's public profile", %{conn: conn, user: user} do
       conn = get(conn, ~p"/api/users/#{user.id}")
-      assert %{"data" => %{"id" => id, "name" => "Reader One"}} = json_response(conn, 200)
+
+      assert %{"data" => %{"id" => id, "name" => "Reader One", "followed_by_user" => false}} =
+               json_response(conn, 200)
+
       assert id == user.id
     end
 
     test "returns 404 for an unknown user", %{conn: conn} do
       conn = get(conn, ~p"/api/users/999999")
       assert json_response(conn, 404)
+    end
+
+    test "reports followed_by_user true once the caller follows them", %{conn: conn, user: user} do
+      {:ok, viewer} =
+        Accounts.register_user(%RegisterUserUsecaseDto{
+          attrs: %{
+            "email" => "viewer@example.com",
+            "password" => "supersecret",
+            "name" => "Viewer"
+          }
+        })
+
+      {:ok, viewer_token, _refresh_token} =
+        Accounts.create_session(%CreateSessionUsecaseDto{user: viewer, remember_me: false})
+
+      follow_conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{viewer_token}")
+        |> post(~p"/api/users/#{user.id}/follow")
+
+      assert json_response(follow_conn, 200)
+
+      authed_show =
+        build_conn()
+        |> put_req_header("authorization", "Bearer #{viewer_token}")
+        |> get(~p"/api/users/#{user.id}")
+
+      assert %{"data" => %{"followed_by_user" => true}} = json_response(authed_show, 200)
+
+      anon_show = get(build_conn(), ~p"/api/users/#{user.id}")
+      assert %{"data" => %{"followed_by_user" => false}} = json_response(anon_show, 200)
     end
   end
 

@@ -51,24 +51,56 @@ defmodule Api.Infrastructure.Repository.Comment.Postgres.CommentRepository do
   end
 
   @doc """
+  Edits a comment's body. Only the comment's author may edit it.
+  """
+  def update_comment(user, post_id, comment_id, attrs) do
+    with {:ok, comment} <- fetch_own_comment(user, post_id, comment_id) do
+      comment
+      |> Comment.update_changeset(attrs)
+      |> Repo.update()
+      |> case do
+        {:ok, updated} ->
+          {:ok, Repo.preload(updated, [:user, replies: {replies_query(), [:user]}])}
+
+        {:error, changeset} ->
+          {:error, changeset}
+      end
+    end
+  end
+
+  defp fetch_own_comment(user, post_id, comment_id) do
+    case Ecto.UUID.cast(comment_id) do
+      {:ok, uuid} ->
+        case Repo.get_by(Comment, id: uuid, post_id: post_id) do
+          nil -> {:error, :not_found}
+          %Comment{user_id: user_id} when user_id != user.id -> {:error, :forbidden}
+          comment -> {:ok, comment}
+        end
+
+      :error ->
+        {:error, :not_found}
+    end
+  end
+
+  @doc """
   Top-level comments for a post, oldest first, each preloaded with its
   (also oldest-first) replies.
   """
   def list_comments(post_id) do
     case Ecto.UUID.cast(post_id) do
       {:ok, uuid} ->
-        replies_query = from(c in Comment, order_by: [asc: c.inserted_at])
-
         Comment
         |> where([c], c.post_id == ^uuid and is_nil(c.parent_comment_id))
         |> order_by(asc: :inserted_at)
         |> Repo.all()
-        |> Repo.preload(user: [], replies: {replies_query, [:user]})
+        |> Repo.preload(user: [], replies: {replies_query(), [:user]})
 
       :error ->
         []
     end
   end
+
+  defp replies_query, do: from(c in Comment, order_by: [asc: c.inserted_at])
 
   defp check_comment_rate_limit(user) do
     case CommentRateLimiter.hit("comment:#{user.id}", @comment_rate_scale_ms, @comment_rate_limit) do

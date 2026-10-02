@@ -1,9 +1,11 @@
 <template>
   <div v-if="post" class="post-detail-page">
     <div class="post-meta">
-      <AvatarCircle :name="post.user.name" :avatar-url="post.user.avatar_url" :size="36" />
+      <NuxtLink :to="`/profile/${post.user.id}`" class="post-avatar-link">
+        <AvatarCircle :name="post.user.name" :avatar-url="post.user.avatar_url" :size="36" />
+      </NuxtLink>
       <div class="post-meta-text">
-        <span class="post-username">{{ post.user.name }}</span>
+        <NuxtLink :to="`/profile/${post.user.id}`" class="post-username">{{ post.user.name }}</NuxtLink>
         <span class="post-date">{{ formattedDate }}</span>
       </div>
     </div>
@@ -96,6 +98,10 @@ const formattedDate = computed(() => {
   margin-bottom: 20px;
 }
 
+.post-avatar-link {
+  display: inline-flex;
+}
+
 .post-meta-text {
   display: flex;
   flex-direction: column;
@@ -105,6 +111,11 @@ const formattedDate = computed(() => {
 .post-username {
   font-weight: 600;
   color: var(--color-ink);
+  text-decoration: none;
+}
+
+.post-username:hover {
+  text-decoration: underline;
 }
 
 .post-date {

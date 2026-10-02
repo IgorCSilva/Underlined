@@ -38,6 +38,12 @@ defmodule ApiWeb.FallbackController do
     |> json(%{errors: %{detail: "forbidden"}})
   end
 
+  def call(conn, {:error, :cannot_follow_self}) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> json(%{errors: %{detail: "can't follow yourself"}})
+  end
+
   def call(conn, {:error, :invalid_parent}) do
     conn
     |> put_status(:unprocessable_entity)

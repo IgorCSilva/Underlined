@@ -3,8 +3,10 @@ defmodule Api.Usecases.User.GetUser.GetUserUsecaseDto do
   Input for `Api.Usecases.User.GetUser.GetUserUsecase`.
   """
 
-  @enforce_keys [:id]
-  defstruct [:id]
+  alias Api.Infrastructure.Repository.User.Postgres.User
 
-  @type t :: %__MODULE__{id: Ecto.UUID.t()}
+  @enforce_keys [:id]
+  defstruct [:id, :current_user]
+
+  @type t :: %__MODULE__{id: Ecto.UUID.t(), current_user: %User{} | nil}
 end

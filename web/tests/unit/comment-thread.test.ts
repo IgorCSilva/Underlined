@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils'
 import CommentThread from '../../app/components/CommentThread.vue'
 import type { Comment } from '../../app/stores/comments'
 
-const stubs = { AvatarCircle: true }
+const stubs = { NuxtLink: { template: '<a><slot /></a>' }, AvatarCircle: true }
 
 function makeComment(overrides: Partial<Comment> = {}): Comment {
   return {
@@ -11,6 +11,7 @@ function makeComment(overrides: Partial<Comment> = {}): Comment {
     type: 'comment',
     body: 'Great read!',
     inserted_at: '2026-10-01T00:00:00Z',
+    updated_at: '2026-10-01T00:00:00Z',
     parent_comment_id: null,
     user: { id: 'u1', name: 'Reader One', avatar_url: null },
     replies: [],

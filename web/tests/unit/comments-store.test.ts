@@ -6,6 +6,7 @@ const fakeComment = {
   type: 'comment' as const,
   body: 'Great read!',
   inserted_at: '2026-10-01T00:00:00Z',
+  updated_at: '2026-10-01T00:00:00Z',
   parent_comment_id: null,
   user: { id: 'u1', name: 'Reader One', avatar_url: null },
   replies: [],

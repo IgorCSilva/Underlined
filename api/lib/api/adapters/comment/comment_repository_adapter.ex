@@ -19,6 +19,13 @@ defmodule Api.Adapters.Comment.CommentRepositoryAdapter do
     adaptee.list_comments(post_id) |> Enum.map(&to_domain/1)
   end
 
+  def update_comment(user, post_id, comment_id, attrs, adaptee) do
+    case adaptee.update_comment(user, post_id, comment_id, attrs) do
+      {:ok, db_comment} -> {:ok, to_domain(db_comment)}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
   @doc "Converts a Postgres comment entity (with :user/:replies preloaded) into the pure domain entity."
   def to_domain(db_comment) do
     %DomainComment{

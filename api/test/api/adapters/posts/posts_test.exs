@@ -9,10 +9,12 @@ defmodule Api.Adapters.PostsTest do
 
   alias Api.Usecases.Comment.CreateComment.CreateCommentUsecaseDto
   alias Api.Usecases.Comment.ListComments.ListCommentsUsecaseDto
+  alias Api.Usecases.Follow.FollowUser.FollowUserUsecaseDto
   alias Api.Usecases.Like.LikePost.LikePostUsecaseDto
   alias Api.Usecases.Like.UnlikePost.UnlikePostUsecaseDto
   alias Api.Usecases.Post.CreatePost.CreatePostUsecaseDto
   alias Api.Usecases.Post.GetPost.GetPostUsecaseDto
+  alias Api.Usecases.Post.ListFollowingPosts.ListFollowingPostsUsecaseDto
   alias Api.Usecases.Post.ListPosts.ListPostsUsecaseDto
   alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
 
@@ -39,6 +41,12 @@ defmodule Api.Adapters.PostsTest do
 
   defp list_posts(before \\ nil, current_user \\ nil),
     do: Posts.list_posts(%ListPostsUsecaseDto{before: before, current_user: current_user})
+
+  defp list_following_posts(user, before \\ nil),
+    do: Posts.list_following_posts(%ListFollowingPostsUsecaseDto{user: user, before: before})
+
+  defp follow_user(follower, followee_id),
+    do: Accounts.follow_user(%FollowUserUsecaseDto{follower: follower, followee_id: followee_id})
 
   defp get_post(id, current_user \\ nil),
     do: Posts.get_post(%GetPostUsecaseDto{id: id, current_user: current_user})
@@ -207,6 +215,66 @@ defmodule Api.Adapters.PostsTest do
 
     test "returns an empty list when there are no posts" do
       assert list_posts() == []
+    end
+  end
+
+  describe "list_following_posts/1" do
+    test "returns only posts by followed users, newest first" do
+      reader = user_fixture()
+      followed = user_fixture(%{"email" => "followed@example.com"})
+      stranger = user_fixture(%{"email" => "stranger@example.com"})
+      book = book_fixture()
+
+      {:ok, _} = follow_user(reader, followed.id)
+
+      {:ok, older} =
+        create_post(
+          followed,
+          @valid_attrs |> Map.put("book_id", book.id) |> Map.put("passage_text", "Older.")
+        )
+
+      {:ok, newer} =
+        create_post(
+          followed,
+          @valid_attrs |> Map.put("book_id", book.id) |> Map.put("passage_text", "Newer.")
+        )
+
+      {:ok, _unfollowed_post} =
+        create_post(
+          stranger,
+          @valid_attrs |> Map.put("book_id", book.id) |> Map.put("passage_text", "Stranger's.")
+        )
+
+      assert Enum.map(list_following_posts(reader), & &1.id) == [newer.id, older.id]
+    end
+
+    test "returns an empty list when the user follows nobody" do
+      reader = user_fixture()
+      assert list_following_posts(reader) == []
+    end
+
+    test "before cursor excludes posts at or after that timestamp" do
+      reader = user_fixture()
+      followed = user_fixture(%{"email" => "followed2@example.com"})
+      book = book_fixture()
+
+      {:ok, _} = follow_user(reader, followed.id)
+
+      {:ok, older} =
+        create_post(
+          followed,
+          @valid_attrs |> Map.put("book_id", book.id) |> Map.put("passage_text", "Older.")
+        )
+
+      {:ok, newer} =
+        create_post(
+          followed,
+          @valid_attrs |> Map.put("book_id", book.id) |> Map.put("passage_text", "Newer.")
+        )
+
+      cursor = DateTime.to_iso8601(newer.inserted_at)
+
+      assert Enum.map(list_following_posts(reader, cursor), & &1.id) == [older.id]
     end
   end
 
