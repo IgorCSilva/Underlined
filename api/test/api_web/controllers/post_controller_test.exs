@@ -237,5 +237,22 @@ defmodule ApiWeb.PostControllerTest do
       assert %{"data" => %{"like_count" => 1, "liked_by_user" => false}} =
                json_response(anon_show, 200)
     end
+
+    test "falls back to an anonymous response instead of 401ing when the token is invalid or expired",
+         %{conn: conn, access_token: token, book: book} do
+      create_conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/posts", post: Map.put(@valid_post_params, "book_id", book.id))
+
+      %{"data" => %{"id" => id}} = json_response(create_conn, 201)
+
+      conn =
+        build_conn()
+        |> put_req_header("authorization", "Bearer not-a-real-token")
+        |> get(~p"/api/posts/#{id}")
+
+      assert %{"data" => %{"id" => ^id, "liked_by_user" => false}} = json_response(conn, 200)
+    end
   end
 end
