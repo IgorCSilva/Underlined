@@ -7,7 +7,7 @@
       class="avatar-option"
       :class="{ 'is-selected': modelValue === avatar }"
       :aria-pressed="modelValue === avatar"
-      :aria-label="`Choose this avatar`"
+      :aria-label="t('profile.chooseAvatar')"
       @click="$emit('update:modelValue', avatar)"
     >
       <img :src="avatar" alt="" />
@@ -18,6 +18,7 @@
 <script setup lang="ts">
 defineProps<{ modelValue: string | null }>()
 defineEmits<{ 'update:modelValue': [value: string] }>()
+const { t } = useI18n()
 
 const avatars = Array.from({ length: 10 }, (_, i) => `/avatars/avatar${i + 1}.jpg`)
 </script>

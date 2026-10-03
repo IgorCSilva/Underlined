@@ -35,4 +35,7 @@ defmodule ApiWeb.ConnCase do
     Api.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
+
+  @doc "Sets the `accept-language` header so the request is handled in the given locale."
+  def put_locale(conn, locale), do: Plug.Conn.put_req_header(conn, "accept-language", locale)
 end

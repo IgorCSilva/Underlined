@@ -7,7 +7,7 @@
       <div class="comment-meta">
         <NuxtLink :to="`/profile/${comment.user.id}`" class="comment-username">{{ comment.user.name }}</NuxtLink>
         <span class="comment-date">{{ formattedDate }}</span>
-        <span v-if="comment.updated_at !== comment.inserted_at" class="comment-edited">(edited)</span>
+        <span v-if="comment.updated_at !== comment.inserted_at" class="comment-edited">{{ t('comments.edited') }}</span>
       </div>
 
       <p v-if="!editing" class="comment-text">{{ comment.body }}</p>
@@ -16,20 +16,20 @@
           v-model="editBody"
           type="text"
           class="comment-edit-input"
-          aria-label="Edit comment"
+          :aria-label="t('comments.editAriaLabel')"
           :disabled="editPending"
         />
-        <button type="submit" class="comment-edit-save" :disabled="editPending || !editBody.trim()">Save</button>
-        <button type="button" class="comment-edit-cancel" @click="cancelEdit">Cancel</button>
+        <button type="submit" class="comment-edit-save" :disabled="editPending || !editBody.trim()">{{ t('comments.save') }}</button>
+        <button type="button" class="comment-edit-cancel" @click="cancelEdit">{{ t('comments.cancel') }}</button>
         <p v-if="editError" class="comment-composer-error">{{ editError }}</p>
       </form>
 
       <div class="comment-actions-row">
         <button v-if="!isReply" type="button" class="comment-reply-toggle" @click="replying = !replying">
-          Reply
+          {{ t('comments.reply') }}
         </button>
         <button v-if="isOwnComment && !editing" type="button" class="comment-edit-toggle" @click="startEdit">
-          Edit
+          {{ t('comments.edit') }}
         </button>
       </div>
 
@@ -37,7 +37,7 @@
         <CommentComposer
           :post-id="postId"
           :parent-comment-id="comment.id"
-          placeholder="Write a reply…"
+          :placeholder="t('comments.replyPlaceholder')"
           @posted="onReplyPosted"
         />
       </div>
@@ -67,6 +67,7 @@ const emit = defineEmits<{ posted: [comment: Comment] }>()
 
 const auth = useAuthStore()
 const comments = useCommentsStore()
+const { t } = useI18n()
 
 const replying = ref(false)
 
@@ -77,8 +78,10 @@ const editBody = ref('')
 const editPending = ref(false)
 const editError = ref('')
 
+const { formatDate } = useLocaleFormat()
+
 const formattedDate = computed(() =>
-  new Date(props.comment.inserted_at).toLocaleDateString(undefined, {
+  formatDate(props.comment.inserted_at, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -111,7 +114,7 @@ async function onEditSave() {
     props.comment.updated_at = updated.updated_at
     editing.value = false
   } catch (err) {
-    editError.value = extractErrorMessage(err)
+    editError.value = extractErrorMessage(err, t)
   } finally {
     editPending.value = false
   }

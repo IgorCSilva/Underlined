@@ -7,7 +7,9 @@ export function useApiFetch<T>(path: string, opts: Record<string, any> = {}) {
   // auth.client.ts), so this is always undefined during SSR — these requests
   // render anonymous on the server and personalize once hydrated client-side.
   const auth = useAuthStore()
-  const authHeaders = auth.accessToken ? { Authorization: `Bearer ${auth.accessToken}` } : undefined
+  const { locale } = useI18n()
+  const authHeaders: Record<string, string> = { 'Accept-Language': locale.value }
+  if (auth.accessToken) authHeaders.Authorization = `Bearer ${auth.accessToken}`
 
   return useFetch<T>(path, {
     baseURL: apiBaseUrl(),

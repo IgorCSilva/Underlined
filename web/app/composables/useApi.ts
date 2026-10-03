@@ -9,9 +9,10 @@ export function apiBaseUrl(): string {
  */
 export function useApi() {
   const auth = useAuthStore()
+  const { locale } = useI18n()
 
   async function request<T>(path: string, opts: Record<string, any> = {}, retried = false): Promise<T> {
-    const headers: Record<string, string> = { ...(opts.headers || {}) }
+    const headers: Record<string, string> = { 'Accept-Language': locale.value, ...(opts.headers || {}) }
     if (auth.accessToken) headers.Authorization = `Bearer ${auth.accessToken}`
 
     try {

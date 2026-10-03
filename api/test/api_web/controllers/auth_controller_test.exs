@@ -41,6 +41,14 @@ defmodule ApiWeb.AuthControllerTest do
       conn2 = register_user(build_conn())
       assert %{"errors" => %{"email" => ["has already been taken"]}} = json_response(conn2, 422)
     end
+
+    test "translates changeset validation errors to pt_BR when requested", %{conn: conn} do
+      conn = register_user(conn)
+      assert conn.status == 201
+
+      conn2 = build_conn() |> put_locale("pt-BR") |> register_user()
+      assert %{"errors" => %{"email" => ["já está em uso"]}} = json_response(conn2, 422)
+    end
   end
 
   describe "POST /api/auth/login" do
@@ -58,7 +66,19 @@ defmodule ApiWeb.AuthControllerTest do
 
     test "returns 401 for an invalid password", %{conn: conn} do
       conn = post(conn, ~p"/api/auth/login", email: "reader@example.com", password: "wrong")
-      assert json_response(conn, 401)
+
+      assert %{"errors" => %{"code" => "invalid_credentials", "detail" => "invalid email or password"}} =
+               json_response(conn, 401)
+    end
+
+    test "translates the error detail to pt_BR when requested", %{conn: conn} do
+      conn =
+        conn
+        |> put_locale("pt-BR")
+        |> post(~p"/api/auth/login", email: "reader@example.com", password: "wrong")
+
+      assert %{"errors" => %{"code" => "invalid_credentials", "detail" => "e-mail ou senha inválidos"}} =
+               json_response(conn, 401)
     end
 
     test "returns 403 for an account that hasn't been enabled yet", %{conn: conn} do

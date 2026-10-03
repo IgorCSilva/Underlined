@@ -4,11 +4,11 @@
       v-model="body"
       type="text"
       class="comment-input"
-      :placeholder="placeholder"
-      :aria-label="placeholder"
+      :placeholder="placeholder ?? t('comments.addPlaceholder')"
+      :aria-label="placeholder ?? t('comments.addPlaceholder')"
       :disabled="pending"
     />
-    <button type="submit" class="comment-submit" :disabled="pending || !body.trim()">Post</button>
+    <button type="submit" class="comment-submit" :disabled="pending || !body.trim()">{{ t('comments.post') }}</button>
     <p v-if="error" class="comment-composer-error">{{ error }}</p>
   </form>
 </template>
@@ -22,7 +22,7 @@ const props = withDefaults(
     parentCommentId?: string | null
     placeholder?: string
   }>(),
-  { parentCommentId: null, placeholder: 'Add a comment…' },
+  { parentCommentId: null },
 )
 
 const emit = defineEmits<{ posted: [comment: Comment] }>()
@@ -31,6 +31,7 @@ const comments = useCommentsStore()
 const body = ref('')
 const pending = ref(false)
 const error = ref('')
+const { t } = useI18n()
 
 async function onSubmit() {
   if (pending.value || !body.value.trim()) return
@@ -44,7 +45,7 @@ async function onSubmit() {
     body.value = ''
     emit('posted', comment)
   } catch (err) {
-    error.value = extractErrorMessage(err)
+    error.value = extractErrorMessage(err, t)
   } finally {
     pending.value = false
   }

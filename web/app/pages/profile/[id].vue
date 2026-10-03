@@ -1,10 +1,12 @@
 <template>
   <ProfileView v-if="user" :user="user" :own="isOwnProfile" />
-  <p v-else-if="pending" class="status-text">Loading…</p>
-  <p v-else class="status-text">User not found.</p>
+  <p v-else-if="pending" class="status-text">{{ t('profile.loading') }}</p>
+  <p v-else class="status-text">{{ t('profile.userNotFound') }}</p>
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 interface ProfileUser {
   id: string
   name: string

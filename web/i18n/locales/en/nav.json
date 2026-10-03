@@ -1,0 +1,13 @@
+{
+  "nav": {
+    "feed": "Feed",
+    "books": "Books",
+    "addBook": "Add book",
+    "profile": "Profile",
+    "login": "Log in",
+    "signup": "Sign up",
+    "toggleMenu": "Toggle navigation menu",
+    "primary": "Primary",
+    "language": "Language"
+  }
+}

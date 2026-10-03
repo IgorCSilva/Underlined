@@ -141,3 +141,9 @@ a {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+.underlined::first-letter {
+  color: var(--color-ink);
+  text-decoration: underline solid var(--color-highlight) 3px;
+  text-underline-offset: 6px;
+}

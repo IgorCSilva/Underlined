@@ -6,12 +6,12 @@
         v-model="q"
         type="search"
         class="search-input"
-        placeholder="Search by title or author…"
-        aria-label="Search books"
+        :placeholder="t('books.search.placeholder')"
+        :aria-label="t('books.search.ariaLabel')"
       />
     </div>
 
-    <p v-if="pending" class="status-text">Searching…</p>
+    <p v-if="pending" class="status-text">{{ t('books.search.searching') }}</p>
     <div v-else class="book-grid">
       <NuxtLink
         v-for="book in books ?? []"
@@ -23,7 +23,7 @@
       </NuxtLink>
       <NuxtLink to="/books/new" class="add-book-tile">
         <span class="add-book-plus" aria-hidden="true">+</span>
-        <span>Add a book</span>
+        <span>{{ t('books.addABook') }}</span>
       </NuxtLink>
     </div>
   </div>
@@ -32,6 +32,7 @@
 <script setup lang="ts">
 import type { Book } from '~/stores/books'
 
+const { t } = useI18n()
 const q = ref('')
 const debouncedQ = ref('')
 let debounceTimer: ReturnType<typeof setTimeout> | undefined

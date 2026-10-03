@@ -6,6 +6,7 @@ defmodule Api.Infrastructure.Repository.Book.Postgres.Book do
 
   use Ecto.Schema
   import Ecto.Changeset
+  import ApiWeb.Gettext
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -33,7 +34,7 @@ defmodule Api.Infrastructure.Repository.Book.Postgres.Book do
 
   defp maybe_validate_cover_url(changeset) do
     if get_change(changeset, :cover_url) do
-      validate_format(changeset, :cover_url, ~r/^https?:\/\//, message: "must be a valid http(s) URL")
+      validate_format(changeset, :cover_url, ~r/^https?:\/\//, message: gettext("must be a valid http(s) URL"))
     else
       changeset
     end

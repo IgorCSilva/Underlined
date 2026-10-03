@@ -6,6 +6,7 @@ defmodule Api.Infrastructure.Repository.User.Postgres.User do
 
   use Ecto.Schema
   import Ecto.Changeset
+  import ApiWeb.Gettext
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -48,7 +49,7 @@ defmodule Api.Infrastructure.Repository.User.Postgres.User do
     |> validate_required([:name])
     |> validate_length(:name, min: 1, max: 100)
     |> validate_length(:bio, max: 500)
-    |> validate_inclusion(:avatar_url, @avatar_choices, message: "must be one of the preset avatars")
+    |> validate_inclusion(:avatar_url, @avatar_choices, message: gettext("must be one of the preset avatars"))
   end
 
   def avatar_changeset(user, avatar_url) do
@@ -68,7 +69,7 @@ defmodule Api.Infrastructure.Repository.User.Postgres.User do
   defp validate_email(changeset) do
     changeset
     |> validate_required([:email])
-    |> validate_format(:email, ~r/^[^\s]+@[^\s]+\.[^\s]+$/, message: "must have the @ sign and no spaces")
+    |> validate_format(:email, ~r/^[^\s]+@[^\s]+\.[^\s]+$/, message: gettext("must have the @ sign and no spaces"))
     |> validate_length(:email, max: 160)
     |> update_change(:email, &String.downcase/1)
     |> unsafe_validate_unique(:email, Api.Repo)

@@ -4,6 +4,7 @@ defmodule ApiWeb.Router do
   pipeline :api do
     plug :accepts, ["json"]
     plug :fetch_cookies
+    plug ApiWeb.Plugs.Locale
   end
 
   pipeline :authenticated do
