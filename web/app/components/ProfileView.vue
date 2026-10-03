@@ -10,8 +10,8 @@
         <p v-if="user.bio" class="profile-bio">{{ user.bio }}</p>
       </div>
       <div v-if="own" class="profile-actions">
-        <NuxtLink to="/profile/edit" class="edit-link">Edit profile</NuxtLink>
-        <button type="button" class="logout-link" @click="onLogout">Log out</button>
+        <NuxtLink to="/profile/edit" class="edit-link">{{ t('profile.editProfile') }}</NuxtLink>
+        <button type="button" class="logout-link" @click="onLogout">{{ t('profile.logOut') }}</button>
       </div>
       <div v-else-if="canFollow" class="profile-actions">
         <FollowButton :user-id="user.id" :followed-by-user="!!user.followed_by_user" />
@@ -34,6 +34,7 @@ const props = defineProps<{
 
 const auth = useAuthStore()
 const router = useRouter()
+const { t } = useI18n()
 
 const initial = computed(() => props.user.name?.[0]?.toUpperCase() ?? '?')
 const canFollow = computed(() => !props.own && !!auth.user && auth.user.id !== props.user.id)

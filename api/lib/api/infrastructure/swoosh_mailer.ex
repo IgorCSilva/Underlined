@@ -4,6 +4,7 @@ defmodule Api.Infrastructure.SwooshMailer do
   @behaviour Api.Adapters.MailerPort
 
   import Swoosh.Email
+  import ApiWeb.Gettext
 
   alias Api.Infrastructure.Repository.User.Postgres.User
 
@@ -14,16 +15,22 @@ defmodule Api.Infrastructure.SwooshMailer do
     new()
     |> to({user.name, user.email})
     |> from(@from)
-    |> subject("Confirm your Underlined account")
-    |> text_body("""
-    Hi #{user.name},
+    |> subject(gettext("Confirm your Underlined account"))
+    |> text_body(
+      gettext(
+        """
+        Hi %{name},
 
-    Confirm your account by visiting the URL below:
+        Confirm your account by visiting the URL below:
 
-    #{url}
+        %{url}
 
-    If you didn't create an account with us, please ignore this.
-    """)
+        If you didn't create an account with us, please ignore this.
+        """,
+        name: user.name,
+        url: url
+      )
+    )
     |> deliver()
   end
 
@@ -32,16 +39,22 @@ defmodule Api.Infrastructure.SwooshMailer do
     new()
     |> to({user.name, user.email})
     |> from(@from)
-    |> subject("Reset your Underlined password")
-    |> text_body("""
-    Hi #{user.name},
+    |> subject(gettext("Reset your Underlined password"))
+    |> text_body(
+      gettext(
+        """
+        Hi %{name},
 
-    Reset your password by visiting the URL below:
+        Reset your password by visiting the URL below:
 
-    #{url}
+        %{url}
 
-    If you didn't request this, please ignore this.
-    """)
+        If you didn't request this, please ignore this.
+        """,
+        name: user.name,
+        url: url
+      )
+    )
     |> deliver()
   end
 

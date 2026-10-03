@@ -8,12 +8,13 @@
     @click.stop.prevent="toggle"
   >
     <span v-if="following" class="follow-check">✓</span>
-    {{ following ? 'Following' : 'Follow' }}
+    {{ following ? t('follow.following') : t('follow.follow') }}
   </button>
 </template>
 
 <script setup lang="ts">
 const props = defineProps<{ userId: string; followedByUser: boolean }>()
+const { t } = useI18n()
 
 const following = ref(props.followedByUser)
 const pending = ref(false)

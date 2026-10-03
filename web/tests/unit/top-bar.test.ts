@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import TopBar from '../../app/components/TopBar.vue'
 
-const stubs = { NuxtLink: { template: '<a><slot /></a>' } }
+const stubs = { NuxtLink: { template: '<a><slot /></a>' }, LocaleSwitcher: true }
 
 describe('TopBar', () => {
   it('shows the brand name and public links when logged out', () => {

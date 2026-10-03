@@ -1,0 +1,14 @@
+{
+  "profile": {
+    "loading": "Loading…",
+    "userNotFound": "User not found.",
+    "editTitle": "Edit profile",
+    "bioLabel": "Bio",
+    "saving": "Saving…",
+    "saveChanges": "Save changes",
+    "editProfile": "Edit profile",
+    "avatarLabel": "Avatar",
+    "logOut": "Log out",
+    "chooseAvatar": "Choose this avatar"
+  }
+}

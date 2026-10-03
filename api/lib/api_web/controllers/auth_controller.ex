@@ -1,5 +1,6 @@
 defmodule ApiWeb.AuthController do
   use ApiWeb, :controller
+  import ApiWeb.Gettext
 
   alias Api.Adapters.Accounts
   alias Api.Infrastructure.Repository.User.Postgres.User
@@ -49,12 +50,19 @@ defmodule ApiWeb.AuthController do
       nil ->
         conn
         |> put_status(:unauthorized)
-        |> json(%{errors: %{detail: "invalid email or password"}})
+        |> json(%{
+          errors: %{detail: gettext("invalid email or password"), code: "invalid_credentials"}
+        })
 
       %User{enabled: false} ->
         conn
         |> put_status(:forbidden)
-        |> json(%{errors: %{detail: "account pending confirmation"}})
+        |> json(%{
+          errors: %{
+            detail: gettext("account pending confirmation"),
+            code: "account_pending_confirmation"
+          }
+        })
 
       user ->
         {access_token, refresh_token} = issue_session!(user, remember_me?)
@@ -81,7 +89,9 @@ defmodule ApiWeb.AuthController do
         conn
         |> delete_refresh_cookie()
         |> put_status(:unauthorized)
-        |> json(%{errors: %{detail: "invalid or expired session"}})
+        |> json(%{
+          errors: %{detail: gettext("invalid or expired session"), code: "invalid_session"}
+        })
     end
   end
 

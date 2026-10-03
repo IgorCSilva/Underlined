@@ -5,7 +5,7 @@
     :class="{ 'is-liked': liked, 'is-bouncing': bouncing }"
     :disabled="pending"
     :aria-pressed="liked"
-    aria-label="Like this post"
+    :aria-label="t('likes.ariaLabel')"
     @click.stop.prevent="toggle"
   >
     <span class="like-icon">{{ liked ? '♥' : '♡' }}</span>
@@ -15,6 +15,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{ postId: string; likedByUser: boolean; likeCount: number }>()
+const { t } = useI18n()
 
 const liked = ref(props.likedByUser)
 const count = ref(props.likeCount)

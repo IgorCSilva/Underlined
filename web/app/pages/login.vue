@@ -1,24 +1,26 @@
 <template>
-  <AuthCard title="Log in">
+  <AuthCard :title="t('auth.login.title')">
     <form @submit.prevent="onSubmit">
       <div class="field">
-        <label for="email">Email</label>
+        <label for="email">{{ t('common.fields.email') }}</label>
         <input id="email" v-model="email" type="email" required autocomplete="email" />
       </div>
       <div class="field">
-        <label for="password">Password</label>
+        <label for="password">{{ t('common.fields.password') }}</label>
         <input id="password" v-model="password" type="password" required autocomplete="current-password" />
       </div>
       <label class="checkbox-row">
         <input v-model="rememberMe" type="checkbox" />
-        Remember me
+        {{ t('auth.login.rememberMe') }}
       </label>
       <p v-if="error" class="form-error">{{ error }}</p>
       <button class="btn-primary" type="submit" :disabled="loading">
-        {{ loading ? 'Logging in…' : 'Log in' }}
+        {{ loading ? t('auth.login.submitting') : t('auth.login.submit') }}
       </button>
     </form>
-    <p class="auth-switch">Don't have an account? <NuxtLink to="/signup">Sign up</NuxtLink></p>
+    <p class="auth-switch">
+      {{ t('auth.login.noAccount') }} <NuxtLink to="/signup">{{ t('auth.login.signupLink') }}</NuxtLink>
+    </p>
   </AuthCard>
 </template>
 
@@ -32,6 +34,7 @@ const error = ref('')
 const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 
 async function onSubmit() {
   loading.value = true
@@ -41,7 +44,7 @@ async function onSubmit() {
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/profile'
     router.push(redirect)
   } catch (err) {
-    error.value = extractErrorMessage(err)
+    error.value = extractErrorMessage(err, t)
   } finally {
     loading.value = false
   }

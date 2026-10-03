@@ -5,7 +5,7 @@
       <button
         type="button"
         class="chip-remove"
-        :aria-label="`Remove keyword ${keyword}`"
+        :aria-label="t('posts.composer.removeKeyword', { keyword })"
         @click="remove(index)"
       >
         ✕
@@ -16,8 +16,8 @@
       v-model="draft"
       type="text"
       class="chip-input"
-      :placeholder="modelValue.length === 0 ? 'Add a keyword…' : ''"
-      aria-label="Add a keyword"
+      :placeholder="modelValue.length === 0 ? t('posts.composer.keywordPlaceholder') : ''"
+      :aria-label="t('posts.composer.keywordAriaLabel')"
       @keydown.enter.prevent="commit"
       @keydown.,.prevent="commit"
       @blur="commit"
@@ -26,6 +26,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 const props = defineProps<{
   modelValue: string[]
   max?: number

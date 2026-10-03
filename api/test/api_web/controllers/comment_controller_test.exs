@@ -126,7 +126,39 @@ defmodule ApiWeb.CommentControllerTest do
           comment: %{"body" => "Me too!", "parent_comment_id" => reply_id}
         )
 
-      assert json_response(conn2, 422)
+      assert %{"errors" => %{"code" => "invalid_parent"}} = json_response(conn2, 422)
+    end
+
+    test "translates the invalid_parent error to pt_BR when requested", %{
+      conn: conn,
+      post: post,
+      access_token: token
+    } do
+      conn = conn |> put_req_header("authorization", "Bearer #{token}") |> put_locale("pt-BR")
+
+      parent_conn =
+        post(conn, ~p"/api/posts/#{post.id}/comments", comment: %{"body" => "Great read!"})
+
+      %{"data" => %{"id" => parent_id}} = json_response(parent_conn, 201)
+
+      reply_conn =
+        post(conn, ~p"/api/posts/#{post.id}/comments",
+          comment: %{"body" => "Agreed!", "parent_comment_id" => parent_id}
+        )
+
+      %{"data" => %{"id" => reply_id}} = json_response(reply_conn, 201)
+
+      conn2 =
+        post(conn, ~p"/api/posts/#{post.id}/comments",
+          comment: %{"body" => "Me too!", "parent_comment_id" => reply_id}
+        )
+
+      assert %{
+               "errors" => %{
+                 "code" => "invalid_parent",
+                 "detail" => "só é possível responder a um comentário de nível superior"
+               }
+             } = json_response(conn2, 422)
     end
 
     test "returns 404 for an unknown post", %{conn: conn, access_token: token} do

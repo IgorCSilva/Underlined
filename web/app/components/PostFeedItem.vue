@@ -6,7 +6,7 @@
       </NuxtLink>
       <span class="feed-meta-text">
         <NuxtLink :to="`/profile/${post.user.id}`" class="feed-username">{{ post.user.name }}</NuxtLink>
-        on <span class="feed-book-title">{{ post.book.title }}</span>
+        {{ t('feed.on') }} <span class="feed-book-title">{{ post.book.title }}</span>
       </span>
     </div>
 
@@ -30,6 +30,7 @@
 import type { Post } from '~/stores/posts'
 
 defineProps<{ post: Post }>()
+const { t } = useI18n()
 </script>
 
 <style scoped>

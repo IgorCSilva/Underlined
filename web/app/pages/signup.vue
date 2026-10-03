@@ -1,25 +1,23 @@
 <template>
-  <AuthCard title="Create your account">
+  <AuthCard :title="t('auth.signup.title')">
     <template v-if="registered">
       <p class="form-success">
-        Thanks for signing up! The person responsible for this application will send you an
-        email to confirm that you own this email address. Once confirmed, you'll be able to log
-        in.
+        {{ t('auth.signup.successMessage') }}
       </p>
-      <p class="auth-switch"><NuxtLink to="/login">Back to log in</NuxtLink></p>
+      <p class="auth-switch"><NuxtLink to="/login">{{ t('auth.signup.backToLogin') }}</NuxtLink></p>
     </template>
     <template v-else>
       <form @submit.prevent="onSubmit">
         <div class="field">
-          <label for="name">Name</label>
+          <label for="name">{{ t('common.fields.name') }}</label>
           <input id="name" v-model="name" type="text" required autocomplete="name" />
         </div>
         <div class="field">
-          <label for="email">Email</label>
+          <label for="email">{{ t('common.fields.email') }}</label>
           <input id="email" v-model="email" type="email" required autocomplete="email" />
         </div>
         <div class="field">
-          <label for="password">Password</label>
+          <label for="password">{{ t('common.fields.password') }}</label>
           <input
             id="password"
             v-model="password"
@@ -31,10 +29,12 @@
         </div>
         <p v-if="error" class="form-error">{{ error }}</p>
         <button class="btn-primary" type="submit" :disabled="loading">
-          {{ loading ? 'Creating account…' : 'Sign up' }}
+          {{ loading ? t('auth.signup.submitting') : t('auth.signup.submit') }}
         </button>
       </form>
-      <p class="auth-switch">Already have an account? <NuxtLink to="/login">Log in</NuxtLink></p>
+      <p class="auth-switch">
+        {{ t('auth.signup.hasAccount') }} <NuxtLink to="/login">{{ t('auth.signup.loginLink') }}</NuxtLink>
+      </p>
     </template>
   </AuthCard>
 </template>
@@ -48,6 +48,7 @@ const error = ref('')
 const registered = ref(false)
 
 const auth = useAuthStore()
+const { t } = useI18n()
 
 async function onSubmit() {
   loading.value = true
@@ -56,7 +57,7 @@ async function onSubmit() {
     await auth.signup({ name: name.value, email: email.value, password: password.value })
     registered.value = true
   } catch (err) {
-    error.value = extractErrorMessage(err)
+    error.value = extractErrorMessage(err, t)
   } finally {
     loading.value = false
   }

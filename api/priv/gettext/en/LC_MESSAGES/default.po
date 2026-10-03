@@ -1,0 +1,122 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: lib/api/infrastructure/swoosh_mailer.ex:18
+#, elixir-autogen, elixir-format
+msgid "Confirm your Underlined account"
+msgstr ""
+
+#: lib/api/infrastructure/swoosh_mailer.ex:20
+#, elixir-autogen, elixir-format
+msgid "Hi %{name},\n\nConfirm your account by visiting the URL below:\n\n%{url}\n\nIf you didn't create an account with us, please ignore this.\n"
+msgstr ""
+
+#: lib/api/infrastructure/swoosh_mailer.ex:44
+#, elixir-autogen, elixir-format
+msgid "Hi %{name},\n\nReset your password by visiting the URL below:\n\n%{url}\n\nIf you didn't request this, please ignore this.\n"
+msgstr ""
+
+#: lib/api/infrastructure/swoosh_mailer.ex:42
+#, elixir-autogen, elixir-format
+msgid "Reset your Underlined password"
+msgstr ""
+
+#: lib/api_web/controllers/fallback_controller.ex:21
+#, elixir-autogen, elixir-format
+msgid "account already confirmed"
+msgstr ""
+
+#: lib/api_web/controllers/auth_controller.ex:62
+#, elixir-autogen, elixir-format
+msgid "account pending confirmation"
+msgstr ""
+
+#: lib/api_web/controllers/fallback_controller.ex:82
+#, elixir-autogen, elixir-format
+msgid "an upstream service failed, please try again"
+msgstr ""
+
+#: lib/api_web/controllers/fallback_controller.ex:55
+#, elixir-autogen, elixir-format
+msgid "can only reply to a top-level comment"
+msgstr ""
+
+#: lib/api_web/controllers/fallback_controller.ex:47
+#, elixir-autogen, elixir-format
+msgid "can't follow yourself"
+msgstr ""
+
+#: lib/api/infrastructure/repository/follow/postgres/follow.ex:39
+#, elixir-autogen, elixir-format
+msgid "cannot follow yourself"
+msgstr ""
+
+#: lib/api/infrastructure/repository/post/postgres/post.ex:58
+#, elixir-autogen, elixir-format
+msgid "each keyword must be 1-40 characters"
+msgstr ""
+
+#: lib/api_web/controllers/fallback_controller.ex:41
+#, elixir-autogen, elixir-format
+msgid "forbidden"
+msgstr ""
+
+#: lib/api_web/controllers/auth_controller.ex:54
+#, elixir-autogen, elixir-format
+msgid "invalid email or password"
+msgstr ""
+
+#: lib/api_web/controllers/auth_controller.ex:93
+#, elixir-autogen, elixir-format
+msgid "invalid or expired session"
+msgstr ""
+
+#: lib/api_web/controllers/fallback_controller.ex:15
+#, elixir-autogen, elixir-format
+msgid "invalid or expired token"
+msgstr ""
+
+#: lib/api_web/controllers/fallback_controller.ex:34
+#, elixir-autogen, elixir-format
+msgid "must be a PNG, JPEG, or WebP image"
+msgstr ""
+
+#: lib/api/infrastructure/repository/book/postgres/book.ex:37
+#, elixir-autogen, elixir-format
+msgid "must be a valid http(s) URL"
+msgstr ""
+
+#: lib/api/infrastructure/repository/user/postgres/user.ex:52
+#, elixir-autogen, elixir-format
+msgid "must be one of the preset avatars"
+msgstr ""
+
+#: lib/api/infrastructure/repository/user/postgres/user.ex:72
+#, elixir-autogen, elixir-format
+msgid "must have the @ sign and no spaces"
+msgstr ""
+
+#: lib/api_web/controllers/fallback_controller.ex:27
+#, elixir-autogen, elixir-format
+msgid "not found"
+msgstr ""
+
+#: lib/api/infrastructure/repository/post/postgres/post.ex:44
+#, elixir-autogen, elixir-format
+msgid "up to %{max} keywords allowed"
+msgstr ""
+
+#: lib/api_web/controllers/fallback_controller.ex:66
+#, elixir-autogen, elixir-format
+msgid "you're commenting too fast, please slow down"
+msgstr ""

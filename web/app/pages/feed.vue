@@ -1,6 +1,6 @@
 <template>
   <div class="feed-page">
-    <h1 class="serif feed-title">The Feed</h1>
+    <h1 class="serif feed-title">{{ t('feed.title') }}</h1>
 
     <div v-if="auth.user" class="feed-tabs" role="tablist">
       <button
@@ -11,7 +11,7 @@
         :aria-selected="activeTab === 'for-you'"
         @click="activeTab = 'for-you'"
       >
-        For You
+        {{ t('feed.forYou') }}
       </button>
       <button
         type="button"
@@ -21,7 +21,7 @@
         :aria-selected="activeTab === 'following'"
         @click="activeTab = 'following'"
       >
-        Following
+        {{ t('feed.following') }}
       </button>
     </div>
 
@@ -37,7 +37,7 @@
       :disabled="activeState.loadingMore"
       @click="loadMore"
     >
-      {{ activeState.loadingMore ? 'Loading…' : 'Load more' }}
+      {{ activeState.loadingMore ? t('feed.loading') : t('feed.loadMore') }}
     </button>
   </div>
 </template>
@@ -55,6 +55,8 @@ interface FeedState {
 }
 
 const auth = useAuthStore()
+const { t } = useI18n()
+const { request } = useApi()
 
 const { data: initialPosts } = await useApiFetch<Post[]>('/api/posts')
 
@@ -72,7 +74,7 @@ const activeState = computed(() => (activeTab.value === 'for-you' ? forYou : fol
 const activeUrl = computed(() => (activeTab.value === 'for-you' ? '/api/posts' : '/api/posts/following'))
 
 const emptyMessage = computed(() =>
-  activeTab.value === 'for-you' ? "Nothing's been published yet." : "No posts yet from people you follow.",
+  activeTab.value === 'for-you' ? t('feed.emptyForYou') : t('feed.emptyFollowing'),
 )
 
 // SSR always renders anonymous (no access token is available server-side),
@@ -82,7 +84,6 @@ const emptyMessage = computed(() =>
 // appended via "Load more", which already fetch authenticated).
 onMounted(async () => {
   if (!auth.accessToken || !forYou.posts.length) return
-  const { request } = useApi()
   const fresh = await request<{ data: Post[] }>('/api/posts')
   const byId = new Map(fresh.data.map((post) => [post.id, post]))
   forYou.posts = forYou.posts.map((post) => byId.get(post.id) ?? post)
@@ -91,12 +92,15 @@ onMounted(async () => {
 watch(activeTab, async (tab) => {
   const state = tab === 'for-you' ? forYou : following
   if (state.loaded) return
-  state.loaded = true
 
-  const { request } = useApi()
-  const res = await request<{ data: Post[] }>(activeUrl.value)
-  state.posts = res.data
-  state.hasMore = res.data.length === PAGE_SIZE
+  try {
+    const res = await request<{ data: Post[] }>(activeUrl.value)
+    state.posts = res.data
+    state.hasMore = res.data.length === PAGE_SIZE
+    state.loaded = true
+  } catch {
+    // leave state.loaded false so switching back to this tab retries
+  }
 })
 
 async function loadMore() {
@@ -106,7 +110,6 @@ async function loadMore() {
 
   state.loadingMore = true
   try {
-    const { request } = useApi()
     const next = await request<{ data: Post[] }>(activeUrl.value, { query: { before: last.inserted_at } })
     state.posts.push(...next.data)
     state.hasMore = next.data.length === PAGE_SIZE
