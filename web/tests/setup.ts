@@ -61,7 +61,7 @@ function t(key: string, params?: Record<string, unknown>): string {
   return value.replace(/\{(\w+)\}/g, (_, name) => String(params[name] ?? ''))
 }
 
-vi.stubGlobal('useI18n', () => ({
+const i18nComposer = {
   t,
   locale: ref('en'),
   locales: ref([
@@ -69,7 +69,14 @@ vi.stubGlobal('useI18n', () => ({
     { code: 'pt-BR', name: 'Português (Brasil)' },
   ]),
   setLocale: vi.fn(),
-}))
+}
+
+vi.stubGlobal('useI18n', () => i18nComposer)
+
+// `useApi()` reads the locale via `useNuxtApp().$i18n` rather than `useI18n()`
+// so it works from Pinia store actions and watchers, not just component
+// setup — see the comment in app/composables/useApi.ts.
+vi.stubGlobal('useNuxtApp', () => ({ $i18n: i18nComposer }))
 
 vi.stubGlobal('useLocaleFormat', () => ({
   formatDate: (date: string | number | Date, options?: Intl.DateTimeFormatOptions) =>
