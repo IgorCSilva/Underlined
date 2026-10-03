@@ -37,7 +37,7 @@
 
     <CommentThread :post-id="post.id" :comments="comments ?? []" @comment-added="onCommentAdded" />
   </div>
-  <p v-else class="status-text">Post not found.</p>
+  <p v-else class="status-text">{{ t('posts.detail.notFound') }}</p>
 </template>
 
 <script setup lang="ts">
@@ -45,6 +45,7 @@ import type { Post } from '~/stores/posts'
 import type { Comment } from '~/stores/comments'
 
 const route = useRoute()
+const { t } = useI18n()
 
 const { data: post } = await useApiFetch<Post>(`/api/posts/${route.params.id}`)
 const { data: comments } = await useApiFetch<Comment[]>(`/api/posts/${route.params.id}/comments`)
@@ -68,9 +69,11 @@ function onCommentAdded() {
   post.value = { ...post.value, comment_count: post.value.comment_count + 1 }
 }
 
+const { formatDate } = useLocaleFormat()
+
 const formattedDate = computed(() => {
   if (!post.value) return ''
-  return new Date(post.value.inserted_at).toLocaleDateString(undefined, {
+  return formatDate(post.value.inserted_at, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

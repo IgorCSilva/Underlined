@@ -51,6 +51,8 @@ config :api, :follow_repository,
 config :api, cors_origin: "http://localhost:3000"
 config :api, web_base_url: "http://localhost:3000"
 
+config :api, ApiWeb.Gettext, default_locale: "en", locales: ~w(en pt_BR)
+
 # Configures the endpoint
 config :api, ApiWeb.Endpoint,
   url: [host: "localhost"],

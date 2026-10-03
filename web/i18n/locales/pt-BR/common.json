@@ -1,0 +1,16 @@
+{
+  "common": {
+    "fields": {
+      "email": "E-mail",
+      "password": "Senha",
+      "name": "Nome"
+    },
+    "home": {
+      "tagline": "Sublinhe o que importa. Compartilhe o que ficou.",
+      "tagline2": "Uma comunidade construída em torno das ideias que nos marcam.",
+      "goToProfile": "Ir para seu perfil",
+      "seeFeed": "Veja o que as pessoas estão lendo",
+      "browseBooks": "Explorar livros"
+    }
+  }
+}

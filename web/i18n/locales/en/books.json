@@ -1,0 +1,18 @@
+{
+  "books": {
+    "search": {
+      "placeholder": "Search by title or author…",
+      "ariaLabel": "Search books",
+      "searching": "Searching…"
+    },
+    "addABook": "Add a book",
+    "new": {
+      "titleLabel": "Title",
+      "authorLabel": "Author",
+      "coverUrlLabel": "Cover image URL (optional)",
+      "coverUrlPlaceholder": "https://…",
+      "adding": "Adding…",
+      "submit": "Add book"
+    }
+  }
+}

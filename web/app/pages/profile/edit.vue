@@ -1,17 +1,17 @@
 <template>
   <div class="edit-page">
-    <h1 class="serif">Edit profile</h1>
+    <h1 class="serif">{{ t('profile.editTitle') }}</h1>
     <form class="card edit-form" @submit.prevent="onSubmit">
       <div class="field">
-        <label for="name">Name</label>
+        <label for="name">{{ t('common.fields.name') }}</label>
         <input id="name" v-model="name" type="text" required />
       </div>
       <div class="field">
-        <label for="bio">Bio</label>
+        <label for="bio">{{ t('profile.bioLabel') }}</label>
         <textarea id="bio" v-model="bio" rows="4" maxlength="500" />
       </div>
       <div class="field">
-        <label>Avatar</label>
+        <label>{{ t('profile.avatarLabel') }}</label>
         <AvatarPicker v-model="avatarUrl" />
       </div>
       <!--
@@ -38,7 +38,7 @@
       -->
       <p v-if="error" class="form-error">{{ error }}</p>
       <button class="btn-primary" type="submit" :disabled="saving">
-        {{ saving ? 'Saving…' : 'Save changes' }}
+        {{ saving ? t('profile.saving') : t('profile.saveChanges') }}
       </button>
     </form>
   </div>
@@ -56,6 +56,7 @@ const error = ref('')
 const dragOver = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 const router = useRouter()
+const { t } = useI18n()
 
 async function onSubmit() {
   saving.value = true
@@ -64,7 +65,7 @@ async function onSubmit() {
     await auth.updateProfile({ name: name.value, bio: bio.value, avatar_url: avatarUrl.value })
     router.push('/profile')
   } catch (err) {
-    error.value = extractErrorMessage(err)
+    error.value = extractErrorMessage(err, t)
   } finally {
     saving.value = false
   }
@@ -86,7 +87,7 @@ async function uploadAvatar(file: File) {
   try {
     await auth.uploadAvatar(file)
   } catch (err) {
-    error.value = extractErrorMessage(err)
+    error.value = extractErrorMessage(err, t)
   }
 }
 </script>

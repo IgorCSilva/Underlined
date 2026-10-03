@@ -1,28 +1,28 @@
 <template>
   <div class="composer-page">
     <div v-if="published" class="composer card success-card">
-      <h2 class="serif">Published!</h2>
-      <p class="status-text">Your post about "{{ published.book.title }}" is live.</p>
+      <h2 class="serif">{{ t('posts.composer.published') }}</h2>
+      <p class="status-text">{{ t('posts.composer.liveMessage', { title: published.book.title }) }}</p>
       <div class="success-actions">
-        <NuxtLink :to="`/posts/${published.id}`" class="btn-primary btn-publish">View post</NuxtLink>
-        <button class="btn-publish-secondary" type="button" @click="reset">Write another</button>
+        <NuxtLink :to="`/posts/${published.id}`" class="btn-primary btn-publish">{{ t('posts.composer.viewPost') }}</NuxtLink>
+        <button class="btn-publish-secondary" type="button" @click="reset">{{ t('posts.composer.writeAnother') }}</button>
       </div>
     </div>
 
     <div v-else-if="!selectedBook" class="book-search">
-      <h1 class="serif search-title">Pick a book to write about</h1>
+      <h1 class="serif search-title">{{ t('posts.composer.pickBookTitle') }}</h1>
       <div class="search-hero">
         <span class="search-icon" aria-hidden="true">🔍</span>
         <input
           v-model="q"
           type="search"
           class="search-input"
-          placeholder="Search by title or author…"
-          aria-label="Search books"
+          :placeholder="t('books.search.placeholder')"
+          :aria-label="t('books.search.ariaLabel')"
         />
       </div>
 
-      <p v-if="pending" class="status-text">Searching…</p>
+      <p v-if="pending" class="status-text">{{ t('books.search.searching') }}</p>
       <div v-else class="book-grid">
         <button
           v-for="book in books ?? []"
@@ -51,32 +51,32 @@
 
       <form @submit.prevent="onSubmit">
         <div class="field">
-          <label for="passage">The passage</label>
+          <label for="passage">{{ t('posts.composer.passageLabel') }}</label>
           <textarea
             id="passage"
             ref="passageInput"
             v-model="passageText"
             class="passage-input serif"
             rows="2"
-            placeholder="Type or paste the passage you want to underline…"
+            :placeholder="t('posts.composer.passagePlaceholder')"
             required
             @input="autoGrowPassage"
           />
         </div>
 
         <div class="field">
-          <label for="thinking">What I think about it</label>
+          <label for="thinking">{{ t('posts.composer.thinkingLabel') }}</label>
           <textarea
             id="thinking"
             v-model="thinking"
             rows="4"
-            placeholder="What did this make you think?"
+            :placeholder="t('posts.composer.thinkingPlaceholder')"
             required
           />
         </div>
 
         <div class="field">
-          <label>Keywords</label>
+          <label>{{ t('posts.composer.keywordsLabel') }}</label>
           <KeywordChipInput v-model="keywords" />
         </div>
 
@@ -84,7 +84,7 @@
 
         <div class="composer-footer">
           <button class="btn-primary btn-publish" type="submit" :disabled="saving">
-            {{ saving ? 'Publishing…' : 'Publish' }}
+            {{ saving ? t('posts.composer.publishing') : t('posts.composer.publish') }}
           </button>
         </div>
       </form>
@@ -101,6 +101,7 @@ definePageMeta({ middleware: 'auth' })
 const route = useRoute()
 const router = useRouter()
 const posts = usePostsStore()
+const { t } = useI18n()
 
 const selectedBook = ref<Book | null>(null)
 const passageInput = ref<HTMLTextAreaElement | null>(null)
@@ -163,7 +164,7 @@ async function onSubmit() {
       keywords: keywords.value,
     })
   } catch (err) {
-    error.value = extractErrorMessage(err)
+    error.value = extractErrorMessage(err, t)
   } finally {
     saving.value = false
   }

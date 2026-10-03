@@ -1,0 +1,20 @@
+{
+  "comments": {
+    "edited": "(edited)",
+    "editAriaLabel": "Edit comment",
+    "save": "Save",
+    "cancel": "Cancel",
+    "reply": "Reply",
+    "edit": "Edit",
+    "replyPlaceholder": "Write a reply…",
+    "addPlaceholder": "Add a comment…",
+    "post": "Post"
+  },
+  "likes": {
+    "ariaLabel": "Like this post"
+  },
+  "follow": {
+    "follow": "Follow",
+    "following": "Following"
+  }
+}

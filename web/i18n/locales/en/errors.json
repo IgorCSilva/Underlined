@@ -1,0 +1,19 @@
+{
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "codes": {
+      "invalid_credentials": "Invalid email or password.",
+      "account_pending_confirmation": "Your account is pending confirmation.",
+      "invalid_session": "Your session has expired. Please log in again.",
+      "invalid_token": "This link is invalid or has expired.",
+      "already_confirmed": "This account has already been confirmed.",
+      "not_found": "Not found.",
+      "invalid_upload": "Please upload a PNG, JPEG, or WebP image.",
+      "forbidden": "You don't have permission to do that.",
+      "cannot_follow_self": "You can't follow yourself.",
+      "invalid_parent": "You can only reply to a top-level comment.",
+      "rate_limited": "You're commenting too fast, please slow down.",
+      "upstream_error": "An upstream service failed, please try again."
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "common": {
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "name": "Name"
+    },
+    "home": {
+      "tagline": "Highlight what matters. Share what stays with you.",
+      "tagline2": " A community built around the ideas that leave their mark on us.",
+      "goToProfile": "Go to your profile",
+      "seeFeed": "See what people are reading",
+      "browseBooks": "Browse books"
+    }
+  }
+}

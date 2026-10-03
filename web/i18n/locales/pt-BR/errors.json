@@ -1,0 +1,19 @@
+{
+  "errors": {
+    "generic": "Algo deu errado. Tente novamente.",
+    "codes": {
+      "invalid_credentials": "E-mail ou senha inválidos.",
+      "account_pending_confirmation": "Sua conta está pendente de confirmação.",
+      "invalid_session": "Sua sessão expirou. Faça login novamente.",
+      "invalid_token": "Este link é inválido ou expirou.",
+      "already_confirmed": "Esta conta já foi confirmada.",
+      "not_found": "Não encontrado.",
+      "invalid_upload": "Envie uma imagem PNG, JPEG ou WebP.",
+      "forbidden": "Você não tem permissão para fazer isso.",
+      "cannot_follow_self": "Você não pode seguir a si mesmo.",
+      "invalid_parent": "Você só pode responder a um comentário de nível superior.",
+      "rate_limited": "Você está comentando rápido demais, vá com calma.",
+      "upstream_error": "Um serviço interno falhou, tente novamente."
+    }
+  }
+}

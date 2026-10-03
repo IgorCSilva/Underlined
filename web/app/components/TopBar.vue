@@ -1,19 +1,21 @@
 <template>
   <header class="top-bar" ref="rootEl">
     <div class="top-bar-inner">
-      <NuxtLink to="/" class="top-bar-brand serif">Underlined</NuxtLink>
+      <NuxtLink to="/" class="top-bar-brand serif underlined">Underlined</NuxtLink>
 
-      <nav class="top-bar-nav" aria-label="Primary">
+      <nav class="top-bar-nav" :aria-label="t('nav.primary')">
         <NuxtLink v-for="link in links" :key="link.to" :to="link.to" class="top-bar-link">
           {{ link.label }}
         </NuxtLink>
       </nav>
 
+      <LocaleSwitcher class="top-bar-locale" />
+
       <button
         type="button"
         class="top-bar-menu-toggle"
         :aria-expanded="menuOpen"
-        aria-label="Toggle navigation menu"
+        :aria-label="t('nav.toggleMenu')"
         @click="menuOpen = !menuOpen"
       >
         <span class="menu-bar" />
@@ -22,7 +24,7 @@
       </button>
     </div>
 
-    <nav v-if="menuOpen" class="top-bar-mobile-menu" aria-label="Primary">
+    <nav v-if="menuOpen" class="top-bar-mobile-menu" :aria-label="t('nav.primary')">
       <NuxtLink
         v-for="link in links"
         :key="link.to"
@@ -32,6 +34,7 @@
       >
         {{ link.label }}
       </NuxtLink>
+      <LocaleSwitcher class="top-bar-mobile-locale" />
     </nav>
   </header>
 </template>
@@ -42,6 +45,7 @@ interface NavLink {
   label: string
 }
 
+const { t } = useI18n()
 const auth = useAuthStore()
 const route = useRoute()
 const rootEl = ref<HTMLElement | null>(null)
@@ -56,20 +60,20 @@ watch(
 
 const links = computed<NavLink[]>(() => {
   const common: NavLink[] = [
-    { to: '/feed', label: 'Feed' },
-    { to: '/books', label: 'Books' },
+    { to: '/feed', label: t('nav.feed') },
+    { to: '/books', label: t('nav.books') },
   ]
 
   if (auth.user) {
     return [
       ...common,
       // { to: '/posts/new', label: 'New post' },
-      { to: '/books/new', label: 'Add book' },
-      { to: '/profile', label: 'Profile' },
+      { to: '/books/new', label: t('nav.addBook') },
+      { to: '/profile', label: t('nav.profile') },
     ]
   }
 
-  return [...common, { to: '/login', label: 'Log in' }, { to: '/signup', label: 'Sign up' }]
+  return [...common, { to: '/login', label: t('nav.login') }, { to: '/signup', label: t('nav.signup') }]
 })
 
 function onDocumentClick(event: MouseEvent) {
@@ -108,6 +112,14 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   font-size: 1.2rem;
   color: var(--color-ink);
   text-decoration: none;
+}
+
+.top-bar-locale {
+  flex-shrink: 0;
+}
+
+.top-bar-mobile-locale {
+  margin-top: 8px;
 }
 
 .top-bar-nav {
@@ -189,6 +201,10 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
 
 @media (max-width: 640px) {
   .top-bar-nav {
+    display: none;
+  }
+
+  .top-bar-locale {
     display: none;
   }
 
