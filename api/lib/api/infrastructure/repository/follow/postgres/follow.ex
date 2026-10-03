@@ -7,6 +7,7 @@ defmodule Api.Infrastructure.Repository.Follow.Postgres.Follow do
 
   use Ecto.Schema
   import Ecto.Changeset
+  import ApiWeb.Gettext
 
   alias Api.Infrastructure.Repository.User.Postgres.User
 
@@ -35,7 +36,7 @@ defmodule Api.Infrastructure.Repository.Follow.Postgres.Follow do
     followee_id = get_field(changeset, :followee_id)
 
     if follower_id && followee_id && follower_id == followee_id do
-      add_error(changeset, :followee_id, "cannot follow yourself")
+      add_error(changeset, :followee_id, gettext("cannot follow yourself"))
     else
       changeset
     end

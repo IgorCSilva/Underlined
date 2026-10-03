@@ -7,6 +7,7 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.Post do
 
   use Ecto.Schema
   import Ecto.Changeset
+  import ApiWeb.Gettext
 
   alias Api.Infrastructure.Repository.Book.Postgres.Book
   alias Api.Infrastructure.Repository.Keyword.Postgres.Keyword
@@ -40,7 +41,7 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.Post do
     |> validate_length(:thinking, min: 1, max: 2000)
     |> validate_length(:keyword_names,
       max: @max_keywords,
-      message: "up to #{@max_keywords} keywords allowed"
+      message: gettext("up to %{max} keywords allowed", max: @max_keywords)
     )
     |> validate_keyword_names()
     |> foreign_key_constraint(:user_id)
@@ -54,7 +55,7 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.Post do
       if Enum.all?(names, &(String.length(&1) in 1..40)) do
         []
       else
-        [keyword_names: "each keyword must be 1-40 characters"]
+        [keyword_names: gettext("each keyword must be 1-40 characters")]
       end
     end)
   end

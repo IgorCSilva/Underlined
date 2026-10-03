@@ -1,0 +1,24 @@
+{
+  "posts": {
+    "detail": {
+      "notFound": "Post not found."
+    },
+    "composer": {
+      "published": "Published!",
+      "liveMessage": "Your post about \"{title}\" is live.",
+      "viewPost": "View post",
+      "writeAnother": "Write another",
+      "pickBookTitle": "Pick a book to write about",
+      "passageLabel": "The passage",
+      "passagePlaceholder": "Type or paste the passage you want to underline…",
+      "thinkingLabel": "What I think about it",
+      "thinkingPlaceholder": "What did this make you think?",
+      "keywordsLabel": "Keywords",
+      "keywordPlaceholder": "Add a keyword…",
+      "keywordAriaLabel": "Add a keyword",
+      "removeKeyword": "Remove keyword {keyword}",
+      "publishing": "Publishing…",
+      "publish": "Publish"
+    }
+  }
+}

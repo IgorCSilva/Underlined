@@ -1,0 +1,24 @@
+{
+  "posts": {
+    "detail": {
+      "notFound": "Post não encontrado."
+    },
+    "composer": {
+      "published": "Publicado!",
+      "liveMessage": "Seu post sobre \"{title}\" está no ar.",
+      "viewPost": "Ver post",
+      "writeAnother": "Escrever outro",
+      "pickBookTitle": "Escolha um livro para escrever sobre",
+      "passageLabel": "A passagem",
+      "passagePlaceholder": "Digite ou cole a passagem que você quer destacar…",
+      "thinkingLabel": "O que eu penso sobre isso",
+      "thinkingPlaceholder": "O que isso te fez pensar?",
+      "keywordsLabel": "Palavras-chave",
+      "keywordPlaceholder": "Adicione uma palavra-chave…",
+      "keywordAriaLabel": "Adicionar palavra-chave",
+      "removeKeyword": "Remover palavra-chave {keyword}",
+      "publishing": "Publicando…",
+      "publish": "Publicar"
+    }
+  }
+}

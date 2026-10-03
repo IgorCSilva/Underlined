@@ -4,8 +4,10 @@ defmodule ApiWeb.ChangesetJSON do
   end
 
   defp translate_error({msg, opts}) do
-    Enum.reduce(opts, msg, fn {key, value}, acc ->
-      String.replace(acc, "%{#{key}}", fn _ -> to_string(value) end)
-    end)
+    if count = opts[:count] do
+      Gettext.dngettext(ApiWeb.Gettext, "errors", msg, msg, count, opts)
+    else
+      Gettext.dgettext(ApiWeb.Gettext, "errors", msg, opts)
+    end
   end
 end

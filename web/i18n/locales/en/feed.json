@@ -1,0 +1,12 @@
+{
+  "feed": {
+    "title": "The Feed",
+    "forYou": "For You",
+    "following": "Following",
+    "emptyForYou": "Nothing's been published yet.",
+    "emptyFollowing": "No posts yet from people you follow.",
+    "loading": "Loading…",
+    "loadMore": "Load more",
+    "on": "on"
+  }
+}
