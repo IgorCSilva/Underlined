@@ -9,7 +9,12 @@ export function extractErrorMessage(err: unknown, t: Translate): string {
   const data = (err as any)?.data ?? (err as any)?.response?._data
   const errors = data?.errors
 
-  if (!errors) return t('errors.generic')
+  if (!errors) {
+    // Not a backend error response (e.g. a bug thrown before the request
+    // ever went out) — log it so it's not a silent, untraceable failure.
+    console.error(err)
+    return t('errors.generic')
+  }
 
   if (typeof errors.code === 'string') {
     const key = `errors.codes.${errors.code}`
