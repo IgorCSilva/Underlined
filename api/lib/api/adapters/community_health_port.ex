@@ -12,12 +12,13 @@ defmodule Api.Adapters.CommunityHealthPort do
               {:ok, term()} | {:error, term()}
 
   @callback record_action(%{
-              actor_id: String.t(),
-              action_type: String.t(),
-              resource_type: String.t(),
-              resource_id: String.t(),
-              community_id: String.t(),
-              event_key: String.t()
+              required(:actor_id) => String.t(),
+              required(:action_type) => String.t(),
+              required(:resource_type) => String.t(),
+              required(:resource_id) => String.t(),
+              required(:community_id) => String.t(),
+              required(:event_key) => String.t(),
+              optional(:context) => map()
             }) :: {:ok, term()} | {:error, term()}
 
   @callback submit_report(%{

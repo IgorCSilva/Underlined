@@ -41,13 +41,23 @@ defmodule Api.Infrastructure.Health.HealthyCommunity.CommunityHealthClient do
         resource_id: resource_id,
         community_id: community_ref,
         event_key: event_key
-      }) do
+      } = params) do
+    context = Map.get(params, :context, %{})
+
     if CircuitBreaker.open?() do
       {:error, :unavailable}
     else
       with {:ok, _} <- ensure_community(community_ref),
            {:ok, _} <-
-             submit_event(community_ref, actor_id, action_type, resource_type, resource_id, event_key) do
+             submit_event(
+               community_ref,
+               actor_id,
+               action_type,
+               resource_type,
+               resource_id,
+               event_key,
+               context
+             ) do
         CircuitBreaker.record_success()
         {:ok, :recorded}
       else
@@ -109,14 +119,15 @@ defmodule Api.Infrastructure.Health.HealthyCommunity.CommunityHealthClient do
     request(:put, "/v1/communities/#{community_ref}/members/#{actor_id}", nil)
   end
 
-  defp submit_event(community_ref, actor_id, action_type, resource_type, resource_id, event_key) do
+  defp submit_event(community_ref, actor_id, action_type, resource_type, resource_id, event_key, context) do
     request(:post, "/v1/events", %{
       community_ref: community_ref,
       actor_id: actor_id,
       action_type: action_type,
       resource_type: resource_type,
       resource_ref: resource_id,
-      event_key: event_key
+      event_key: event_key,
+      context: context
     })
   end
 

@@ -52,7 +52,10 @@ defmodule Api.Adapters.Posts do
   end
 
   def create_comment(dto) do
-    CreateCommentUsecase.call(dto, %CreateCommentUsecase{repository: comment_repository()})
+    CreateCommentUsecase.call(dto, %CreateCommentUsecase{
+      repository: comment_repository(),
+      community_health_enqueuer: community_health_enqueuer()
+    })
   end
 
   def list_comments(dto) do

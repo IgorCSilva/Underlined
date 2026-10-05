@@ -39,7 +39,7 @@ defmodule Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker do
           "resource_id" => resource_id,
           "community_id" => community_id,
           "event_key" => event_key
-        }
+        } = args
       }) do
     params = %{
       actor_id: actor_id,
@@ -47,7 +47,8 @@ defmodule Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker do
       resource_type: resource_type,
       resource_id: resource_id,
       community_id: community_id,
-      event_key: event_key
+      event_key: event_key,
+      context: Map.get(args, "context", %{})
     }
 
     case community_health().record_action(params) do
