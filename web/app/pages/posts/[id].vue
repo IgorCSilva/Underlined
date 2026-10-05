@@ -44,6 +44,8 @@
     </div>
 
     <CommentThread :post-id="post.id" :comments="comments ?? []" @comment-added="onCommentAdded" />
+
+    <RelatedPosts :posts="relatedPosts ?? []" />
   </div>
   <p v-else class="status-text">{{ t('posts.detail.notFound') }}</p>
 </template>
@@ -57,6 +59,7 @@ const { t } = useI18n()
 
 const { data: post } = await useApiFetch<Post>(`/api/posts/${route.params.id}`)
 const { data: comments } = await useApiFetch<Comment[]>(`/api/posts/${route.params.id}/comments`)
+const { data: relatedPosts } = await useApiFetch<Post[]>(`/api/posts/${route.params.id}/related`)
 
 // SSR always renders anonymous (no access token is available server-side),
 // so a logged-in viewer's own like never shows up in the hydrated payload.

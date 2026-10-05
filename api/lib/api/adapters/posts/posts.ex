@@ -18,6 +18,7 @@ defmodule Api.Adapters.Posts do
   alias Api.Usecases.Post.GetPost.GetPostUsecase
   alias Api.Usecases.Post.ListFollowingPosts.ListFollowingPostsUsecase
   alias Api.Usecases.Post.ListPosts.ListPostsUsecase
+  alias Api.Usecases.Post.RelatedPosts.RelatedPostsUsecase
   alias Api.Usecases.Report.CreateReport.CreateReportUsecase
   alias Api.Usecases.Report.ListReportReasons.ListReportReasonsUsecase
 
@@ -38,6 +39,10 @@ defmodule Api.Adapters.Posts do
 
   def list_following_posts(dto) do
     ListFollowingPostsUsecase.call(dto, %ListFollowingPostsUsecase{repository: post_repository()})
+  end
+
+  def related_posts(dto) do
+    RelatedPostsUsecase.call(dto, %RelatedPostsUsecase{repository: post_repository()})
   end
 
   def like_post(dto) do

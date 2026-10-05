@@ -34,6 +34,13 @@ defmodule Api.Adapters.Post.PostRepositoryAdapter do
     end
   end
 
+  def related_posts(id, current_user, adaptee) do
+    case adaptee.related_posts(id, current_user) do
+      {:error, :not_found} -> {:error, :not_found}
+      {:ok, posts} -> {:ok, Enum.map(posts, &to_domain/1)}
+    end
+  end
+
   @doc "Converts a Postgres post entity (with its associations preloaded) into the pure domain entity."
   def to_domain(db_post) do
     %DomainPost{
