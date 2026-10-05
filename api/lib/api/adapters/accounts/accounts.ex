@@ -56,11 +56,17 @@ defmodule Api.Adapters.Accounts do
   ## Follows
 
   def follow_user(dto) do
-    FollowUserUsecase.call(dto, %FollowUserUsecase{repository: follow_repository()})
+    FollowUserUsecase.call(dto, %FollowUserUsecase{
+      repository: follow_repository(),
+      community_health_enqueuer: community_health_enqueuer()
+    })
   end
 
   def unfollow_user(dto) do
-    UnfollowUserUsecase.call(dto, %UnfollowUserUsecase{repository: follow_repository()})
+    UnfollowUserUsecase.call(dto, %UnfollowUserUsecase{
+      repository: follow_repository(),
+      community_health_enqueuer: community_health_enqueuer()
+    })
   end
 
   ## Email confirmation

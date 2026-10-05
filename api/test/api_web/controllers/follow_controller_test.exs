@@ -1,9 +1,11 @@
 defmodule ApiWeb.FollowControllerTest do
   use ApiWeb.ConnCase, async: true
+  use Oban.Testing, repo: Api.Repo
 
   import Mox
 
   alias Api.Adapters.Accounts
+  alias Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker
   alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
   alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
 
@@ -34,14 +36,17 @@ defmodule ApiWeb.FollowControllerTest do
     {:ok, access_token, _refresh_token} =
       Accounts.create_session(%CreateSessionUsecaseDto{user: follower, remember_me: false})
 
-    %{followee: followee, access_token: access_token}
+    {:ok, claims} = Api.Infrastructure.Guardian.decode_and_verify(access_token)
+
+    %{followee: followee, access_token: access_token, follower_id: claims["sub"]}
   end
 
   describe "POST /api/users/:id/follow" do
     test "follows the user when authenticated", %{
       conn: conn,
       followee: followee,
-      access_token: token
+      access_token: token,
+      follower_id: follower_id
     } do
       conn =
         conn
@@ -49,6 +54,18 @@ defmodule ApiWeb.FollowControllerTest do
         |> post(~p"/api/users/#{followee.id}/follow")
 
       assert json_response(conn, 200) == %{"data" => %{"following" => true}}
+
+      assert_enqueued(
+        worker: CommunityHealthWorker,
+        args: %{
+          action: "record_action",
+          actor_id: follower_id,
+          action_type: "FOLLOW",
+          resource_type: "actor",
+          resource_id: followee.id,
+          community_id: "default"
+        }
+      )
     end
 
     test "following twice stays following", %{conn: conn, followee: followee, access_token: token} do
@@ -110,12 +127,29 @@ defmodule ApiWeb.FollowControllerTest do
   end
 
   describe "DELETE /api/users/:id/follow" do
-    test "unfollows a followed user", %{conn: conn, followee: followee, access_token: token} do
+    test "unfollows a followed user", %{
+      conn: conn,
+      followee: followee,
+      access_token: token,
+      follower_id: follower_id
+    } do
       conn = conn |> put_req_header("authorization", "Bearer #{token}")
       post(conn, ~p"/api/users/#{followee.id}/follow")
 
       conn2 = delete(conn, ~p"/api/users/#{followee.id}/follow")
       assert json_response(conn2, 200) == %{"data" => %{"following" => false}}
+
+      assert_enqueued(
+        worker: CommunityHealthWorker,
+        args: %{
+          action: "record_action",
+          actor_id: follower_id,
+          action_type: "UNFOLLOW",
+          resource_type: "actor",
+          resource_id: followee.id,
+          community_id: "default"
+        }
+      )
     end
 
     test "rejects an unauthenticated request", %{conn: conn, followee: followee} do
