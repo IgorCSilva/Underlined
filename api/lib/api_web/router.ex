@@ -49,6 +49,9 @@ defmodule ApiWeb.Router do
       post "/posts/:post_id/comments", CommentController, :create
       put "/posts/:post_id/comments/:id", CommentController, :update
 
+      get "/reports/reasons", ReportController, :reasons
+      post "/reports", ReportController, :create
+
       post "/users/:id/follow", FollowController, :create
       delete "/users/:id/follow", FollowController, :delete
     end

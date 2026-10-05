@@ -15,9 +15,14 @@ defmodule Api.Adapters.Posts do
   alias Api.Usecases.Post.GetPost.GetPostUsecase
   alias Api.Usecases.Post.ListFollowingPosts.ListFollowingPostsUsecase
   alias Api.Usecases.Post.ListPosts.ListPostsUsecase
+  alias Api.Usecases.Report.CreateReport.CreateReportUsecase
+  alias Api.Usecases.Report.ListReportReasons.ListReportReasonsUsecase
 
   def create_post(dto) do
-    CreatePostUsecase.call(dto, %CreatePostUsecase{repository: post_repository()})
+    CreatePostUsecase.call(dto, %CreatePostUsecase{
+      repository: post_repository(),
+      community_health_enqueuer: community_health_enqueuer()
+    })
   end
 
   def list_posts(dto) do
@@ -52,7 +57,38 @@ defmodule Api.Adapters.Posts do
     UpdateCommentUsecase.call(dto, %UpdateCommentUsecase{repository: comment_repository()})
   end
 
+  def create_report(dto) do
+    CreateReportUsecase.call(dto, %CreateReportUsecase{
+      community_health_enqueuer: community_health_enqueuer()
+    })
+  end
+
+  def list_report_reasons(dto) do
+    ListReportReasonsUsecase.call(dto, %ListReportReasonsUsecase{
+      community_health_reader: community_health_reader()
+    })
+  end
+
   defp post_repository, do: Application.get_env(:api, :post_repository) |> Map.new()
   defp like_repository, do: Application.get_env(:api, :like_repository) |> Map.new()
   defp comment_repository, do: Application.get_env(:api, :comment_repository) |> Map.new()
+
+  defp community_health_enqueuer,
+    do:
+      Application.get_env(
+        :api,
+        :community_health_enqueuer,
+        &Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker.enqueue/1
+      )
+
+  defp community_health_reader do
+    adapter =
+      Application.get_env(
+        :api,
+        :community_health,
+        Api.Infrastructure.Health.HealthyCommunity.CommunityHealthNoop
+      )
+
+    &adapter.list_rules/1
+  end
 end

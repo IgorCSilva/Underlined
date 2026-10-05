@@ -66,6 +66,28 @@ if smtp_host = System.get_env("SMTP_HOST") do
   end
 end
 
+# Community Health is off by default (Api.Infrastructure.Health.HealthyCommunity.CommunityHealthNoop,
+# selected via Application.get_env's fallback in each usecase) so a
+# missing/misconfigured env var fails closed, never open. Only wire up the
+# real HTTP adapter when explicitly enabled and fully configured — and never
+# in :test, same reasoning as the DATABASE_URL guard above: tests must use
+# Api.CommunityHealthMock regardless of what COMMUNITY_HEALTH_ENABLED happens
+# to be set to in whatever shell/container `mix test` runs in.
+if config_env() != :test do
+  community_health_enabled? = System.get_env("COMMUNITY_HEALTH_ENABLED") in ~w(true 1)
+  community_health_api_url = System.get_env("COMMUNITY_HEALTH_API_URL")
+  community_health_api_key = System.get_env("COMMUNITY_HEALTH_API_KEY")
+
+  if community_health_enabled? and community_health_api_url && community_health_api_key do
+    config :api, Api.Infrastructure.Health.HealthyCommunity.CommunityHealthClient,
+      base_url: community_health_api_url,
+      api_key: community_health_api_key
+
+    config :api,
+      community_health: Api.Infrastructure.Health.HealthyCommunity.CommunityHealthClient
+  end
+end
+
 if resend_api_key = System.get_env("RESEND_API_KEY") do
   config :api, Api.Mailer,
     adapter: Swoosh.Adapters.Resend,

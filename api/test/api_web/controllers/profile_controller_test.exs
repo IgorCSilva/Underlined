@@ -1,9 +1,11 @@
 defmodule ApiWeb.ProfileControllerTest do
   use ApiWeb.ConnCase, async: true
+  use Oban.Testing, repo: Api.Repo
 
   import Mox
 
   alias Api.Adapters.Accounts
+  alias Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker
   alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
   alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
 
@@ -84,7 +86,12 @@ defmodule ApiWeb.ProfileControllerTest do
         |> put_req_header("authorization", "Bearer #{token}")
         |> put(~p"/api/me", user: %{avatar_url: preset})
 
-      assert %{"data" => %{"avatar_url" => ^preset}} = json_response(conn, 200)
+      assert %{"data" => %{"id" => id, "avatar_url" => ^preset}} = json_response(conn, 200)
+
+      assert_enqueued(
+        worker: CommunityHealthWorker,
+        args: %{action: "ensure_member", actor_id: id, community_id: "default"}
+      )
     end
 
     test "rejects an avatar_url outside the preset list", %{conn: conn, access_token: token} do

@@ -1,11 +1,13 @@
 defmodule ApiWeb.PostControllerTest do
   use ApiWeb.ConnCase, async: true
+  use Oban.Testing, repo: Api.Repo
 
   import Mox
 
   alias Api.Adapters.Accounts
   alias Api.Adapters.Catalog
   alias Api.Adapters.Posts
+  alias Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker
   alias Api.Usecases.Book.AddBook.AddBookUsecaseDto
   alias Api.Usecases.Post.CreatePost.CreatePostUsecaseDto
   alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
@@ -52,6 +54,7 @@ defmodule ApiWeb.PostControllerTest do
 
       assert %{
                "data" => %{
+                 "id" => post_id,
                  "thinking" => "This changed how I think.",
                  "book" => %{"id" => book_id},
                  "passage" => %{"text" => "A short passage."},
@@ -61,6 +64,18 @@ defmodule ApiWeb.PostControllerTest do
 
       assert book_id == book.id
       assert Enum.sort(keywords) == ["attention", "nature-writing"]
+
+      assert_enqueued(
+        worker: CommunityHealthWorker,
+        args: %{
+          action: "record_action",
+          action_type: "CREATE",
+          resource_type: "post",
+          resource_id: post_id,
+          community_id: "default",
+          event_key: "post:create:#{post_id}"
+        }
+      )
     end
 
     test "rejects an unauthenticated request", %{conn: conn, book: book} do

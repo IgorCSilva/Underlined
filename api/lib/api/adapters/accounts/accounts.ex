@@ -40,8 +40,17 @@ defmodule Api.Adapters.Accounts do
   def get_user!(dto), do: GetUserOrRaiseUsecase.call(dto)
   def get_user_by_email(dto), do: GetUserByEmailUsecase.call(dto)
   def get_user_by_email_and_password(dto), do: GetUserByEmailAndPasswordUsecase.call(dto)
-  def register_user(dto), do: RegisterUserUsecase.call(dto)
-  def update_profile(dto), do: UpdateProfileUsecase.call(dto)
+  def register_user(dto) do
+    RegisterUserUsecase.call(dto, %RegisterUserUsecase{
+      community_health_enqueuer: community_health_enqueuer()
+    })
+  end
+
+  def update_profile(dto) do
+    UpdateProfileUsecase.call(dto, %UpdateProfileUsecase{
+      community_health_enqueuer: community_health_enqueuer()
+    })
+  end
   def update_avatar(dto), do: UpdateAvatarUsecase.call(dto)
 
   ## Follows
@@ -116,4 +125,12 @@ defmodule Api.Adapters.Accounts do
 
   defp refresh_token_repository,
     do: Application.get_env(:api, :refresh_token_repository) |> Map.new()
+
+  defp community_health_enqueuer,
+    do:
+      Application.get_env(
+        :api,
+        :community_health_enqueuer,
+        &Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker.enqueue/1
+      )
 end

@@ -22,6 +22,7 @@
     <div class="feed-icon-row">
       <LikeButton :post-id="post.id" :liked-by-user="post.liked_by_user" :like-count="post.like_count" />
       <NuxtLink :to="`/posts/${post.id}`" class="feed-icon">💬 {{ post.comment_count }}</NuxtLink>
+      <ReportButton resource-type="post" :resource-id="post.id" />
     </div>
   </div>
 </template>

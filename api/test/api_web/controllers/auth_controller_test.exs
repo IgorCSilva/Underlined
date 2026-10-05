@@ -1,7 +1,9 @@
 defmodule ApiWeb.AuthControllerTest do
   use ApiWeb.ConnCase, async: true
+  use Oban.Testing, repo: Api.Repo
 
   alias Api.Adapters.Accounts
+  alias Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker
   alias Api.Repo
   alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
 
@@ -32,6 +34,11 @@ defmodule ApiWeb.AuthControllerTest do
       refute Map.has_key?(user, "password")
       refute Map.has_key?(user, "access_token")
       refute conn.resp_cookies["refresh_token"]
+
+      assert_enqueued(
+        worker: CommunityHealthWorker,
+        args: %{action: "ensure_member", actor_id: user["id"], community_id: "default"}
+      )
     end
 
     test "returns 422 for a duplicate email", %{conn: conn} do
@@ -206,8 +213,13 @@ defmodule ApiWeb.AuthControllerTest do
         |> put_req_header("authorization", "Bearer #{token}")
         |> put(~p"/api/me", user: %{"name" => "New Name", "bio" => "Avid reader"})
 
-      assert %{"data" => %{"name" => "New Name", "bio" => "Avid reader"}} =
+      assert %{"data" => %{"id" => id, "name" => "New Name", "bio" => "Avid reader"}} =
                json_response(conn, 200)
+
+      assert_enqueued(
+        worker: CommunityHealthWorker,
+        args: %{action: "ensure_member", actor_id: id, community_id: "default"}
+      )
     end
   end
 end

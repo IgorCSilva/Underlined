@@ -52,6 +52,7 @@ defmodule Api.MixProject do
       {:sweet_xml, "~> 0.7"},
       {:gen_smtp, "~> 1.2"},
       {:hammer, "~> 7.0"},
+      {:oban, "~> 2.18"},
       {:mox, "~> 1.1", only: :test}
     ]
   end

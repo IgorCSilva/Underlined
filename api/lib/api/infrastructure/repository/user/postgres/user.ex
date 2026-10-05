@@ -48,7 +48,7 @@ defmodule Api.Infrastructure.Repository.User.Postgres.User do
     |> cast(attrs, [:name, :bio, :avatar_url])
     |> validate_required([:name])
     |> validate_length(:name, min: 1, max: 100)
-    |> validate_length(:bio, max: 500)
+    |> validate_length(:bio, max: 200)
     |> validate_inclusion(:avatar_url, @avatar_choices, message: gettext("must be one of the preset avatars"))
   end
 

@@ -33,6 +33,7 @@
     <div class="post-icon-row">
       <LikeButton :post-id="post.id" :liked-by-user="post.liked_by_user" :like-count="post.like_count" />
       <span class="post-icon">💬 {{ post.comment_count }}</span>
+      <ReportButton resource-type="post" :resource-id="post.id" />
     </div>
 
     <CommentThread :post-id="post.id" :comments="comments ?? []" @comment-added="onCommentAdded" />
