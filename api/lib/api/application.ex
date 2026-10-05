@@ -25,6 +25,8 @@ defmodule Api.Application do
       Api.Infrastructure.Health.HealthyCommunity.CommunityHealthCircuitBreaker,
       # Runs background jobs (e.g. Community Health sync) off the request path
       {Oban, Application.fetch_env!(:api, Oban)},
+      # In-memory cache for the keyword page's stats/related-keywords lookup
+      {Cachex, name: :keyword_page_cache},
       # Start the Endpoint (http/https)
       ApiWeb.Endpoint
       # Start a worker by calling: Api.Worker.start_link(arg)

@@ -17,7 +17,14 @@
     </NuxtLink>
 
     <div v-if="post.keywords.length" class="feed-keywords">
-      <span v-for="keyword in post.keywords" :key="keyword" class="feed-keyword-chip">{{ keyword }}</span>
+      <NuxtLink
+        v-for="keyword in post.keywords"
+        :key="keyword"
+        :to="`/keywords/${encodeURIComponent(keyword)}`"
+        class="feed-keyword-chip"
+      >
+        {{ keyword }}
+      </NuxtLink>
     </div>
 
     <div class="feed-icon-row">
@@ -124,6 +131,12 @@ const { t } = useI18n()
   padding: 4px 10px;
   border-radius: var(--radius-pill);
   font-size: 0.75rem;
+  text-decoration: none;
+}
+
+.feed-keyword-chip:hover {
+  text-decoration: underline solid var(--color-highlight) 2px;
+  text-underline-offset: 3px;
 }
 
 .feed-icon-row {

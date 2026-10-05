@@ -52,6 +52,10 @@ config :api, :bookmark_repository,
   adapter: Api.Adapters.Bookmark.BookmarkRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.Bookmark.Postgres.BookmarkRepository
 
+config :api, :keyword_repository,
+  adapter: Api.Adapters.Keyword.KeywordRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Keyword.Postgres.KeywordRepository
+
 config :api, cors_origin: "http://localhost:3000"
 config :api, web_base_url: "http://localhost:3000"
 

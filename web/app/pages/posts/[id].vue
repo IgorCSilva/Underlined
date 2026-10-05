@@ -27,7 +27,14 @@
     </div>
 
     <div v-if="post.keywords.length" class="post-keywords">
-      <span v-for="keyword in post.keywords" :key="keyword" class="post-keyword-chip">{{ keyword }}</span>
+      <NuxtLink
+        v-for="keyword in post.keywords"
+        :key="keyword"
+        :to="`/keywords/${encodeURIComponent(keyword)}`"
+        class="post-keyword-chip"
+      >
+        {{ keyword }}
+      </NuxtLink>
     </div>
 
     <div class="post-icon-row">
@@ -216,6 +223,12 @@ const formattedDate = computed(() => {
   padding: 5px 12px;
   border-radius: var(--radius-pill);
   font-size: 0.8rem;
+  text-decoration: none;
+}
+
+.post-keyword-chip:hover {
+  text-decoration: underline solid var(--color-highlight) 2px;
+  text-underline-offset: 3px;
 }
 
 .post-icon-row {

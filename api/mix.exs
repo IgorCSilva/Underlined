@@ -53,6 +53,7 @@ defmodule Api.MixProject do
       {:gen_smtp, "~> 1.2"},
       {:hammer, "~> 7.0"},
       {:oban, "~> 2.18"},
+      {:cachex, "~> 3.6"},
       {:mox, "~> 1.1", only: :test}
     ]
   end

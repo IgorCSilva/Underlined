@@ -47,6 +47,13 @@ describe('PostFeedItem', () => {
     expect(wrapper.find('.feed-keywords').exists()).toBe(false)
   })
 
+  it('links each keyword chip to its keyword page', () => {
+    const wrapper = mount(PostFeedItem, { props: { post }, global: { stubs } })
+    const chips = wrapper.findAll('.feed-keyword-chip')
+
+    expect(chips.map((c) => c.attributes('to'))).toEqual(['/keywords/attention', '/keywords/nature-writing'])
+  })
+
   it('links to the post detail page', () => {
     const wrapper = mount(PostFeedItem, { props: { post }, global: { stubs } })
     expect(wrapper.find('a').exists()).toBe(true)

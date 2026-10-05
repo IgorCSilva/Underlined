@@ -1,0 +1,12 @@
+{
+  "keywords": {
+    "stats": {
+      "posts": "{count} publicações",
+      "books": "{count} livros",
+      "readers": "{count} leitores"
+    },
+    "related": "Ideias relacionadas",
+    "empty": "Nenhuma publicação com essa palavra-chave ainda.",
+    "notFound": "Essa palavra-chave ainda não existe."
+  }
+}
