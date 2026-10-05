@@ -66,6 +66,7 @@ defmodule ApiWeb.Router do
       get "/users/:id", ProfileController, :show
       get "/posts", PostController, :index
       get "/posts/:id", PostController, :show
+      get "/books/:id/page", BookController, :page
       get "/keywords/:name", KeywordController, :show
     end
   end

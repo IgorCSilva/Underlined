@@ -7,7 +7,8 @@
       </NuxtLink>
       <span class="feed-meta-text">
         <NuxtLink :to="`/profile/${post.user.id}`" class="feed-username">{{ post.user.name }}</NuxtLink>
-        {{ t('feed.on') }} <span class="feed-book-title">{{ post.book.title }}</span>
+        {{ t('feed.on') }}
+        <NuxtLink :to="`/books/${post.book.id}`" class="feed-book-title">{{ post.book.title }}</NuxtLink>
       </span>
     </div>
 
@@ -87,6 +88,13 @@ const { t } = useI18n()
 
 .feed-book-title {
   font-weight: 600;
+  color: inherit;
+  text-decoration: none;
+}
+
+.feed-book-title:hover {
+  text-decoration: underline solid var(--color-highlight) 2px;
+  text-underline-offset: 3px;
 }
 
 .feed-content-link {

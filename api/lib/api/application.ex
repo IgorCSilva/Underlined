@@ -26,7 +26,9 @@ defmodule Api.Application do
       # Runs background jobs (e.g. Community Health sync) off the request path
       {Oban, Application.fetch_env!(:api, Oban)},
       # In-memory cache for the keyword page's stats/related-keywords lookup
-      {Cachex, name: :keyword_page_cache},
+      Supervisor.child_spec({Cachex, name: :keyword_page_cache}, id: :keyword_page_cache),
+      # In-memory cache for the book page's stats lookup
+      Supervisor.child_spec({Cachex, name: :book_page_cache}, id: :book_page_cache),
       # Start the Endpoint (http/https)
       ApiWeb.Endpoint
       # Start a worker by calling: Api.Worker.start_link(arg)

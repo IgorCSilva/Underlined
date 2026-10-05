@@ -11,14 +11,14 @@
     </div>
 
     <div class="passage-hero">
-      <div class="passage-book">
+      <NuxtLink :to="`/books/${post.book.id}`" class="passage-book">
         <span class="passage-book-cover">
           <img v-if="post.book.cover_url" :src="post.book.cover_url" alt="" />
           <span v-else class="passage-book-placeholder">📖</span>
         </span>
         <span class="passage-book-title serif">{{ post.book.title }}</span>
         <span class="passage-book-author">{{ post.book.author }}</span>
-      </div>
+      </NuxtLink>
       <p class="passage-text serif">{{ post.passage.text }}</p>
     </div>
 
@@ -151,6 +151,13 @@ const formattedDate = computed(() => {
   align-items: center;
   text-align: center;
   gap: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.passage-book:hover .passage-book-title {
+  text-decoration: underline solid var(--color-highlight) 2px;
+  text-underline-offset: 3px;
 }
 
 .passage-book-cover {

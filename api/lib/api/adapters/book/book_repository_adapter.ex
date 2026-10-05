@@ -5,6 +5,7 @@ defmodule Api.Adapters.Book.BookRepositoryAdapter do
   Api.Domain.Book business entity.
   """
 
+  alias Api.Adapters.Post.PostRepositoryAdapter
   alias Api.Domain.Book, as: DomainBook
 
   def list_books(query, adaptee), do: adaptee.list_books(query) |> Enum.map(&to_domain/1)
@@ -20,6 +21,25 @@ defmodule Api.Adapters.Book.BookRepositoryAdapter do
     case adaptee.add_book(attrs) do
       {:ok, db_book} -> {:ok, to_domain(db_book)}
       {:error, changeset} -> {:error, changeset}
+    end
+  end
+
+  @doc """
+  Fetches the book page (book, stats, posts) and converts every nested
+  entity into its pure domain form.
+  """
+  def get_book_page(id, before, current_user, adaptee) do
+    case adaptee.get_book_page(id, before, current_user) do
+      {:error, :not_found} ->
+        {:error, :not_found}
+
+      {:ok, %{book: book, stats: stats, posts: posts}} ->
+        {:ok,
+         %{
+           book: to_domain(book),
+           stats: stats,
+           posts: Enum.map(posts, &PostRepositoryAdapter.to_domain/1)
+         }}
     end
   end
 

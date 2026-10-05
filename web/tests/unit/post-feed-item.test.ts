@@ -54,6 +54,13 @@ describe('PostFeedItem', () => {
     expect(chips.map((c) => c.attributes('to'))).toEqual(['/keywords/attention', '/keywords/nature-writing'])
   })
 
+  it('links the book title to its book page', () => {
+    const wrapper = mount(PostFeedItem, { props: { post }, global: { stubs } })
+    const bookTitle = wrapper.find('.feed-book-title')
+
+    expect(bookTitle.attributes('to')).toBe('/books/book-1')
+  })
+
   it('links to the post detail page', () => {
     const wrapper = mount(PostFeedItem, { props: { post }, global: { stubs } })
     expect(wrapper.find('a').exists()).toBe(true)
