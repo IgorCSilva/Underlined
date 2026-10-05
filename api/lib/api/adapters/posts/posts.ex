@@ -38,11 +38,17 @@ defmodule Api.Adapters.Posts do
   end
 
   def like_post(dto) do
-    LikePostUsecase.call(dto, %LikePostUsecase{repository: like_repository()})
+    LikePostUsecase.call(dto, %LikePostUsecase{
+      repository: like_repository(),
+      community_health_enqueuer: community_health_enqueuer()
+    })
   end
 
   def unlike_post(dto) do
-    UnlikePostUsecase.call(dto, %UnlikePostUsecase{repository: like_repository()})
+    UnlikePostUsecase.call(dto, %UnlikePostUsecase{
+      repository: like_repository(),
+      community_health_enqueuer: community_health_enqueuer()
+    })
   end
 
   def create_comment(dto) do
