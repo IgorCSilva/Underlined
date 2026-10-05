@@ -9,6 +9,7 @@ export interface Post {
   keywords: string[]
   like_count: number
   liked_by_user: boolean
+  bookmarked_by_user: boolean
   comment_count: number
   user: { id: string; name: string; avatar_url: string | null }
 }
@@ -18,12 +19,20 @@ export interface LikeResult {
   like_count: number
 }
 
+export interface BookmarkResult {
+  bookmarked: boolean
+}
+
 interface PostResponse {
   data: Post
 }
 
 interface LikeResponse {
   data: LikeResult
+}
+
+interface BookmarkResponse {
+  data: BookmarkResult
 }
 
 export const usePostsStore = defineStore('posts', {
@@ -51,6 +60,18 @@ export const usePostsStore = defineStore('posts', {
     async unlikePost(postId: string): Promise<LikeResult> {
       const { request } = useApi()
       const res = await request<LikeResponse>(`/api/posts/${postId}/likes`, { method: 'DELETE' })
+      return res.data
+    },
+
+    async bookmarkPost(postId: string): Promise<BookmarkResult> {
+      const { request } = useApi()
+      const res = await request<BookmarkResponse>(`/api/posts/${postId}/bookmarks`, { method: 'POST' })
+      return res.data
+    },
+
+    async unbookmarkPost(postId: string): Promise<BookmarkResult> {
+      const { request } = useApi()
+      const res = await request<BookmarkResponse>(`/api/posts/${postId}/bookmarks`, { method: 'DELETE' })
       return res.data
     },
   },

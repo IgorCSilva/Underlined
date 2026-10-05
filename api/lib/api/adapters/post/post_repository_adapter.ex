@@ -41,6 +41,7 @@ defmodule Api.Adapters.Post.PostRepositoryAdapter do
       thinking: db_post.thinking,
       like_count: db_post.like_count,
       liked_by_user: db_post.liked_by_user,
+      bookmarked_by_user: db_post.bookmarked_by_user,
       comment_count: db_post.comment_count,
       book: BookRepositoryAdapter.to_domain(db_post.book),
       passage: PassageRepositoryAdapter.to_domain(db_post.passage),

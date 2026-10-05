@@ -6,6 +6,7 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
   import Ecto.Query, warn: false
 
   alias Api.Infrastructure.Repository.Book.Postgres.{Book, BookRepository}
+  alias Api.Infrastructure.Repository.Bookmark.Postgres.BookmarkRepository
   alias Api.Infrastructure.Repository.Follow.Postgres.Follow
   alias Api.Infrastructure.Repository.Keyword.Postgres.Keyword
   alias Api.Infrastructure.Repository.Like.Postgres.LikeRepository
@@ -69,6 +70,7 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
     |> Repo.all()
     |> Repo.preload(@preloads)
     |> annotate_liked(current_user)
+    |> annotate_bookmarked(current_user)
   end
 
   defp maybe_before(query, before) when is_binary(before) do
@@ -96,12 +98,19 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
     |> Repo.all()
     |> Repo.preload(@preloads)
     |> annotate_liked(user)
+    |> annotate_bookmarked(user)
   end
 
   def get_post(id, current_user \\ nil) do
     case fetch_post(id) do
-      nil -> nil
-      post -> post |> Repo.preload(@preloads) |> annotate_liked_one(current_user)
+      nil ->
+        nil
+
+      post ->
+        post
+        |> Repo.preload(@preloads)
+        |> annotate_liked_one(current_user)
+        |> annotate_bookmarked_one(current_user)
     end
   end
 
@@ -125,6 +134,22 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
 
   defp annotate_liked_one(post, user) do
     %{post | liked_by_user: LikeRepository.liked?(user, post.id)}
+  end
+
+  defp annotate_bookmarked(posts, nil), do: posts
+
+  defp annotate_bookmarked(posts, user) do
+    bookmarked_ids = BookmarkRepository.bookmarked_post_ids(user, Enum.map(posts, & &1.id))
+
+    Enum.map(posts, fn post ->
+      %{post | bookmarked_by_user: MapSet.member?(bookmarked_ids, post.id)}
+    end)
+  end
+
+  defp annotate_bookmarked_one(post, nil), do: post
+
+  defp annotate_bookmarked_one(post, user) do
+    %{post | bookmarked_by_user: BookmarkRepository.bookmarked?(user, post.id)}
   end
 
   defp normalize_keyword_names(names) when is_list(names) do

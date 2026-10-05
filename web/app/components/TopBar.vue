@@ -69,6 +69,7 @@ const links = computed<NavLink[]>(() => {
       ...common,
       // { to: '/posts/new', label: 'New post' },
       { to: '/books/new', label: t('nav.addBook') },
+      { to: '/saved', label: t('nav.saved') },
       { to: '/profile', label: t('nav.profile') },
     ]
   }

@@ -48,6 +48,10 @@ config :api, :follow_repository,
   adapter: Api.Adapters.Follow.FollowRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.Follow.Postgres.FollowRepository
 
+config :api, :bookmark_repository,
+  adapter: Api.Adapters.Bookmark.BookmarkRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Bookmark.Postgres.BookmarkRepository
+
 config :api, cors_origin: "http://localhost:3000"
 config :api, web_base_url: "http://localhost:3000"
 

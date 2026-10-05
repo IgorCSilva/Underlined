@@ -16,5 +16,8 @@
   "follow": {
     "follow": "Follow",
     "following": "Following"
+  },
+  "bookmarks": {
+    "ariaLabel": "Save this post"
   }
 }

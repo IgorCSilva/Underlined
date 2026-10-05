@@ -46,6 +46,10 @@ defmodule ApiWeb.Router do
       post "/posts/:post_id/likes", LikeController, :create
       delete "/posts/:post_id/likes", LikeController, :delete
 
+      get "/me/bookmarks", BookmarkController, :index
+      post "/posts/:post_id/bookmarks", BookmarkController, :create
+      delete "/posts/:post_id/bookmarks", BookmarkController, :delete
+
       post "/posts/:post_id/comments", CommentController, :create
       put "/posts/:post_id/comments/:id", CommentController, :update
 

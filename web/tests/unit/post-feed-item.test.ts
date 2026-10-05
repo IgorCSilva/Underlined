@@ -12,6 +12,7 @@ const post: Post = {
   keywords: ['attention', 'nature-writing'],
   like_count: 2,
   liked_by_user: false,
+  bookmarked_by_user: false,
   comment_count: 3,
   user: { id: 'user-1', name: 'Reader One', avatar_url: null },
 }
@@ -20,6 +21,7 @@ const stubs = {
   NuxtLink: { template: '<a><slot /></a>' },
   AvatarCircle: true,
   LikeButton: true,
+  BookmarkButton: true,
 }
 
 describe('PostFeedItem', () => {
