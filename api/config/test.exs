@@ -22,6 +22,11 @@ config :api, Api.Infrastructure.Guardian,
 # context calls out to these Mox-based stubs instead (see test/support).
 config :api, mailer: Api.MailerMock
 config :api, object_store: Api.ObjectStoreMock
+config :api, community_health: Api.CommunityHealthMock
+
+# Jobs are inserted but never auto-executed; tests assert on what was
+# enqueued with Oban.Testing instead of waiting for a runner.
+config :api, Oban, testing: :manual, queues: false, plugins: false
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false

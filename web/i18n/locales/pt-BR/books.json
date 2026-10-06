@@ -13,6 +13,14 @@
       "coverUrlPlaceholder": "https://…",
       "adding": "Adicionando…",
       "submit": "Adicionar livro"
+    },
+    "page": {
+      "stats": {
+        "posts": "{count} publicações",
+        "readers": "{count} leitores"
+      },
+      "empty": "Nenhuma publicação sobre este livro ainda.",
+      "notFound": "Este livro não existe."
     }
   }
 }

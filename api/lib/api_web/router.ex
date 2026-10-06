@@ -46,8 +46,15 @@ defmodule ApiWeb.Router do
       post "/posts/:post_id/likes", LikeController, :create
       delete "/posts/:post_id/likes", LikeController, :delete
 
+      get "/me/bookmarks", BookmarkController, :index
+      post "/posts/:post_id/bookmarks", BookmarkController, :create
+      delete "/posts/:post_id/bookmarks", BookmarkController, :delete
+
       post "/posts/:post_id/comments", CommentController, :create
       put "/posts/:post_id/comments/:id", CommentController, :update
+
+      get "/reports/reasons", ReportController, :reasons
+      post "/reports", ReportController, :create
 
       post "/users/:id/follow", FollowController, :create
       delete "/users/:id/follow", FollowController, :delete
@@ -57,8 +64,13 @@ defmodule ApiWeb.Router do
       pipe_through :maybe_authenticated
 
       get "/users/:id", ProfileController, :show
+      get "/users/:id/interests", ProfileController, :interests
+      get "/users/:id/community_health", ProfileController, :community_health
       get "/posts", PostController, :index
       get "/posts/:id", PostController, :show
+      get "/posts/:id/related", PostController, :related
+      get "/books/:id/page", BookController, :page
+      get "/keywords/:name", KeywordController, :show
     end
   end
 end

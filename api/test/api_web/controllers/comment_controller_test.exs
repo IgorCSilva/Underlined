@@ -1,11 +1,13 @@
 defmodule ApiWeb.CommentControllerTest do
   use ApiWeb.ConnCase, async: true
+  use Oban.Testing, repo: Api.Repo
 
   import Mox
 
   alias Api.Adapters.Accounts
   alias Api.Adapters.Catalog
   alias Api.Adapters.Posts
+  alias Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker
   alias Api.Usecases.Book.AddBook.AddBookUsecaseDto
   alias Api.Usecases.Post.CreatePost.CreatePostUsecaseDto
   alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
@@ -56,7 +58,8 @@ defmodule ApiWeb.CommentControllerTest do
     test "creates a top-level comment when authenticated", %{
       conn: conn,
       post: post,
-      access_token: token
+      access_token: token,
+      commenter: commenter
     } do
       conn =
         conn
@@ -68,12 +71,26 @@ defmodule ApiWeb.CommentControllerTest do
       assert data["body"] == "Great read!"
       assert data["parent_comment_id"] == nil
       assert data["replies"] == []
+
+      assert_enqueued(
+        worker: CommunityHealthWorker,
+        args: %{
+          action: "record_action",
+          actor_id: commenter.id,
+          action_type: "COMMENT",
+          resource_type: "comment",
+          resource_id: data["id"],
+          community_id: "default",
+          context: %{parent_type: "comment"}
+        }
+      )
     end
 
     test "creates a reply when given a parent_comment_id", %{
       conn: conn,
       post: post,
-      access_token: token
+      access_token: token,
+      commenter: commenter
     } do
       conn = conn |> put_req_header("authorization", "Bearer #{token}")
 
@@ -90,6 +107,19 @@ defmodule ApiWeb.CommentControllerTest do
       assert %{"data" => data} = json_response(reply_conn, 201)
       assert data["type"] == "reply"
       assert data["parent_comment_id"] == parent_id
+
+      assert_enqueued(
+        worker: CommunityHealthWorker,
+        args: %{
+          action: "record_action",
+          actor_id: commenter.id,
+          action_type: "COMMENT",
+          resource_type: "comment",
+          resource_id: data["id"],
+          community_id: "default",
+          context: %{parent_type: "reply"}
+        }
+      )
     end
 
     test "rejects an unauthenticated request", %{conn: conn, post: post} do

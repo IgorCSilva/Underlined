@@ -24,6 +24,7 @@ describe('TopBar', () => {
     return wrapper.vm.$nextTick().then(() => {
       // expect(wrapper.text()).toContain('New post')
       expect(wrapper.text()).toContain('Add book')
+      expect(wrapper.text()).toContain('Saved')
       expect(wrapper.text()).toContain('Profile')
       expect(wrapper.text()).not.toContain('Log in')
       expect(wrapper.text()).not.toContain('Sign up')

@@ -83,6 +83,19 @@ services:
       CORS_ORIGIN: http://localhost:3000
       PHX_HOST: localhost
       PORT: "4000"
+      # The standalone HealthyCommunity repo's own docker-compose stack
+      # (see its roadmap.md Part B, Step 1) exposes its "app" service on
+      # host port 4100; host.docker.internal lets this container reach it
+      # without the two compose projects sharing a network. Off by default
+      # (fails closed via Api.Infrastructure.CommunityHealthNoop) — set
+      # COMMUNITY_HEALTH_ENABLED=true and COMMUNITY_HEALTH_API_KEY (from
+      # `mix community_health.register_platform "Underlined"` in that repo)
+      # to turn it on.
+      COMMUNITY_HEALTH_ENABLED: ${COMMUNITY_HEALTH_ENABLED:-false}
+      COMMUNITY_HEALTH_API_URL: ${COMMUNITY_HEALTH_API_URL:-}
+      COMMUNITY_HEALTH_API_KEY: ${COMMUNITY_HEALTH_API_KEY:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "4000:4000"
     volumes:

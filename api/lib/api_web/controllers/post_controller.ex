@@ -6,6 +6,7 @@ defmodule ApiWeb.PostController do
   alias Api.Usecases.Post.GetPost.GetPostUsecaseDto
   alias Api.Usecases.Post.ListFollowingPosts.ListFollowingPostsUsecaseDto
   alias Api.Usecases.Post.ListPosts.ListPostsUsecaseDto
+  alias Api.Usecases.Post.RelatedPosts.RelatedPostsUsecaseDto
 
   action_fallback ApiWeb.FallbackController
 
@@ -33,6 +34,13 @@ defmodule ApiWeb.PostController do
     case Posts.get_post(%GetPostUsecaseDto{id: id, current_user: current_user(conn)}) do
       nil -> {:error, :not_found}
       post -> render(conn, :show, post: post)
+    end
+  end
+
+  def related(conn, %{"id" => id}) do
+    with {:ok, posts} <-
+           Posts.related_posts(%RelatedPostsUsecaseDto{id: id, current_user: current_user(conn)}) do
+      render(conn, :index, posts: posts)
     end
   end
 

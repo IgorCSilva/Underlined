@@ -1,0 +1,28 @@
+{
+  "communityHealth": {
+    "unavailable": "Os recursos da comunidade estão temporariamente indisponíveis"
+  },
+  "reports": {
+    "ariaLabel": "Denunciar este conteúdo",
+    "title": "Denunciar conteúdo",
+    "reasonLabel": "Motivo",
+    "reasonPlaceholder": "Selecione um motivo…",
+    "descriptionLabel": "Detalhes adicionais (opcional)",
+    "descriptionPlaceholder": "Adicione qualquer contexto que possa ajudar um revisor…",
+    "cancel": "Cancelar",
+    "submit": "Enviar denúncia",
+    "submitting": "Enviando…",
+    "submitted": "Obrigado — sua denúncia foi enviada.",
+    "close": "Fechar",
+    "error": "Algo deu errado ao enviar sua denúncia. Tente novamente.",
+    "reasons": {
+      "PERSONAL_ATTACK": "Ataque pessoal",
+      "HARASSMENT": "Assédio",
+      "HATEFUL_CONTENT": "Conteúdo de ódio",
+      "THREAT": "Ameaça",
+      "SPAM": "Spam",
+      "SEXUAL_HARASSMENT": "Assédio sexual",
+      "DISCRIMINATION": "Discriminação"
+    }
+  }
+}

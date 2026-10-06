@@ -11,14 +11,14 @@
     </div>
 
     <div class="passage-hero">
-      <div class="passage-book">
+      <NuxtLink :to="`/books/${post.book.id}`" class="passage-book">
         <span class="passage-book-cover">
           <img v-if="post.book.cover_url" :src="post.book.cover_url" alt="" />
           <span v-else class="passage-book-placeholder">📖</span>
         </span>
         <span class="passage-book-title serif">{{ post.book.title }}</span>
         <span class="passage-book-author">{{ post.book.author }}</span>
-      </div>
+      </NuxtLink>
       <p class="passage-text serif">{{ post.passage.text }}</p>
     </div>
 
@@ -27,15 +27,25 @@
     </div>
 
     <div v-if="post.keywords.length" class="post-keywords">
-      <span v-for="keyword in post.keywords" :key="keyword" class="post-keyword-chip">{{ keyword }}</span>
+      <NuxtLink
+        v-for="keyword in post.keywords"
+        :key="keyword"
+        :to="`/keywords/${encodeURIComponent(keyword)}`"
+        class="post-keyword-chip"
+      >
+        {{ keyword }}
+      </NuxtLink>
     </div>
 
     <div class="post-icon-row">
       <LikeButton :post-id="post.id" :liked-by-user="post.liked_by_user" :like-count="post.like_count" />
       <span class="post-icon">💬 {{ post.comment_count }}</span>
+      <ReportButton resource-type="post" :resource-id="post.id" />
     </div>
 
     <CommentThread :post-id="post.id" :comments="comments ?? []" @comment-added="onCommentAdded" />
+
+    <RelatedPosts :posts="relatedPosts ?? []" />
   </div>
   <p v-else class="status-text">{{ t('posts.detail.notFound') }}</p>
 </template>
@@ -49,6 +59,7 @@ const { t } = useI18n()
 
 const { data: post } = await useApiFetch<Post>(`/api/posts/${route.params.id}`)
 const { data: comments } = await useApiFetch<Comment[]>(`/api/posts/${route.params.id}/comments`)
+const { data: relatedPosts } = await useApiFetch<Post[]>(`/api/posts/${route.params.id}/related`)
 
 // SSR always renders anonymous (no access token is available server-side),
 // so a logged-in viewer's own like never shows up in the hydrated payload.
@@ -143,6 +154,13 @@ const formattedDate = computed(() => {
   align-items: center;
   text-align: center;
   gap: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.passage-book:hover .passage-book-title {
+  text-decoration: underline solid var(--color-highlight) 2px;
+  text-underline-offset: 3px;
 }
 
 .passage-book-cover {
@@ -215,6 +233,12 @@ const formattedDate = computed(() => {
   padding: 5px 12px;
   border-radius: var(--radius-pill);
   font-size: 0.8rem;
+  text-decoration: none;
+}
+
+.post-keyword-chip:hover {
+  text-decoration: underline solid var(--color-highlight) 2px;
+  text-underline-offset: 3px;
 }
 
 .post-icon-row {

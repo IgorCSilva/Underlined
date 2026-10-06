@@ -1,9 +1,16 @@
 defmodule ApiWeb.ProfileControllerTest do
   use ApiWeb.ConnCase, async: true
+  use Oban.Testing, repo: Api.Repo
 
   import Mox
 
   alias Api.Adapters.Accounts
+  alias Api.Adapters.Catalog
+  alias Api.Adapters.Posts
+  alias Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker
+  alias Api.Infrastructure.Repository.InterestProfile.Postgres.InterestProfileRepository
+  alias Api.Usecases.Book.AddBook.AddBookUsecaseDto
+  alias Api.Usecases.Post.CreatePost.CreatePostUsecaseDto
   alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
   alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
 
@@ -84,7 +91,12 @@ defmodule ApiWeb.ProfileControllerTest do
         |> put_req_header("authorization", "Bearer #{token}")
         |> put(~p"/api/me", user: %{avatar_url: preset})
 
-      assert %{"data" => %{"avatar_url" => ^preset}} = json_response(conn, 200)
+      assert %{"data" => %{"id" => id, "avatar_url" => ^preset}} = json_response(conn, 200)
+
+      assert_enqueued(
+        worker: CommunityHealthWorker,
+        args: %{action: "ensure_member", actor_id: id, community_id: "default"}
+      )
     end
 
     test "rejects an avatar_url outside the preset list", %{conn: conn, access_token: token} do
@@ -176,6 +188,127 @@ defmodule ApiWeb.ProfileControllerTest do
         |> put(~p"/api/me/avatar", avatar: upload)
 
       assert json_response(conn, 422)
+    end
+  end
+
+  describe "GET /api/users/:id/interests" do
+    defp create_post(user, book, keywords, passage_text) do
+      {:ok, post} =
+        Posts.create_post(%CreatePostUsecaseDto{
+          user: user,
+          attrs: %{
+            "book_id" => book.id,
+            "passage_text" => passage_text,
+            "thinking" => "Thinking.",
+            "keywords" => keywords
+          }
+        })
+
+      post
+    end
+
+    setup do
+      {:ok, book} =
+        Catalog.add_book(%AddBookUsecaseDto{attrs: %{"title" => "Sapiens", "author" => "Harari"}})
+
+      {:ok, other} =
+        Accounts.register_user(%RegisterUserUsecaseDto{
+          attrs: %{"email" => "other@example.com", "password" => "supersecret", "name" => "Other Reader"}
+        })
+
+      %{book: book, other: other}
+    end
+
+    test "returns keyword usage counts, most-used first", %{conn: conn, user: user, book: book} do
+      create_post(user, book, ["attention", "nature-writing"], "First.")
+      create_post(user, book, ["attention"], "Second.")
+      InterestProfileRepository.recompute(user.id)
+
+      conn = get(conn, ~p"/api/users/#{user.id}/interests")
+
+      assert %{"data" => %{"interest_profile" => profile}} = json_response(conn, 200)
+      assert profile == [
+               %{"keyword" => "attention", "post_count" => 2},
+               %{"keyword" => "nature-writing", "post_count" => 1}
+             ]
+    end
+
+    test "ranks similar readers by shared keyword overlap", %{
+      conn: conn,
+      user: user,
+      book: book,
+      other: other
+    } do
+      create_post(user, book, ["attention", "nature-writing"], "Mine.")
+      create_post(other, book, ["attention", "nature-writing"], "Theirs too.")
+      InterestProfileRepository.recompute(user.id)
+      InterestProfileRepository.recompute(other.id)
+
+      conn = get(conn, ~p"/api/users/#{user.id}/interests")
+
+      assert %{"data" => %{"similar_readers" => [%{"id" => id, "shared_score" => 2}]}} =
+               json_response(conn, 200)
+
+      assert id == other.id
+    end
+
+    test "returns empty lists for a user with no posts", %{conn: conn, user: user} do
+      conn = get(conn, ~p"/api/users/#{user.id}/interests")
+
+      assert json_response(conn, 200) == %{"data" => %{"interest_profile" => [], "similar_readers" => []}}
+    end
+
+    test "returns 404 for an unknown user", %{conn: conn} do
+      conn = get(conn, ~p"/api/users/999999/interests")
+      assert json_response(conn, 404)
+    end
+  end
+
+  describe "GET /api/users/:id/community_health" do
+    test "returns the reputation level and trust level when Community Health is available", %{
+      conn: conn,
+      user: user
+    } do
+      Api.CommunityHealthMock
+      |> expect(:get_reputation, fn %{actor_id: actor_id, community_id: "default"} ->
+        assert actor_id == user.id
+        {:ok, %{score: 60, level: 3}}
+      end)
+      |> expect(:get_trust_level, fn %{actor_id: actor_id, community_id: "default"} ->
+        assert actor_id == user.id
+        {:ok, %{trust_level: "medium"}}
+      end)
+
+      conn = get(conn, ~p"/api/users/#{user.id}/community_health")
+
+      assert json_response(conn, 200) == %{
+               "data" => %{
+                 "reputation_level" => 3,
+                 "trust_level" => "medium",
+                 "community_health_available" => true
+               }
+             }
+    end
+
+    test "fails closed when Community Health is unavailable", %{conn: conn, user: user} do
+      Api.CommunityHealthMock
+      |> expect(:get_reputation, fn _params -> {:error, :unavailable} end)
+      |> expect(:get_trust_level, fn _params -> {:error, :unavailable} end)
+
+      conn = get(conn, ~p"/api/users/#{user.id}/community_health")
+
+      assert json_response(conn, 200) == %{
+               "data" => %{
+                 "reputation_level" => nil,
+                 "trust_level" => nil,
+                 "community_health_available" => false
+               }
+             }
+    end
+
+    test "returns 404 for an unknown user", %{conn: conn} do
+      conn = get(conn, ~p"/api/users/999999/community_health")
+      assert json_response(conn, 404)
     end
   end
 end

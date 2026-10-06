@@ -43,4 +43,32 @@ describe('posts store', () => {
       posts.createPost({ book_id: 'b1', passage_text: '', thinking: '' }),
     ).rejects.toThrow('validation failed')
   })
+
+  it('bookmarkPost posts to /api/posts/:id/bookmarks and returns the result', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ data: { bookmarked: true } })
+    vi.stubGlobal('$fetch', fetchMock)
+
+    const posts = usePostsStore()
+    const result = await posts.bookmarkPost('1')
+
+    expect(result).toEqual({ bookmarked: true })
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/posts/1/bookmarks',
+      expect.objectContaining({ method: 'POST' }),
+    )
+  })
+
+  it('unbookmarkPost deletes /api/posts/:id/bookmarks and returns the result', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ data: { bookmarked: false } })
+    vi.stubGlobal('$fetch', fetchMock)
+
+    const posts = usePostsStore()
+    const result = await posts.unbookmarkPost('1')
+
+    expect(result).toEqual({ bookmarked: false })
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/posts/1/bookmarks',
+      expect.objectContaining({ method: 'DELETE' }),
+    )
+  })
 })

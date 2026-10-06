@@ -147,12 +147,12 @@ defmodule Api.Adapters.AccountsTest do
 
     test "rejects a bio that is too long" do
       user = register_user()
-      attrs = %{"bio" => String.duplicate("a", 501)}
+      attrs = %{"bio" => String.duplicate("a", 201)}
 
       assert {:error, changeset} =
                Accounts.update_profile(%UpdateProfileUsecaseDto{user: user, attrs: attrs})
 
-      assert "should be at most 500 character(s)" in errors_on(changeset).bio
+      assert "should be at most 200 character(s)" in errors_on(changeset).bio
     end
 
     test "sets the avatar to one of the fixed presets" do
