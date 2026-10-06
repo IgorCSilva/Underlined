@@ -64,6 +64,8 @@ defmodule ApiWeb.Router do
       pipe_through :maybe_authenticated
 
       get "/users/:id", ProfileController, :show
+      get "/users/:id/interests", ProfileController, :interests
+      get "/users/:id/community_health", ProfileController, :community_health
       get "/posts", PostController, :index
       get "/posts/:id", PostController, :show
       get "/posts/:id/related", PostController, :related

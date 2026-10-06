@@ -19,4 +19,10 @@ defmodule Api.Infrastructure.Health.HealthyCommunity.CommunityHealthNoop do
 
   @impl true
   def list_rules(_community_id), do: {:error, :unavailable}
+
+  @impl true
+  def get_reputation(_params), do: {:error, :unavailable}
+
+  @impl true
+  def get_trust_level(_params), do: {:error, :unavailable}
 end

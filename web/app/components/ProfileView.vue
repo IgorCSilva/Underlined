@@ -16,11 +16,28 @@
       <div v-else-if="canFollow" class="profile-actions">
         <FollowButton :user-id="user.id" :followed-by-user="!!user.followed_by_user" />
       </div>
+      <ContributionLevel :user-id="user.id" />
+    </div>
+
+    <div v-if="interestProfile.length" class="profile-section">
+      <h2 class="profile-section-title">{{ t('profile.interests.title') }}</h2>
+      <InterestProfile :profile="interestProfile" />
+    </div>
+
+    <div v-if="similarReaders.length" class="profile-section">
+      <h2 class="profile-section-title">{{ t('profile.similarReaders.title') }}</h2>
+      <SimilarReaders :readers="similarReaders" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import InterestProfile from './InterestProfile.vue'
+import SimilarReaders from './SimilarReaders.vue'
+import ContributionLevel from './health/ContributionLevel.vue'
+import type { InterestEntry } from './InterestProfile.vue'
+import type { SimilarReader } from './SimilarReaders.vue'
+
 const props = defineProps<{
   user: {
     id: string
@@ -38,6 +55,29 @@ const { t } = useI18n()
 
 const initial = computed(() => props.user.name?.[0]?.toUpperCase() ?? '?')
 const canFollow = computed(() => !props.own && !!auth.user && auth.user.id !== props.user.id)
+
+interface InterestsResponse {
+  interest_profile: InterestEntry[]
+  similar_readers: SimilarReader[]
+}
+
+const interestProfile = ref<InterestEntry[]>([])
+const similarReaders = ref<SimilarReader[]>([])
+
+// Fetched onMounted, not via a blocking top-level `await` — ProfileView is
+// mounted directly by two pages (profile/index.vue and profile/[id].vue)
+// with no Suspense boundary, same reasoning as ContributionLevel's fetch.
+onMounted(async () => {
+  try {
+    const { request } = useApi()
+    const res = await request<{ data: InterestsResponse }>(`/api/users/${props.user.id}/interests`)
+    interestProfile.value = res.data.interest_profile
+    similarReaders.value = res.data.similar_readers
+  } catch {
+    interestProfile.value = []
+    similarReaders.value = []
+  }
+})
 
 async function onLogout() {
   await auth.logout()
@@ -122,5 +162,16 @@ async function onLogout() {
 .edit-link:hover,
 .logout-link:hover {
   text-decoration: underline;
+}
+
+.profile-section {
+  margin-top: 32px;
+}
+
+.profile-section-title {
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-ink);
 }
 </style>

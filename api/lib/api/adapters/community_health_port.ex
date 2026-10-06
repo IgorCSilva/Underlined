@@ -31,4 +31,10 @@ defmodule Api.Adapters.CommunityHealthPort do
             }) :: {:ok, term()} | {:error, term()}
 
   @callback list_rules(String.t()) :: {:ok, [map()]} | {:error, term()}
+
+  @callback get_reputation(%{actor_id: String.t(), community_id: String.t()}) ::
+              {:ok, %{score: integer(), level: integer()}} | {:error, term()}
+
+  @callback get_trust_level(%{actor_id: String.t(), community_id: String.t()}) ::
+              {:ok, %{trust_level: String.t()}} | {:error, term()}
 end

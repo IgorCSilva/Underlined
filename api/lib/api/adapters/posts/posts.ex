@@ -25,7 +25,8 @@ defmodule Api.Adapters.Posts do
   def create_post(dto) do
     CreatePostUsecase.call(dto, %CreatePostUsecase{
       repository: post_repository(),
-      community_health_enqueuer: community_health_enqueuer()
+      community_health_enqueuer: community_health_enqueuer(),
+      interest_profile_enqueuer: interest_profile_enqueuer()
     })
   end
 
@@ -111,6 +112,14 @@ defmodule Api.Adapters.Posts do
         :api,
         :community_health_enqueuer,
         &Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker.enqueue/1
+      )
+
+  defp interest_profile_enqueuer,
+    do:
+      Application.get_env(
+        :api,
+        :interest_profile_enqueuer,
+        &Api.Infrastructure.InterestProfile.RecomputeInterestProfileWorker.enqueue/1
       )
 
   defp community_health_reader do

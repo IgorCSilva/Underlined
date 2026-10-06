@@ -56,6 +56,10 @@ config :api, :keyword_repository,
   adapter: Api.Adapters.Keyword.KeywordRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.Keyword.Postgres.KeywordRepository
 
+config :api, :interest_profile_repository,
+  adapter: Api.Adapters.InterestProfile.InterestProfileRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.InterestProfile.Postgres.InterestProfileRepository
+
 config :api, cors_origin: "http://localhost:3000"
 config :api, web_base_url: "http://localhost:3000"
 
@@ -66,7 +70,7 @@ config :api, web_base_url: "http://localhost:3000"
 # the real HTTP client.
 config :api, Oban,
   repo: Api.Repo,
-  queues: [community_health: 5],
+  queues: [community_health: 5, interest_profiles: 2],
   plugins: [
     {Oban.Plugins.Pruner, max_age: :timer.hours(24 * 7)},
     # Rescues jobs orphaned by a container restart mid-execution (state

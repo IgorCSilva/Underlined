@@ -23,6 +23,7 @@ defmodule Api.Adapters.Accounts do
   alias Api.Usecases.Session.RevokeAllRefreshTokens.RevokeAllRefreshTokensUsecase
   alias Api.Usecases.Session.RevokeRefreshToken.RevokeRefreshTokenUsecase
 
+  alias Api.Usecases.User.GetCommunityHealth.GetCommunityHealthUsecase
   alias Api.Usecases.User.GetUser.GetUserUsecase
   alias Api.Usecases.User.GetUserByEmail.GetUserByEmailUsecase
   alias Api.Usecases.User.GetUserByEmailAndPassword.GetUserByEmailAndPasswordUsecase
@@ -35,6 +36,13 @@ defmodule Api.Adapters.Accounts do
 
   def get_user(dto) do
     GetUserUsecase.call(dto, %GetUserUsecase{repository: user_repository()})
+  end
+
+  def get_community_health(dto) do
+    GetCommunityHealthUsecase.call(dto, %GetCommunityHealthUsecase{
+      community_health_reputation_reader: community_health_reputation_reader(),
+      community_health_trust_reader: community_health_trust_reader()
+    })
   end
 
   def get_user!(dto), do: GetUserOrRaiseUsecase.call(dto)
@@ -138,5 +146,16 @@ defmodule Api.Adapters.Accounts do
         :api,
         :community_health_enqueuer,
         &Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker.enqueue/1
+      )
+
+  defp community_health_reputation_reader, do: &community_health_adapter().get_reputation/1
+  defp community_health_trust_reader, do: &community_health_adapter().get_trust_level/1
+
+  defp community_health_adapter,
+    do:
+      Application.get_env(
+        :api,
+        :community_health,
+        Api.Infrastructure.Health.HealthyCommunity.CommunityHealthNoop
       )
 end

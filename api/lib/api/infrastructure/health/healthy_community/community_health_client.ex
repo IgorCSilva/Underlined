@@ -110,6 +110,54 @@ defmodule Api.Infrastructure.Health.HealthyCommunity.CommunityHealthClient do
     end
   end
 
+  @impl true
+  def get_reputation(%{actor_id: actor_id, community_id: community_ref}) do
+    if CircuitBreaker.open?() do
+      {:error, :unavailable}
+    else
+      case request(:get, "/v1/communities/#{community_ref}/members/#{actor_id}/reputation", nil, @read_timeout) do
+        {:ok, body} ->
+          CircuitBreaker.record_success()
+          decode_reputation(body)
+
+        {:error, reason} ->
+          CircuitBreaker.record_failure()
+          {:error, reason}
+      end
+    end
+  end
+
+  @impl true
+  def get_trust_level(%{actor_id: actor_id, community_id: community_ref}) do
+    if CircuitBreaker.open?() do
+      {:error, :unavailable}
+    else
+      case request(:get, "/v1/communities/#{community_ref}/members/#{actor_id}/trust", nil, @read_timeout) do
+        {:ok, body} ->
+          CircuitBreaker.record_success()
+          decode_trust(body)
+
+        {:error, reason} ->
+          CircuitBreaker.record_failure()
+          {:error, reason}
+      end
+    end
+  end
+
+  defp decode_reputation(body) do
+    case Jason.decode(body) do
+      {:ok, %{"score" => score, "level" => level}} -> {:ok, %{score: score, level: level}}
+      _ -> {:error, :invalid_response}
+    end
+  end
+
+  defp decode_trust(body) do
+    case Jason.decode(body) do
+      {:ok, %{"trust_level" => trust_level}} -> {:ok, %{trust_level: trust_level}}
+      _ -> {:error, :invalid_response}
+    end
+  end
+
   defp ensure_community(community_ref) do
     name = community_ref |> String.replace("_", " ") |> String.capitalize()
     request(:post, "/v1/communities", %{external_ref: community_ref, name: name})
