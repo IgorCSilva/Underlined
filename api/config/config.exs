@@ -48,8 +48,38 @@ config :api, :follow_repository,
   adapter: Api.Adapters.Follow.FollowRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.Follow.Postgres.FollowRepository
 
+config :api, :bookmark_repository,
+  adapter: Api.Adapters.Bookmark.BookmarkRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Bookmark.Postgres.BookmarkRepository
+
+config :api, :keyword_repository,
+  adapter: Api.Adapters.Keyword.KeywordRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Keyword.Postgres.KeywordRepository
+
+config :api, :interest_profile_repository,
+  adapter: Api.Adapters.InterestProfile.InterestProfileRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.InterestProfile.Postgres.InterestProfileRepository
+
 config :api, cors_origin: "http://localhost:3000"
 config :api, web_base_url: "http://localhost:3000"
+
+# Community Health integration: fire-and-forget jobs run on their own queue so
+# a slow/down CH service can never back up other background work. The
+# adapter itself defaults to the no-op implementation (see
+# Api.Infrastructure.Health.HealthyCommunity.CommunityHealthNoop) unless config/runtime.exs enables
+# the real HTTP client.
+config :api, Oban,
+  repo: Api.Repo,
+  queues: [community_health: 5, interest_profiles: 2],
+  plugins: [
+    {Oban.Plugins.Pruner, max_age: :timer.hours(24 * 7)},
+    # Rescues jobs orphaned by a container restart mid-execution (state
+    # stuck at "executing" with no process left to ever finish them) —
+    # otherwise they sit there forever instead of retrying.
+    Oban.Plugins.Lifeline
+  ]
+
+config :api, community_health_default_community: "default"
 
 config :api, ApiWeb.Gettext, default_locale: "en", locales: ~w(en pt_BR)
 

@@ -1,0 +1,28 @@
+{
+  "communityHealth": {
+    "unavailable": "Community features are temporarily unavailable"
+  },
+  "reports": {
+    "ariaLabel": "Report this content",
+    "title": "Report content",
+    "reasonLabel": "Reason",
+    "reasonPlaceholder": "Select a reason…",
+    "descriptionLabel": "Additional details (optional)",
+    "descriptionPlaceholder": "Add any context that might help a reviewer…",
+    "cancel": "Cancel",
+    "submit": "Submit report",
+    "submitting": "Submitting…",
+    "submitted": "Thanks — your report has been submitted.",
+    "close": "Close",
+    "error": "Something went wrong submitting your report. Please try again.",
+    "reasons": {
+      "PERSONAL_ATTACK": "Personal attack",
+      "HARASSMENT": "Harassment",
+      "HATEFUL_CONTENT": "Hateful content",
+      "THREAT": "Threat",
+      "SPAM": "Spam",
+      "SEXUAL_HARASSMENT": "Sexual harassment",
+      "DISCRIMINATION": "Discrimination"
+    }
+  }
+}

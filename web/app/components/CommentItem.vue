@@ -31,6 +31,7 @@
         <button v-if="isOwnComment && !editing" type="button" class="comment-edit-toggle" @click="startEdit">
           {{ t('comments.edit') }}
         </button>
+        <ReportButton resource-type="comment" :resource-id="comment.id" />
       </div>
 
       <div v-if="replying" class="comment-reply-composer">

@@ -8,7 +8,7 @@
       </div>
       <div class="field">
         <label for="bio">{{ t('profile.bioLabel') }}</label>
-        <textarea id="bio" v-model="bio" rows="4" maxlength="500" />
+        <textarea id="bio" v-model="bio" rows="4" maxlength="200" />
       </div>
       <div class="field">
         <label>{{ t('profile.avatarLabel') }}</label>

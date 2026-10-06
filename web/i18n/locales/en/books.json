@@ -13,6 +13,14 @@
       "coverUrlPlaceholder": "https://…",
       "adding": "Adding…",
       "submit": "Add book"
+    },
+    "page": {
+      "stats": {
+        "posts": "{count} posts",
+        "readers": "{count} readers"
+      },
+      "empty": "No posts about this book yet.",
+      "notFound": "This book doesn't exist."
     }
   }
 }

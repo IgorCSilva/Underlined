@@ -12,6 +12,7 @@ const post: Post = {
   keywords: ['attention', 'nature-writing'],
   like_count: 2,
   liked_by_user: false,
+  bookmarked_by_user: false,
   comment_count: 3,
   user: { id: 'user-1', name: 'Reader One', avatar_url: null },
 }
@@ -20,6 +21,7 @@ const stubs = {
   NuxtLink: { template: '<a><slot /></a>' },
   AvatarCircle: true,
   LikeButton: true,
+  BookmarkButton: true,
 }
 
 describe('PostFeedItem', () => {
@@ -43,6 +45,20 @@ describe('PostFeedItem', () => {
   it('omits the keyword row when there are no keywords', () => {
     const wrapper = mount(PostFeedItem, { props: { post: { ...post, keywords: [] } }, global: { stubs } })
     expect(wrapper.find('.feed-keywords').exists()).toBe(false)
+  })
+
+  it('links each keyword chip to its keyword page', () => {
+    const wrapper = mount(PostFeedItem, { props: { post }, global: { stubs } })
+    const chips = wrapper.findAll('.feed-keyword-chip')
+
+    expect(chips.map((c) => c.attributes('to'))).toEqual(['/keywords/attention', '/keywords/nature-writing'])
+  })
+
+  it('links the book title to its book page', () => {
+    const wrapper = mount(PostFeedItem, { props: { post }, global: { stubs } })
+    const bookTitle = wrapper.find('.feed-book-title')
+
+    expect(bookTitle.attributes('to')).toBe('/books/book-1')
   })
 
   it('links to the post detail page', () => {

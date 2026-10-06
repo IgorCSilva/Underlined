@@ -3,6 +3,9 @@
     "detail": {
       "notFound": "Post not found."
     },
+    "related": {
+      "title": "Related ideas"
+    },
     "composer": {
       "published": "Published!",
       "liveMessage": "Your post about \"{title}\" is live.",

@@ -1,12 +1,14 @@
 <template>
   <div class="feed-item">
+    <span v-if="showSavedBadge" class="feed-saved-badge" aria-hidden="true">🔖</span>
     <div class="feed-meta">
       <NuxtLink :to="`/profile/${post.user.id}`" class="feed-avatar-link">
         <AvatarCircle :name="post.user.name" :avatar-url="post.user.avatar_url" :size="28" />
       </NuxtLink>
       <span class="feed-meta-text">
         <NuxtLink :to="`/profile/${post.user.id}`" class="feed-username">{{ post.user.name }}</NuxtLink>
-        {{ t('feed.on') }} <span class="feed-book-title">{{ post.book.title }}</span>
+        {{ t('feed.on') }}
+        <NuxtLink :to="`/books/${post.book.id}`" class="feed-book-title">{{ post.book.title }}</NuxtLink>
       </span>
     </div>
 
@@ -16,12 +18,21 @@
     </NuxtLink>
 
     <div v-if="post.keywords.length" class="feed-keywords">
-      <span v-for="keyword in post.keywords" :key="keyword" class="feed-keyword-chip">{{ keyword }}</span>
+      <NuxtLink
+        v-for="keyword in post.keywords"
+        :key="keyword"
+        :to="`/keywords/${encodeURIComponent(keyword)}`"
+        class="feed-keyword-chip"
+      >
+        {{ keyword }}
+      </NuxtLink>
     </div>
 
     <div class="feed-icon-row">
       <LikeButton :post-id="post.id" :liked-by-user="post.liked_by_user" :like-count="post.like_count" />
+      <BookmarkButton :post-id="post.id" :bookmarked-by-user="post.bookmarked_by_user" />
       <NuxtLink :to="`/posts/${post.id}`" class="feed-icon">💬 {{ post.comment_count }}</NuxtLink>
+      <ReportButton resource-type="post" :resource-id="post.id" />
     </div>
   </div>
 </template>
@@ -29,15 +40,23 @@
 <script setup lang="ts">
 import type { Post } from '~/stores/posts'
 
-defineProps<{ post: Post }>()
+withDefaults(defineProps<{ post: Post; showSavedBadge?: boolean }>(), { showSavedBadge: false })
 const { t } = useI18n()
 </script>
 
 <style scoped>
 .feed-item {
+  position: relative;
   display: block;
   padding: 24px 0;
   border-bottom: 1px solid var(--color-border);
+}
+
+.feed-saved-badge {
+  position: absolute;
+  top: 24px;
+  right: 0;
+  font-size: 0.85rem;
 }
 
 .feed-item:last-child {
@@ -69,6 +88,13 @@ const { t } = useI18n()
 
 .feed-book-title {
   font-weight: 600;
+  color: inherit;
+  text-decoration: none;
+}
+
+.feed-book-title:hover {
+  text-decoration: underline solid var(--color-highlight) 2px;
+  text-underline-offset: 3px;
 }
 
 .feed-content-link {
@@ -113,6 +139,12 @@ const { t } = useI18n()
   padding: 4px 10px;
   border-radius: var(--radius-pill);
   font-size: 0.75rem;
+  text-decoration: none;
+}
+
+.feed-keyword-chip:hover {
+  text-decoration: underline solid var(--color-highlight) 2px;
+  text-underline-offset: 3px;
 }
 
 .feed-icon-row {

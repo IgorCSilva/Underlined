@@ -4,6 +4,7 @@ defmodule ApiWeb.BookController do
   alias Api.Adapters.Catalog
   alias Api.Usecases.Book.AddBook.AddBookUsecaseDto
   alias Api.Usecases.Book.GetBook.GetBookUsecaseDto
+  alias Api.Usecases.Book.GetBookPage.GetBookPageUsecaseDto
   alias Api.Usecases.Book.ListBooks.ListBooksUsecaseDto
 
   action_fallback ApiWeb.FallbackController
@@ -20,9 +21,22 @@ defmodule ApiWeb.BookController do
     end
   end
 
+  def page(conn, %{"id" => id} = params) do
+    with {:ok, page} <-
+           Catalog.get_book_page(%GetBookPageUsecaseDto{
+             id: id,
+             before: params["before"],
+             current_user: current_user(conn)
+           }) do
+      render(conn, :page, page: page)
+    end
+  end
+
   def create(conn, %{"book" => book_params}) do
     with {:ok, book} <- Catalog.add_book(%AddBookUsecaseDto{attrs: book_params}) do
       render(conn, :show, book: book)
     end
   end
+
+  defp current_user(conn), do: Api.Infrastructure.Guardian.Plug.current_resource(conn)
 end

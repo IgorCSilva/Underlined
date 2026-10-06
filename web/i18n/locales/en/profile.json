@@ -9,6 +9,18 @@
     "editProfile": "Edit profile",
     "avatarLabel": "Avatar",
     "logOut": "Log out",
-    "chooseAvatar": "Choose this avatar"
+    "chooseAvatar": "Choose this avatar",
+    "interests": {
+      "title": "Reading interests"
+    },
+    "similarReaders": {
+      "title": "Similar readers"
+    },
+    "sharedIdeas": "{count} shared ideas",
+    "trustLevels": {
+      "low": "Low trust",
+      "medium": "Medium trust",
+      "high": "High trust"
+    }
   }
 }
