@@ -1,11 +1,13 @@
 defmodule ApiWeb.LikeControllerTest do
   use ApiWeb.ConnCase, async: true
+  use Oban.Testing, repo: Api.Repo
 
   import Mox
 
   alias Api.Adapters.Accounts
   alias Api.Adapters.Catalog
   alias Api.Adapters.Posts
+  alias Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker
   alias Api.Usecases.Book.AddBook.AddBookUsecaseDto
   alias Api.Usecases.Post.CreatePost.CreatePostUsecaseDto
   alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
@@ -45,17 +47,34 @@ defmodule ApiWeb.LikeControllerTest do
         }
       })
 
-    %{post: post, access_token: access_token}
+    %{post: post, access_token: access_token, liker: liker}
   end
 
   describe "POST /api/posts/:post_id/likes" do
-    test "likes the post when authenticated", %{conn: conn, post: post, access_token: token} do
+    test "likes the post when authenticated", %{
+      conn: conn,
+      post: post,
+      access_token: token,
+      liker: liker
+    } do
       conn =
         conn
         |> put_req_header("authorization", "Bearer #{token}")
         |> post(~p"/api/posts/#{post.id}/likes")
 
       assert json_response(conn, 200) == %{"data" => %{"liked" => true, "like_count" => 1}}
+
+      assert_enqueued(
+        worker: CommunityHealthWorker,
+        args: %{
+          action: "record_action",
+          actor_id: liker.id,
+          action_type: "REACT",
+          resource_type: "post",
+          resource_id: post.id,
+          community_id: "default"
+        }
+      )
     end
 
     test "liking twice stays at a like_count of 1", %{conn: conn, post: post, access_token: token} do
@@ -83,12 +102,24 @@ defmodule ApiWeb.LikeControllerTest do
   end
 
   describe "DELETE /api/posts/:post_id/likes" do
-    test "unlikes a liked post", %{conn: conn, post: post, access_token: token} do
+    test "unlikes a liked post", %{conn: conn, post: post, access_token: token, liker: liker} do
       conn = conn |> put_req_header("authorization", "Bearer #{token}")
       post(conn, ~p"/api/posts/#{post.id}/likes")
 
       conn2 = delete(conn, ~p"/api/posts/#{post.id}/likes")
       assert json_response(conn2, 200) == %{"data" => %{"liked" => false, "like_count" => 0}}
+
+      assert_enqueued(
+        worker: CommunityHealthWorker,
+        args: %{
+          action: "record_action",
+          actor_id: liker.id,
+          action_type: "UNREACT",
+          resource_type: "post",
+          resource_id: post.id,
+          community_id: "default"
+        }
+      )
     end
 
     test "rejects an unauthenticated request", %{conn: conn, post: post} do

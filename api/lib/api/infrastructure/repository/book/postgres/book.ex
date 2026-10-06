@@ -27,8 +27,8 @@ defmodule Api.Infrastructure.Repository.Book.Postgres.Book do
       value -> value
     end)
     |> validate_required([:title, :author])
-    |> validate_length(:title, min: 1, max: 300)
-    |> validate_length(:author, min: 1, max: 300)
+    |> validate_length(:title, min: 1, max: 80)
+    |> validate_length(:author, min: 1, max: 80)
     |> maybe_validate_cover_url()
   end
 

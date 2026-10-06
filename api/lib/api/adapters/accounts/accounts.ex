@@ -23,6 +23,7 @@ defmodule Api.Adapters.Accounts do
   alias Api.Usecases.Session.RevokeAllRefreshTokens.RevokeAllRefreshTokensUsecase
   alias Api.Usecases.Session.RevokeRefreshToken.RevokeRefreshTokenUsecase
 
+  alias Api.Usecases.User.GetCommunityHealth.GetCommunityHealthUsecase
   alias Api.Usecases.User.GetUser.GetUserUsecase
   alias Api.Usecases.User.GetUserByEmail.GetUserByEmailUsecase
   alias Api.Usecases.User.GetUserByEmailAndPassword.GetUserByEmailAndPasswordUsecase
@@ -37,21 +38,43 @@ defmodule Api.Adapters.Accounts do
     GetUserUsecase.call(dto, %GetUserUsecase{repository: user_repository()})
   end
 
+  def get_community_health(dto) do
+    GetCommunityHealthUsecase.call(dto, %GetCommunityHealthUsecase{
+      community_health_reputation_reader: community_health_reputation_reader(),
+      community_health_trust_reader: community_health_trust_reader()
+    })
+  end
+
   def get_user!(dto), do: GetUserOrRaiseUsecase.call(dto)
   def get_user_by_email(dto), do: GetUserByEmailUsecase.call(dto)
   def get_user_by_email_and_password(dto), do: GetUserByEmailAndPasswordUsecase.call(dto)
-  def register_user(dto), do: RegisterUserUsecase.call(dto)
-  def update_profile(dto), do: UpdateProfileUsecase.call(dto)
+  def register_user(dto) do
+    RegisterUserUsecase.call(dto, %RegisterUserUsecase{
+      community_health_enqueuer: community_health_enqueuer()
+    })
+  end
+
+  def update_profile(dto) do
+    UpdateProfileUsecase.call(dto, %UpdateProfileUsecase{
+      community_health_enqueuer: community_health_enqueuer()
+    })
+  end
   def update_avatar(dto), do: UpdateAvatarUsecase.call(dto)
 
   ## Follows
 
   def follow_user(dto) do
-    FollowUserUsecase.call(dto, %FollowUserUsecase{repository: follow_repository()})
+    FollowUserUsecase.call(dto, %FollowUserUsecase{
+      repository: follow_repository(),
+      community_health_enqueuer: community_health_enqueuer()
+    })
   end
 
   def unfollow_user(dto) do
-    UnfollowUserUsecase.call(dto, %UnfollowUserUsecase{repository: follow_repository()})
+    UnfollowUserUsecase.call(dto, %UnfollowUserUsecase{
+      repository: follow_repository(),
+      community_health_enqueuer: community_health_enqueuer()
+    })
   end
 
   ## Email confirmation
@@ -116,4 +139,23 @@ defmodule Api.Adapters.Accounts do
 
   defp refresh_token_repository,
     do: Application.get_env(:api, :refresh_token_repository) |> Map.new()
+
+  defp community_health_enqueuer,
+    do:
+      Application.get_env(
+        :api,
+        :community_health_enqueuer,
+        &Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker.enqueue/1
+      )
+
+  defp community_health_reputation_reader, do: &community_health_adapter().get_reputation/1
+  defp community_health_trust_reader, do: &community_health_adapter().get_trust_level/1
+
+  defp community_health_adapter,
+    do:
+      Application.get_env(
+        :api,
+        :community_health,
+        Api.Infrastructure.Health.HealthyCommunity.CommunityHealthNoop
+      )
 end

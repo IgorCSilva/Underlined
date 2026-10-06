@@ -2,6 +2,9 @@ defmodule ApiWeb.ProfileController do
   use ApiWeb, :controller
 
   alias Api.Adapters.Accounts
+  alias Api.Adapters.InterestProfiles
+  alias Api.Usecases.InterestProfile.GetInterestProfile.GetInterestProfileUsecaseDto
+  alias Api.Usecases.User.GetCommunityHealth.GetCommunityHealthUsecaseDto
   alias Api.Usecases.User.GetUser.GetUserUsecaseDto
   alias Api.Usecases.User.UpdateAvatar.UpdateAvatarUsecaseDto
   alias Api.Usecases.User.UpdateProfile.UpdateProfileUsecaseDto
@@ -19,6 +22,28 @@ defmodule ApiWeb.ProfileController do
 
   def me(conn, _params) do
     render(conn, :show, user: current_user(conn))
+  end
+
+  def interests(conn, %{"id" => id}) do
+    case Accounts.get_user(%GetUserUsecaseDto{id: id, current_user: current_user(conn)}) do
+      nil ->
+        {:error, :not_found}
+
+      _user ->
+        {:ok, result} = InterestProfiles.get_interest_profile(%GetInterestProfileUsecaseDto{user_id: id})
+        render(conn, :interests, result: result)
+    end
+  end
+
+  def community_health(conn, %{"id" => id}) do
+    case Accounts.get_user(%GetUserUsecaseDto{id: id, current_user: current_user(conn)}) do
+      nil ->
+        {:error, :not_found}
+
+      _user ->
+        {:ok, result} = Accounts.get_community_health(%GetCommunityHealthUsecaseDto{user_id: id})
+        render(conn, :community_health, result: result)
+    end
   end
 
   def update(conn, %{"user" => user_params}) do

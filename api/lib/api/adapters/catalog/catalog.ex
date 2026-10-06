@@ -8,6 +8,7 @@ defmodule Api.Adapters.Catalog do
 
   alias Api.Usecases.Book.AddBook.AddBookUsecase
   alias Api.Usecases.Book.GetBook.GetBookUsecase
+  alias Api.Usecases.Book.GetBookPage.GetBookPageUsecase
   alias Api.Usecases.Book.ListBooks.ListBooksUsecase
 
   def list_books(dto) do
@@ -16,6 +17,10 @@ defmodule Api.Adapters.Catalog do
 
   def get_book(dto) do
     GetBookUsecase.call(dto, %GetBookUsecase{repository: book_repository()})
+  end
+
+  def get_book_page(dto) do
+    GetBookPageUsecase.call(dto, %GetBookPageUsecase{repository: book_repository()})
   end
 
   def add_book(dto) do

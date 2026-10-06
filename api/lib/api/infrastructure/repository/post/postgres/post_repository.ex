@@ -6,6 +6,7 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
   import Ecto.Query, warn: false
 
   alias Api.Infrastructure.Repository.Book.Postgres.{Book, BookRepository}
+  alias Api.Infrastructure.Repository.Bookmark.Postgres.BookmarkRepository
   alias Api.Infrastructure.Repository.Follow.Postgres.Follow
   alias Api.Infrastructure.Repository.Keyword.Postgres.Keyword
   alias Api.Infrastructure.Repository.Like.Postgres.LikeRepository
@@ -15,6 +16,7 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
 
   @preloads [:book, :passage, :keywords, :user]
   @page_size 20
+  @related_limit 4
 
   def create_post(user, attrs) do
     with %Book{} = book <- BookRepository.get_book(attrs["book_id"]) || {:error, :not_found} do
@@ -69,6 +71,7 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
     |> Repo.all()
     |> Repo.preload(@preloads)
     |> annotate_liked(current_user)
+    |> annotate_bookmarked(current_user)
   end
 
   defp maybe_before(query, before) when is_binary(before) do
@@ -96,12 +99,19 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
     |> Repo.all()
     |> Repo.preload(@preloads)
     |> annotate_liked(user)
+    |> annotate_bookmarked(user)
   end
 
   def get_post(id, current_user \\ nil) do
     case fetch_post(id) do
-      nil -> nil
-      post -> post |> Repo.preload(@preloads) |> annotate_liked_one(current_user)
+      nil ->
+        nil
+
+      post ->
+        post
+        |> Repo.preload(@preloads)
+        |> annotate_liked_one(current_user)
+        |> annotate_bookmarked_one(current_user)
     end
   end
 
@@ -111,6 +121,46 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
       {:ok, uuid} -> Repo.get(Post, uuid)
       :error -> nil
     end
+  end
+
+  @doc """
+  Other posts that share at least one keyword with the post `post_id`, most
+  shared keywords first (ties broken by recency). Returns `{:error,
+  :not_found}` when `post_id` doesn't exist; `{:ok, []}` when the post has
+  no keywords or nothing else shares them.
+  """
+  def related_posts(post_id, current_user \\ nil) do
+    case fetch_post(post_id) do
+      nil ->
+        {:error, :not_found}
+
+      post ->
+        keyword_ids = post |> Repo.preload(:keywords) |> Map.fetch!(:keywords) |> Enum.map(& &1.id)
+
+        posts =
+          post.id
+          |> list_related_posts(keyword_ids)
+          |> Repo.preload(@preloads)
+          |> annotate_liked(current_user)
+          |> annotate_bookmarked(current_user)
+
+        {:ok, posts}
+    end
+  end
+
+  defp list_related_posts(_post_id, []), do: []
+
+  defp list_related_posts(post_id, keyword_ids) do
+    Post
+    |> join(:inner, [p], pk in "post_keywords",
+      on: pk.post_id == p.id and pk.keyword_id in type(^keyword_ids, {:array, Ecto.UUID})
+    )
+    |> where([p], p.id != ^post_id)
+    |> group_by([p], p.id)
+    |> order_by([p, pk], desc: count(pk.keyword_id), desc: max(p.inserted_at))
+    |> limit(^@related_limit)
+    |> select([p], p)
+    |> Repo.all()
   end
 
   defp annotate_liked(posts, nil), do: posts
@@ -125,6 +175,22 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
 
   defp annotate_liked_one(post, user) do
     %{post | liked_by_user: LikeRepository.liked?(user, post.id)}
+  end
+
+  defp annotate_bookmarked(posts, nil), do: posts
+
+  defp annotate_bookmarked(posts, user) do
+    bookmarked_ids = BookmarkRepository.bookmarked_post_ids(user, Enum.map(posts, & &1.id))
+
+    Enum.map(posts, fn post ->
+      %{post | bookmarked_by_user: MapSet.member?(bookmarked_ids, post.id)}
+    end)
+  end
+
+  defp annotate_bookmarked_one(post, nil), do: post
+
+  defp annotate_bookmarked_one(post, user) do
+    %{post | bookmarked_by_user: BookmarkRepository.bookmarked?(user, post.id)}
   end
 
   defp normalize_keyword_names(names) when is_list(names) do

@@ -1,11 +1,13 @@
 defmodule ApiWeb.PostControllerTest do
   use ApiWeb.ConnCase, async: true
+  use Oban.Testing, repo: Api.Repo
 
   import Mox
 
   alias Api.Adapters.Accounts
   alias Api.Adapters.Catalog
   alias Api.Adapters.Posts
+  alias Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker
   alias Api.Usecases.Book.AddBook.AddBookUsecaseDto
   alias Api.Usecases.Post.CreatePost.CreatePostUsecaseDto
   alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
@@ -52,6 +54,7 @@ defmodule ApiWeb.PostControllerTest do
 
       assert %{
                "data" => %{
+                 "id" => post_id,
                  "thinking" => "This changed how I think.",
                  "book" => %{"id" => book_id},
                  "passage" => %{"text" => "A short passage."},
@@ -61,6 +64,18 @@ defmodule ApiWeb.PostControllerTest do
 
       assert book_id == book.id
       assert Enum.sort(keywords) == ["attention", "nature-writing"]
+
+      assert_enqueued(
+        worker: CommunityHealthWorker,
+        args: %{
+          action: "record_action",
+          action_type: "CREATE",
+          resource_type: "post",
+          resource_id: post_id,
+          community_id: "default",
+          event_key: "post:create:#{post_id}"
+        }
+      )
     end
 
     test "rejects an unauthenticated request", %{conn: conn, book: book} do
@@ -253,6 +268,72 @@ defmodule ApiWeb.PostControllerTest do
         |> get(~p"/api/posts/#{id}")
 
       assert %{"data" => %{"id" => ^id, "liked_by_user" => false}} = json_response(conn, 200)
+    end
+  end
+
+  describe "GET /api/posts/:id/related" do
+    defp create_post(user, book, keywords, passage_text) do
+      {:ok, post} =
+        Posts.create_post(%CreatePostUsecaseDto{
+          user: user,
+          attrs:
+            @valid_post_params
+            |> Map.put("book_id", book.id)
+            |> Map.put("keywords", keywords)
+            |> Map.put("passage_text", passage_text)
+        })
+
+      post
+    end
+
+    test "returns posts sharing a keyword, most shared keywords first, excluding itself and unrelated posts",
+         %{conn: conn, user: user, book: book} do
+      target = create_post(user, book, ["attention", "nature-writing"], "Target.")
+      two_shared = create_post(user, book, ["attention", "nature-writing"], "Two shared.")
+      one_shared = create_post(user, book, ["attention"], "One shared.")
+      _unrelated = create_post(user, book, ["unrelated"], "Unrelated.")
+      _no_keywords = create_post(user, book, [], "No keywords.")
+
+      conn = get(conn, ~p"/api/posts/#{target.id}/related")
+
+      assert %{"data" => [%{"id" => first_id}, %{"id" => second_id}]} = json_response(conn, 200)
+      assert first_id == two_shared.id
+      assert second_id == one_shared.id
+    end
+
+    test "returns an empty list for a post with no keywords", %{conn: conn, user: user, book: book} do
+      target = create_post(user, book, [], "No keywords.")
+      _other = create_post(user, book, ["attention"], "Other.")
+
+      conn = get(conn, ~p"/api/posts/#{target.id}/related")
+
+      assert json_response(conn, 200) == %{"data" => []}
+    end
+
+    test "annotates liked_by_user/bookmarked_by_user for an authenticated caller, not for anonymous",
+         %{access_token: token, user: user, book: book} do
+      target = create_post(user, book, ["attention"], "Target.")
+      related = create_post(user, book, ["attention"], "Related.")
+
+      build_conn()
+      |> put_req_header("authorization", "Bearer #{token}")
+      |> post(~p"/api/posts/#{related.id}/likes")
+
+      authed_conn =
+        build_conn()
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> get(~p"/api/posts/#{target.id}/related")
+
+      assert %{"data" => [%{"id" => id, "liked_by_user" => true}]} = json_response(authed_conn, 200)
+      assert id == related.id
+
+      anon_conn = get(build_conn(), ~p"/api/posts/#{target.id}/related")
+      assert %{"data" => [%{"liked_by_user" => false}]} = json_response(anon_conn, 200)
+    end
+
+    test "returns 404 for an unknown post", %{conn: conn} do
+      conn = get(conn, ~p"/api/posts/#{Ecto.UUID.generate()}/related")
+      assert json_response(conn, 404)
     end
   end
 end

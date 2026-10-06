@@ -1,0 +1,12 @@
+{
+  "keywords": {
+    "stats": {
+      "posts": "{count} posts",
+      "books": "{count} books",
+      "readers": "{count} readers"
+    },
+    "related": "Related ideas",
+    "empty": "No posts for this keyword yet.",
+    "notFound": "This keyword doesn't exist yet."
+  }
+}
