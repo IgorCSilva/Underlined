@@ -93,7 +93,7 @@ const { t } = useI18n()
 }
 
 .feed-book-title:hover {
-  text-decoration: underline solid var(--color-highlight) 2px;
+  text-decoration: underline solid var(--color-highlight) 1px;
   text-underline-offset: 3px;
 }
 
@@ -107,7 +107,7 @@ const { t } = useI18n()
   margin: 0 0 8px;
   font-size: 1.05rem;
   line-height: 1.6;
-  text-decoration: underline solid var(--color-highlight) 2px;
+  text-decoration: underline solid var(--color-highlight) 1px;
   text-underline-offset: 6px;
   display: -webkit-box;
   -webkit-line-clamp: 3;

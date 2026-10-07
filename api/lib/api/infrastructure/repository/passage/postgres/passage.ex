@@ -16,6 +16,8 @@ defmodule Api.Infrastructure.Repository.Passage.Postgres.Passage do
 
   schema "passages" do
     field :text, :string
+    # DB column is :text (unbounded) as of the widen_passages_text migration
+    # — the 300-char business limit lives only here, in validate_length.
 
     belongs_to :book, Book
     belongs_to :user, User
@@ -27,7 +29,7 @@ defmodule Api.Infrastructure.Repository.Passage.Postgres.Passage do
     passage
     |> cast(attrs, [:book_id, :user_id, :text])
     |> validate_required([:book_id, :user_id, :text])
-    |> validate_length(:text, min: 1, max: 1000)
+    |> validate_length(:text, min: 1, max: 300)
     |> foreign_key_constraint(:book_id)
     |> foreign_key_constraint(:user_id)
   end

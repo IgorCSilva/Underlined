@@ -145,5 +145,5 @@ a {
 .underlined::first-letter {
   color: var(--color-ink);
   text-decoration: underline solid var(--color-highlight) 3px;
-  text-underline-offset: 6px;
+  text-underline-offset: 4px;
 }

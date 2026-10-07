@@ -94,6 +94,24 @@ defmodule ApiWeb.PostControllerTest do
       assert json_response(conn, 422)
     end
 
+    test "returns a 422, not a 500, for a passage text over the 300-char limit", %{
+      conn: conn,
+      access_token: token,
+      book: book
+    } do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/posts",
+          post:
+            @valid_post_params
+            |> Map.put("book_id", book.id)
+            |> Map.put("passage_text", String.duplicate("a", 301))
+        )
+
+      assert %{"errors" => %{"text" => _}} = json_response(conn, 422)
+    end
+
     test "returns 404 when the book doesn't exist", %{conn: conn, access_token: token} do
       conn =
         conn

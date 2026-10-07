@@ -58,6 +58,7 @@
             v-model="passageText"
             class="passage-input serif"
             rows="2"
+            maxlength="300"
             :placeholder="t('posts.composer.passagePlaceholder')"
             required
             @input="autoGrowPassage"
