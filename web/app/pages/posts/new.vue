@@ -4,7 +4,14 @@
       <h2 class="serif">{{ t('posts.composer.published') }}</h2>
       <p class="status-text">{{ t('posts.composer.liveMessage', { title: published.book.title }) }}</p>
       <div class="success-actions">
-        <NuxtLink :to="`/posts/${published.id}`" class="btn-primary btn-publish">{{ t('posts.composer.viewPost') }}</NuxtLink>
+        <button
+          class="btn-primary btn-publish"
+          type="button"
+          :disabled="navigatingToPost"
+          @click="goToPost"
+        >
+          {{ navigatingToPost ? t('posts.composer.loadingPost') : t('posts.composer.viewPost') }}
+        </button>
         <button class="btn-publish-secondary" type="button" @click="reset">{{ t('posts.composer.writeAnother') }}</button>
       </div>
     </div>
@@ -112,6 +119,7 @@ const keywords = ref<string[]>([])
 const saving = ref(false)
 const error = ref('')
 const published = ref<Post | null>(null)
+const navigatingToPost = ref(false)
 
 const q = ref('')
 const debouncedQ = ref('')
@@ -169,6 +177,12 @@ async function onSubmit() {
   } finally {
     saving.value = false
   }
+}
+
+async function goToPost() {
+  if (!published.value || navigatingToPost.value) return
+  navigatingToPost.value = true
+  await router.push(`/posts/${published.value.id}`)
 }
 
 function reset() {

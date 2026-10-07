@@ -10,6 +10,7 @@
       "published": "Publicado!",
       "liveMessage": "Seu post sobre \"{title}\" está no ar.",
       "viewPost": "Ver post",
+      "loadingPost": "Carregando…",
       "writeAnother": "Escrever outro",
       "pickBookTitle": "Escolha um livro para escrever sobre",
       "passageLabel": "A passagem",

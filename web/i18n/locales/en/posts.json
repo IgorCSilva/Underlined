@@ -10,6 +10,7 @@
       "published": "Published!",
       "liveMessage": "Your post about \"{title}\" is live.",
       "viewPost": "View post",
+      "loadingPost": "Loading…",
       "writeAnother": "Write another",
       "pickBookTitle": "Pick a book to write about",
       "passageLabel": "The passage",
