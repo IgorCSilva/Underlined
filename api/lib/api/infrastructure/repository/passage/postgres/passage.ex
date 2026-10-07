@@ -33,4 +33,12 @@ defmodule Api.Infrastructure.Repository.Passage.Postgres.Passage do
     |> foreign_key_constraint(:book_id)
     |> foreign_key_constraint(:user_id)
   end
+
+  @doc "Editing a passage may only ever change its text — not its book, author, or owning post."
+  def update_changeset(passage, attrs) do
+    passage
+    |> cast(attrs, [:text])
+    |> validate_required([:text])
+    |> validate_length(:text, min: 1, max: 300)
+  end
 end

@@ -1,7 +1,13 @@
 {
   "posts": {
     "detail": {
-      "notFound": "Post não encontrado."
+      "notFound": "Post não encontrado.",
+      "edit": "Editar",
+      "save": "Salvar",
+      "saving": "Salvando…",
+      "cancel": "Cancelar",
+      "passageEditAriaLabel": "Editar a passagem",
+      "thinkingEditAriaLabel": "Editar o que eu penso sobre isso"
     },
     "related": {
       "title": "Ideias relacionadas"

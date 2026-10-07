@@ -51,6 +51,18 @@ export const usePostsStore = defineStore('posts', {
       return res.data
     },
 
+    async updatePost(
+      postId: string,
+      payload: { passage_text: string; thinking: string },
+    ): Promise<Post> {
+      const { request } = useApi()
+      const res = await request<PostResponse>(`/api/posts/${postId}`, {
+        method: 'PUT',
+        body: { post: payload },
+      })
+      return res.data
+    },
+
     async likePost(postId: string): Promise<LikeResult> {
       const { request } = useApi()
       const res = await request<LikeResponse>(`/api/posts/${postId}/likes`, { method: 'POST' })

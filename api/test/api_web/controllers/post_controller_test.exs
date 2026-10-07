@@ -124,6 +124,107 @@ defmodule ApiWeb.PostControllerTest do
     end
   end
 
+  describe "PUT /api/posts/:id" do
+    test "lets the author edit the passage text and thinking", %{
+      conn: conn,
+      access_token: token,
+      book: book
+    } do
+      authed = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      create_conn = post(authed, ~p"/api/posts", post: Map.put(@valid_post_params, "book_id", book.id))
+      %{"data" => %{"id" => post_id}} = json_response(create_conn, 201)
+
+      update_conn =
+        put(authed, ~p"/api/posts/#{post_id}",
+          post: %{"passage_text" => "A fixed passage.", "thinking" => "A fixed thought."}
+        )
+
+      assert %{
+               "data" => %{
+                 "id" => ^post_id,
+                 "thinking" => "A fixed thought.",
+                 "passage" => %{"text" => "A fixed passage."}
+               }
+             } = json_response(update_conn, 200)
+    end
+
+    test "rejects an edit from a user who didn't write the post", %{
+      conn: conn,
+      access_token: token,
+      book: book
+    } do
+      authed = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      create_conn = post(authed, ~p"/api/posts", post: Map.put(@valid_post_params, "book_id", book.id))
+      %{"data" => %{"id" => post_id}} = json_response(create_conn, 201)
+
+      {:ok, other_user} =
+        Accounts.register_user(%RegisterUserUsecaseDto{
+          attrs: %{
+            "email" => "other@example.com",
+            "password" => "supersecret",
+            "name" => "Other Reader"
+          }
+        })
+
+      {:ok, other_token, _refresh_token} =
+        Accounts.create_session(%CreateSessionUsecaseDto{user: other_user, remember_me: false})
+
+      other_conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{other_token}")
+        |> put(~p"/api/posts/#{post_id}",
+          post: %{"passage_text" => "Hijacked.", "thinking" => "Hijacked."}
+        )
+
+      assert json_response(other_conn, 403)
+    end
+
+    test "rejects an unauthenticated request", %{conn: conn, access_token: token, book: book} do
+      authed = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      create_conn = post(authed, ~p"/api/posts", post: Map.put(@valid_post_params, "book_id", book.id))
+      %{"data" => %{"id" => post_id}} = json_response(create_conn, 201)
+
+      conn =
+        put(conn, ~p"/api/posts/#{post_id}",
+          post: %{"passage_text" => "Nope.", "thinking" => "Nope."}
+        )
+
+      assert json_response(conn, 401)
+    end
+
+    test "returns 404 for an unknown post", %{conn: conn, access_token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> put(~p"/api/posts/#{Ecto.UUID.generate()}",
+          post: %{"passage_text" => "Nope.", "thinking" => "Nope."}
+        )
+
+      assert json_response(conn, 404)
+    end
+
+    test "returns a 422 for a passage text over the 300-char limit", %{
+      conn: conn,
+      access_token: token,
+      book: book
+    } do
+      authed = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      create_conn = post(authed, ~p"/api/posts", post: Map.put(@valid_post_params, "book_id", book.id))
+      %{"data" => %{"id" => post_id}} = json_response(create_conn, 201)
+
+      update_conn =
+        put(authed, ~p"/api/posts/#{post_id}",
+          post: %{"passage_text" => String.duplicate("a", 301), "thinking" => "Still fine."}
+        )
+
+      assert %{"errors" => %{"text" => _}} = json_response(update_conn, 422)
+    end
+  end
+
   describe "GET /api/posts" do
     test "lists posts newest first without authentication", %{
       conn: conn,

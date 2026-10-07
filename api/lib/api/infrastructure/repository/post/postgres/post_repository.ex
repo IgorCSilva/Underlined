@@ -58,6 +58,38 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
   end
 
   @doc """
+  Edits a post's thinking and its passage's text. Only the post's author
+  may edit it.
+  """
+  def update_post(user, post_id, attrs) do
+    with {:ok, post} <- fetch_own_post(user, post_id) do
+      post = Repo.preload(post, :passage)
+
+      multi =
+        Ecto.Multi.new()
+        |> Ecto.Multi.update(:post, Post.update_changeset(post, %{"thinking" => attrs["thinking"]}))
+        |> Ecto.Multi.update(
+          :passage,
+          Passage.update_changeset(post.passage, %{"text" => attrs["passage_text"]})
+        )
+
+      case Repo.transaction(multi) do
+        {:ok, %{post: updated_post}} -> {:ok, Repo.preload(updated_post, @preloads, force: true)}
+        {:error, :post, changeset, _changes} -> {:error, changeset}
+        {:error, :passage, changeset, _changes} -> {:error, changeset}
+      end
+    end
+  end
+
+  defp fetch_own_post(user, post_id) do
+    case fetch_post(post_id) do
+      nil -> {:error, :not_found}
+      %Post{user_id: user_id} when user_id != user.id -> {:error, :forbidden}
+      post -> {:ok, post}
+    end
+  end
+
+  @doc """
   Chronological feed, newest first. `before` (an ISO8601 timestamp, usually the
   `inserted_at` of the last post on the previous page) pages backward through
   the feed; invalid/absent cursors just return the first page. `current_user`,

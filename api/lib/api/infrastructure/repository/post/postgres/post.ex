@@ -51,6 +51,14 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.Post do
     |> unique_constraint(:passage_id)
   end
 
+  @doc "Editing a post may only ever change its thinking — not its author, book, passage, or keywords."
+  def update_changeset(post, attrs) do
+    post
+    |> cast(attrs, [:thinking])
+    |> validate_required([:thinking])
+    |> validate_length(:thinking, min: 1, max: 2000)
+  end
+
   defp validate_keyword_names(changeset) do
     validate_change(changeset, :keyword_names, fn :keyword_names, names ->
       if Enum.all?(names, &(String.length(&1) in 1..40)) do
