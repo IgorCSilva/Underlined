@@ -107,6 +107,7 @@ const { t } = useI18n()
   margin: 0 0 8px;
   font-size: 1.05rem;
   line-height: 1.6;
+  white-space: pre-line;
   text-decoration: underline solid var(--color-highlight) 1px;
   text-underline-offset: 6px;
   display: -webkit-box;
@@ -120,6 +121,7 @@ const { t } = useI18n()
   font-style: italic;
   font-size: 0.95rem;
   color: var(--color-ink);
+  white-space: pre-line;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

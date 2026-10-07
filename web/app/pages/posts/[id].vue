@@ -210,6 +210,7 @@ const formattedDate = computed(() => {
   margin: 0;
   font-size: 1.4rem;
   line-height: 1.6;
+  white-space: pre-line;
   text-decoration: underline solid var(--color-highlight) 2px;
   text-underline-offset: 8px;
 }
@@ -227,6 +228,7 @@ const formattedDate = computed(() => {
   margin: 0;
   font-size: 1.1rem;
   line-height: 1.6;
+  white-space: pre-line;
 }
 
 .post-keywords {
