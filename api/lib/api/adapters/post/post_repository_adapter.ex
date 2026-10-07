@@ -63,6 +63,7 @@ defmodule Api.Adapters.Post.PostRepositoryAdapter do
       passage: PassageRepositoryAdapter.to_domain(db_post.passage),
       keywords: Enum.map(db_post.keywords, &KeywordRepositoryAdapter.to_domain/1),
       user: UserRepositoryAdapter.to_domain(db_post.user),
+      spoiler: db_post.spoiler,
       inserted_at: db_post.inserted_at,
       updated_at: db_post.updated_at
     }

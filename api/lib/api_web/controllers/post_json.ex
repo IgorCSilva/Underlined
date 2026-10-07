@@ -8,6 +8,7 @@ defmodule ApiWeb.PostJSON do
     %{
       id: post.id,
       thinking: post.thinking,
+      spoiler: post.spoiler,
       inserted_at: post.inserted_at,
       book: %{
         id: post.book.id,

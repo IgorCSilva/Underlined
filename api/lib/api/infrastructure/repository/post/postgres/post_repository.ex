@@ -38,7 +38,8 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
             "book_id" => book.id,
             "passage_id" => passage.id,
             "thinking" => attrs["thinking"],
-            "keyword_names" => keyword_names
+            "keyword_names" => keyword_names,
+            "spoiler" => attrs["spoiler"] || false
           })
         end)
         |> Ecto.Multi.update(:post_with_keywords, fn %{post: post} ->
@@ -64,10 +65,14 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
   def update_post(user, post_id, attrs) do
     with {:ok, post} <- fetch_own_post(user, post_id) do
       post = Repo.preload(post, :passage)
+      spoiler = if Map.has_key?(attrs, "spoiler"), do: attrs["spoiler"], else: post.spoiler
 
       multi =
         Ecto.Multi.new()
-        |> Ecto.Multi.update(:post, Post.update_changeset(post, %{"thinking" => attrs["thinking"]}))
+        |> Ecto.Multi.update(
+          :post,
+          Post.update_changeset(post, %{"thinking" => attrs["thinking"], "spoiler" => spoiler})
+        )
         |> Ecto.Multi.update(
           :passage,
           Passage.update_changeset(post.passage, %{"text" => attrs["passage_text"]})

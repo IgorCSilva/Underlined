@@ -7,7 +7,9 @@
       "saving": "Salvando…",
       "cancel": "Cancelar",
       "passageEditAriaLabel": "Editar a passagem",
-      "thinkingEditAriaLabel": "Editar o que eu penso sobre isso"
+      "thinkingEditAriaLabel": "Editar o que eu penso sobre isso",
+      "spoilerLabel": "Spoiler",
+      "spoilerHint": "Spoiler — clique para revelar"
     },
     "related": {
       "title": "Ideias relacionadas"
@@ -27,6 +29,7 @@
       "keywordPlaceholder": "Adicione uma palavra-chave…",
       "keywordAriaLabel": "Adicionar palavra-chave",
       "removeKeyword": "Remover palavra-chave {keyword}",
+      "spoilerLabel": "Spoiler",
       "publishing": "Publicando…",
       "publish": "Publicar"
     }

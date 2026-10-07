@@ -7,7 +7,9 @@
       "saving": "Saving…",
       "cancel": "Cancel",
       "passageEditAriaLabel": "Edit the passage",
-      "thinkingEditAriaLabel": "Edit what I think about it"
+      "thinkingEditAriaLabel": "Edit what I think about it",
+      "spoilerLabel": "Spoiler",
+      "spoilerHint": "Spoiler — click to reveal"
     },
     "related": {
       "title": "Related ideas"
@@ -27,6 +29,7 @@
       "keywordPlaceholder": "Add a keyword…",
       "keywordAriaLabel": "Add a keyword",
       "removeKeyword": "Remove keyword {keyword}",
+      "spoilerLabel": "Spoiler",
       "publishing": "Publishing…",
       "publish": "Publish"
     }

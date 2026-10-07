@@ -22,7 +22,13 @@
         <span class="passage-book-title serif">{{ post.book.title }}</span>
         <span class="passage-book-author">{{ post.book.author }}</span>
       </NuxtLink>
-      <p v-if="!editing" class="passage-text serif">{{ post.passage.text }}</p>
+      <p
+        v-if="!editing"
+        class="passage-text serif"
+        :class="{ 'is-spoiler': showSpoilerBlur }"
+      >
+        {{ post.passage.text }}
+      </p>
       <textarea
         v-else
         v-model="editPassage"
@@ -31,10 +37,15 @@
         :aria-label="t('posts.detail.passageEditAriaLabel')"
         :disabled="editPending"
       />
+      <button v-if="showSpoilerBlur" type="button" class="spoiler-reveal-badge" @click="revealed = true">
+        {{ t('posts.detail.spoilerHint') }}
+      </button>
     </div>
 
     <div class="thinking-card">
-      <p v-if="!editing" class="thinking-text serif">{{ post.thinking }}</p>
+      <p v-if="!editing" class="thinking-text serif" :class="{ 'is-spoiler': showSpoilerBlur }">
+        {{ post.thinking }}
+      </p>
       <textarea
         v-else
         v-model="editThinking"
@@ -45,6 +56,16 @@
     </div>
 
     <div v-if="editing" class="post-edit-controls">
+      <button
+        type="button"
+        class="spoiler-toggle"
+        :class="{ 'is-active': editSpoiler }"
+        :aria-pressed="editSpoiler"
+        :disabled="editPending"
+        @click="editSpoiler = !editSpoiler"
+      >
+        {{ t('posts.detail.spoilerLabel') }}
+      </button>
       <button
         type="button"
         class="btn-primary post-edit-save"
@@ -123,9 +144,15 @@ function onCommentAdded() {
 
 const isOwnPost = computed(() => !!post.value && auth.user?.id === post.value.user.id)
 
+// Spoilers are blurred for everyone except the post's own author, who
+// already knows what they wrote.
+const revealed = ref(false)
+const showSpoilerBlur = computed(() => !!post.value?.spoiler && !isOwnPost.value && !revealed.value)
+
 const editing = ref(false)
 const editPassage = ref('')
 const editThinking = ref('')
+const editSpoiler = ref(false)
 const editPending = ref(false)
 const editError = ref('')
 
@@ -133,6 +160,7 @@ function startEdit() {
   if (!post.value) return
   editPassage.value = post.value.passage.text
   editThinking.value = post.value.thinking
+  editSpoiler.value = post.value.spoiler
   editError.value = ''
   editing.value = true
 }
@@ -150,8 +178,12 @@ async function onEditSave() {
   editPending.value = true
   editError.value = ''
   try {
-    const updated = await posts.updatePost(post.value.id, { passage_text: passageText, thinking })
-    post.value = { ...post.value, passage: updated.passage, thinking: updated.thinking }
+    const updated = await posts.updatePost(post.value.id, {
+      passage_text: passageText,
+      thinking,
+      spoiler: editSpoiler.value,
+    })
+    post.value = { ...post.value, passage: updated.passage, thinking: updated.thinking, spoiler: updated.spoiler }
     editing.value = false
   } catch (err) {
     editError.value = extractErrorMessage(err, t)
@@ -252,6 +284,27 @@ const formattedDate = computed(() => {
   margin-bottom: 20px;
 }
 
+.spoiler-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 20px;
+  border: 1.5px solid #e74823;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: #e74823;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.spoiler-toggle.is-active {
+  background: #e74823;
+  color: #ffffff;
+}
+
 .post-edit-save {
   width: auto;
   padding: 10px 24px;
@@ -293,6 +346,7 @@ const formattedDate = computed(() => {
 }
 
 .passage-hero {
+  position: relative;
   display: flex;
   gap: 24px;
   align-items: flex-start;
@@ -300,6 +354,30 @@ const formattedDate = computed(() => {
   border-radius: var(--radius-card);
   padding: 32px;
   margin-bottom: 20px;
+}
+
+.is-spoiler {
+  filter: blur(8px);
+  user-select: none;
+}
+
+.spoiler-reveal-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 8px 18px;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(34, 37, 43, 0.12);
+  white-space: nowrap;
+  z-index: 1;
 }
 
 .passage-book {

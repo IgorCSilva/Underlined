@@ -88,6 +88,16 @@
           <KeywordChipInput v-model="keywords" />
         </div>
 
+        <button
+          type="button"
+          class="spoiler-toggle"
+          :class="{ 'is-active': spoiler }"
+          :aria-pressed="spoiler"
+          @click="spoiler = !spoiler"
+        >
+          {{ t('posts.composer.spoilerLabel') }}
+        </button>
+
         <p v-if="error" class="form-error">{{ error }}</p>
 
         <div class="composer-footer">
@@ -116,6 +126,7 @@ const passageInput = ref<HTMLTextAreaElement | null>(null)
 const passageText = ref('')
 const thinking = ref('')
 const keywords = ref<string[]>([])
+const spoiler = ref(false)
 const saving = ref(false)
 const error = ref('')
 const published = ref<Post | null>(null)
@@ -171,6 +182,7 @@ async function onSubmit() {
       passage_text: passageText.value,
       thinking: thinking.value,
       keywords: keywords.value,
+      spoiler: spoiler.value,
     })
   } catch (err) {
     error.value = extractErrorMessage(err, t)
@@ -190,6 +202,7 @@ function reset() {
   passageText.value = ''
   thinking.value = ''
   keywords.value = []
+  spoiler.value = false
   router.replace({ query: {} })
 }
 </script>
@@ -337,6 +350,28 @@ function reset() {
   overflow: hidden;
   text-decoration: underline solid var(--color-highlight) 2px;
   text-underline-offset: 6px;
+}
+
+.spoiler-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  padding: 8px 20px;
+  border: 1.5px solid #e74823;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: #e74823;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.spoiler-toggle.is-active {
+  background: #e74823;
+  color: #ffffff;
 }
 
 .composer-footer {

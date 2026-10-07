@@ -122,6 +122,26 @@ defmodule ApiWeb.PostControllerTest do
 
       assert json_response(conn, 404)
     end
+
+    test "defaults spoiler to false when not given", %{conn: conn, access_token: token, book: book} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/posts", post: Map.put(@valid_post_params, "book_id", book.id))
+
+      assert %{"data" => %{"spoiler" => false}} = json_response(conn, 201)
+    end
+
+    test "marks a post as a spoiler when requested", %{conn: conn, access_token: token, book: book} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/posts",
+          post: @valid_post_params |> Map.put("book_id", book.id) |> Map.put("spoiler", true)
+        )
+
+      assert %{"data" => %{"spoiler" => true}} = json_response(conn, 201)
+    end
   end
 
   describe "PUT /api/posts/:id" do
@@ -147,6 +167,46 @@ defmodule ApiWeb.PostControllerTest do
                  "passage" => %{"text" => "A fixed passage."}
                }
              } = json_response(update_conn, 200)
+    end
+
+    test "lets the author toggle the spoiler flag", %{conn: conn, access_token: token, book: book} do
+      authed = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      create_conn = post(authed, ~p"/api/posts", post: Map.put(@valid_post_params, "book_id", book.id))
+      %{"data" => %{"id" => post_id, "spoiler" => false}} = json_response(create_conn, 201)
+
+      update_conn =
+        put(authed, ~p"/api/posts/#{post_id}",
+          post: %{
+            "passage_text" => "A short passage.",
+            "thinking" => "This changed how I think.",
+            "spoiler" => true
+          }
+        )
+
+      assert %{"data" => %{"spoiler" => true}} = json_response(update_conn, 200)
+    end
+
+    test "keeps the existing spoiler flag when the edit omits it", %{
+      conn: conn,
+      access_token: token,
+      book: book
+    } do
+      authed = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      create_conn =
+        post(authed, ~p"/api/posts",
+          post: @valid_post_params |> Map.put("book_id", book.id) |> Map.put("spoiler", true)
+        )
+
+      %{"data" => %{"id" => post_id}} = json_response(create_conn, 201)
+
+      update_conn =
+        put(authed, ~p"/api/posts/#{post_id}",
+          post: %{"passage_text" => "A fixed passage.", "thinking" => "A fixed thought."}
+        )
+
+      assert %{"data" => %{"spoiler" => true}} = json_response(update_conn, 200)
     end
 
     test "rejects an edit from a user who didn't write the post", %{
