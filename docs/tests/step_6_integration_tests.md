@@ -32,6 +32,12 @@ For raw setup commands (starting stacks, registering the platform), see
 
 ## Before you start
 
+- **Start from empty databases.** This file assumes both Underlined's and
+  HealthyCommunity's databases are empty before Test 1 (then builds up a post and
+  rules, per the next few bullets). If you're re-running this file, empty both first
+  with the two snippets from
+  [Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty)
+  — the same snippets this file's [Cleanup](#cleanup) section ends with.
 - Both repos checked out: `Underlined` and `HealthyCommunity`.
 - You have one **enabled** user to log in with (see
   [Step 1's doc](step_1_plus_integration_tests.md#finding-a-users-id-and-why-signing-up-isnt-enough-to-log-in)).
@@ -40,10 +46,17 @@ For raw setup commands (starting stacks, registering the platform), see
 - For the Report tests, a community needs at least one active rule (see
   [Step 4's doc](step_4_plus_integration_tests.md#before-you-start) for the
   `mix community_health.add_rule` commands) if not already provisioned.
-- All DB verification below uses `docker compose exec api iex -S mix` (Underlined) and
-  `docker compose exec app iex -S mix` (HealthyCommunity) — never `psql` — with:
+- All DB verification below uses **two separate shells** — never `psql` — since a
+  comment's id is never shown in the UI and has to be looked up in Underlined's own
+  database before it's used to query HealthyCommunity's:
   ```elixir
-  # HealthyCommunity
+  # Underlined: docker compose exec api iex -S mix
+  alias Api.Repo
+  alias Api.Infrastructure.Repository.Comment.Postgres.Comment
+  import Ecto.Query
+  ```
+  ```elixir
+  # HealthyCommunity: docker compose exec app iex -S mix
   alias CommunityHealth.Repo
   alias CommunityHealth.Actions.CommunityAction
   alias CommunityHealth.Reports.Report
@@ -71,21 +84,30 @@ For raw setup commands (starting stacks, registering the platform), see
   integration fully removed. No loading delay, no error.
 
 **Backend verification**
-```elixir
-post_id = "<the post id>"
+1. The comment's id is never shown in the UI, so look it up in Underlined's own
+   database first — it's the most recently created comment on the post (in the
+   **Underlined** shell):
+   ```elixir
+   post_id = "<the post id from the URL>"
+   comment = Repo.one(from c in Comment, where: c.post_id == ^post_id, order_by: [desc: c.inserted_at], limit: 1)
+   comment.id
+   ```
+2. Use that id to find the recorded action (in the **HealthyCommunity** shell):
+   ```elixir
+   comment_id = "<comment.id from step 1>"
 
-action =
-  Repo.one(
-    from a in CommunityAction,
-      join: r in assoc(a, :resource),
-      where: a.action_type == "COMMENT" and r.external_ref == ^"<the comment id>",
-      order_by: [desc: a.inserted_at],
-      limit: 1
-  )
+   action =
+     Repo.one(
+       from a in CommunityAction,
+         join: r in assoc(a, :resource),
+         where: a.action_type == "COMMENT" and r.external_ref == ^comment_id,
+         order_by: [desc: a.inserted_at],
+         limit: 1
+     )
 
-action.action_type  # => "COMMENT"
-action.context      # => %{"parent_type" => "comment"}
-```
+   action.action_type  # => "COMMENT"
+   action.context      # => %{"parent_type" => "comment"}
+   ```
 
 **Pass criteria:** the comment UI is unaffected AND, within a few seconds (processed by
 an Oban job after the HTTP response), exactly one new `community_actions` row with
@@ -105,17 +127,27 @@ comment.
 - The reply appears nested under its parent, as usual.
 
 **Backend verification**
-```elixir
-action =
-  Repo.one(
-    from a in CommunityAction,
-      join: r in assoc(a, :resource),
-      where: a.action_type == "COMMENT" and r.external_ref == ^"<the reply's comment id>",
-      limit: 1
-  )
+1. Same lookup as Test 1 — the reply is itself just a new row in Underlined's
+   `comments` table, now the most recent one for the post (in the **Underlined**
+   shell):
+   ```elixir
+   reply = Repo.one(from c in Comment, where: c.post_id == ^post_id, order_by: [desc: c.inserted_at], limit: 1)
+   reply.id
+   ```
+2. In the **HealthyCommunity** shell:
+   ```elixir
+   reply_id = "<reply.id from step 1>"
 
-action.context  # => %{"parent_type" => "reply"}
-```
+   action =
+     Repo.one(
+       from a in CommunityAction,
+         join: r in assoc(a, :resource),
+         where: a.action_type == "COMMENT" and r.external_ref == ^reply_id,
+         limit: 1
+     )
+
+   action.context  # => %{"parent_type" => "reply"}
+   ```
 
 **Pass criteria:** the reply gets its own `community_actions` row, with its own
 `event_key` (`comment:create:<reply_id>`, distinct from the parent's), and
@@ -285,3 +317,13 @@ If every row's "UI must look like" column holds, Step 6's Community Health integ
 is safe to run in production with `COMMUNITY_HEALTH_ENABLED=false` while HealthyCommunity
 itself stays local/undeployed — the same posture every earlier step established, now
 proven for comments and replies as well.
+
+---
+
+## Cleanup
+
+Run both truncate snippets from
+[Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty).
+That leaves Underlined's and HealthyCommunity's databases empty — schema and containers
+untouched, zero rows — so [Step 7's tests](step_7_integration_tests.md) can start from
+the same clean slate this file assumed at the top.

@@ -1,6 +1,6 @@
 <template>
   <CommunityHealthGate :available="available" class="contribution-level">
-    <span class="seedlings">{{ seedlings }}</span>
+    <span class="seedlings">{{ available ? seedlings : '🌱' }}</span>
     <span v-if="trustLevel" class="trust-label">{{ t(`profile.trustLevels.${trustLevel}`) }}</span>
   </CommunityHealthGate>
 </template>

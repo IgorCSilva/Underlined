@@ -20,6 +20,16 @@ export function useApi() {
   const nuxtApp = useNuxtApp()
 
   async function request<T>(path: string, opts: Record<string, any> = {}, retried = false): Promise<T> {
+    // Waits for the one shared session restore before this request's first
+    // attempt, rather than firing blind with whatever accessToken happens
+    // to be in memory yet (e.g. right after a fresh page load, before the
+    // refresh-cookie exchange has resolved) and recovering via its own
+    // independent 401 retry below. Without this, two components mounting
+    // at once could each race their own uncoordinated refresh: the second
+    // one's failure would call clearSession() and wipe out the session the
+    // first one just correctly established, even though nothing was wrong.
+    if (!auth.initialized) await auth.ensureInitialized()
+
     const headers: Record<string, string> = {
       'Accept-Language': nuxtApp.$i18n.locale.value,
       ...(opts.headers || {}),

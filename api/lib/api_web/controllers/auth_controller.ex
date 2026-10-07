@@ -85,9 +85,16 @@ defmodule ApiWeb.AuthController do
       |> put_refresh_cookie(refresh_token, remember_me?)
       |> render(:session, user: user, access_token: access_token)
     else
+      # Deliberately does NOT delete the cookie here: the refresh token is
+      # rotated on every successful call, so two refresh requests racing on
+      # the same (about-to-be-rotated) cookie value is expected under normal
+      # use (e.g. several components independently reacting to an expired
+      # access token). The loser must not be able to delete a cookie the
+      # winner just legitimately set — that would log the user out of a
+      # perfectly valid session. Only an explicit logout deletes the cookie;
+      # a genuinely dead cookie here just keeps failing harmlessly.
       _ ->
         conn
-        |> delete_refresh_cookie()
         |> put_status(:unauthorized)
         |> json(%{
           errors: %{detail: gettext("invalid or expired session"), code: "invalid_session"}

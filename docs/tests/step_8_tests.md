@@ -9,6 +9,12 @@ Underlined's own UI (`http://localhost:3000`) and API (`http://localhost:4000`).
 
 ## Before you start
 
+- **Start from an empty database.** This file assumes Underlined's database is empty
+  before Test 1 (then builds up a post to bookmark, per the next few bullets). If
+  you're re-running this file, empty it first with the Underlined snippet from
+  [Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty)
+  (skip the HealthyCommunity one — this step doesn't touch it), the same snippet this
+  file's [Cleanup](#cleanup) section ends with.
 - Underlined's stack is up: `docker compose up -d` (HealthyCommunity is irrelevant here
   — don't bother starting it).
 - You have one **enabled** user to log in with, since bookmarking requires
@@ -267,3 +273,14 @@ If every row holds, Step 8's save/bookmark feature is safe end-to-end: writes ar
 gated, bookmarking is idempotent, the Saved page is a live, per-user, feed-identical
 view of the `bookmarks` table — and since this step has no Community Health pairing,
 none of that behavior changes whether CH is running, disabled, or absent.
+
+---
+
+## Cleanup
+
+Run the Underlined snippet from
+[Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty)
+(HealthyCommunity isn't touched by this step, so there's nothing to reset there). That
+leaves Underlined's database empty — schema and containers untouched, zero rows — so
+[Step 9's tests](step_9_tests.md) can start from the same clean slate this file assumed
+at the top.

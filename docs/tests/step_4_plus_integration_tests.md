@@ -29,6 +29,12 @@ For raw setup commands (starting stacks, registering the platform), see
 
 ## Before you start
 
+- **Start from empty databases.** This file assumes both Underlined's and
+  HealthyCommunity's databases are empty before Test 1 (then builds up a post and
+  rules to report against, per the next few bullets). If you're re-running this file,
+  empty both first with the two snippets from
+  [Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty)
+  — the same snippets this file's [Cleanup](#cleanup) section ends with.
 - Both repos checked out: `Underlined` and `HealthyCommunity`.
 - You have one **enabled** user to log in with (see
   [Step 1's doc](step_1_plus_integration_tests.md#finding-a-users-id-and-why-signing-up-isnt-enough-to-log-in)).
@@ -105,7 +111,7 @@ report records a flag, not a moderation decision).
 **Backend verification**
 ```elixir
 Repo.aggregate(
-  from(r in Report, where: r.reporter_external_id == ^"<the user's id>"),
+  from(r in Report, where: r.reporter_external_id == ^"244c5127-8801-44fc-8c71-e4c596ac5af3"),
   :count
 )
 # => 1
@@ -225,11 +231,12 @@ alias Api.Adapters.Posts
 alias Api.Usecases.Report.CreateReport.CreateReportUsecaseDto
 
 Posts.create_report(%CreateReportUsecaseDto{
-  user: %{id: "<any user id>"},
+  user: %{id: "244c5127-8801-44fc-8c71-e4c596ac5af3"},
   attrs: %{
     "resource_type" => "post",
-    "resource_id" => "<any post id>",
-    "reason" => "NOT_A_REAL_RULE_CODE"
+    "resource_id" => "9107d87a-4c73-448f-bee2-ec325b45e824",
+    "reason" => "NOT_A_REAL_RULE_CODE",
+    "description" => "some description"
   }
 })
 ```
@@ -304,3 +311,13 @@ integration is safe to run in production with `COMMUNITY_HEALTH_ENABLED=false` w
 HealthyCommunity itself stays local/undeployed — the Report control simply greys out,
 exactly as designed, and the rest of the feed/post-detail experience is completely
 unaffected.
+
+---
+
+## Cleanup
+
+Run both truncate snippets from
+[Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty).
+That leaves Underlined's and HealthyCommunity's databases empty — schema and containers
+untouched, zero rows — so [Step 5's tests](step_5_integration_tests.md) can start from
+the same clean slate this file assumed at the top.

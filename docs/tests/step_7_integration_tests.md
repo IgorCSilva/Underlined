@@ -31,6 +31,12 @@ For raw setup commands (starting stacks, registering the platform), see
 
 ## Before you start
 
+- **Start from empty databases.** This file assumes both Underlined's and
+  HealthyCommunity's databases are empty before Test 1 (then builds up the two users
+  it needs, per the next bullet). If you're re-running this file, empty both first
+  with the two snippets from
+  [Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty)
+  — the same snippets this file's [Cleanup](#cleanup) section ends with.
 - Both repos checked out: `Underlined` and `HealthyCommunity`.
 - You have two **enabled** users to log in with (see
   [Step 1's doc](step_1_plus_integration_tests.md#finding-a-users-id-and-why-signing-up-isnt-enough-to-log-in)) —
@@ -276,3 +282,13 @@ is safe to run in production with `COMMUNITY_HEALTH_ENABLED=false` while Healthy
 itself stays local/undeployed — the same posture every earlier step established, now
 proven for follows as well, and the lowest-priority retrofit of the seven is caught up
 with the rest.
+
+---
+
+## Cleanup
+
+Run both truncate snippets from
+[Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty).
+That leaves Underlined's and HealthyCommunity's databases empty — schema and containers
+untouched, zero rows — so [Step 8's tests](step_8_tests.md) can start from the same
+clean slate this file assumed at the top.

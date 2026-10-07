@@ -1,6 +1,8 @@
 <template>
   <span class="ch-gate" :class="{ 'is-unavailable': !available }" :title="!available ? t('communityHealth.unavailable') : undefined">
-    <slot />
+    <span class="ch-gate-content">
+      <slot />
+    </span>
   </span>
 </template>
 
@@ -17,7 +19,14 @@ const { t } = useI18n()
 .ch-gate.is-unavailable {
   opacity: 0.4;
   filter: grayscale(1);
-  pointer-events: none;
   cursor: not-allowed;
+}
+
+/* pointer-events: none goes on the inner wrapper, not the outer span: the
+   outer span carries `title` for the hover tooltip, and an element with
+   pointer-events: none never registers :hover — put it there and the
+   tooltip can never show. */
+.ch-gate.is-unavailable .ch-gate-content {
+  pointer-events: none;
 }
 </style>

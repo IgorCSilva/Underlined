@@ -83,6 +83,7 @@ const emptyMessage = computed(() =>
 // merge in the corrected like state (without disturbing any pages already
 // appended via "Load more", which already fetch authenticated).
 onMounted(async () => {
+  await auth.ensureInitialized()
   if (!auth.accessToken || !forYou.posts.length) return
   const fresh = await request<{ data: Post[] }>('/api/posts')
   const byId = new Map(fresh.data.map((post) => [post.id, post]))

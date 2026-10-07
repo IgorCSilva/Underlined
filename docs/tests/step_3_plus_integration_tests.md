@@ -20,6 +20,12 @@ For raw setup commands (starting stacks, registering the platform), see
 
 ## Before you start
 
+- **Start from empty databases.** This file assumes both Underlined's and
+  HealthyCommunity's databases are empty before Test 1 (then builds up a book/user to
+  post with, per the next two bullets). If you're re-running this file, empty both
+  first with the two snippets from
+  [Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty)
+  — the same snippets this file's [Cleanup](#cleanup) section ends with.
 - Both repos checked out: `Underlined` and `HealthyCommunity`.
 - You have one **enabled** user to log in with (see
   [Step 1's doc](step_1_plus_integration_tests.md#finding-a-users-id-and-why-signing-up-isnt-enough-to-log-in)
@@ -82,7 +88,8 @@ For raw setup commands (starting stacks, registering the platform), see
    ```elixir
    post_id = "<the same post id>"
 
-   action = Repo.one(from a in CommunityAction, where: a.event_key == "post:create:#{post_id}")
+   event_key = "post:create:#{post_id}"
+   action = Repo.one(from a in CommunityAction, where: a.event_key == ^event_key)
    action.action_type        # => "CREATE"
    action.actor_external_id  # => the post's user_id from step 1
 
@@ -243,7 +250,8 @@ Covers posts published before the integration existed/was enabled.
    ```
 2. For each id, confirm an action now exists in HealthyCommunity:
    ```elixir
-   Repo.exists?(from a in CommunityAction, where: a.event_key == "post:create:<id>")
+   event_key = "post:create:<id>"
+   Repo.exists?(from a in CommunityAction, where: a.event_key == ^event_key)
    ```
 
 **Pass criteria:** every pre-existing post now has a `CREATE` action after the backfill
@@ -257,7 +265,8 @@ runs, without touching the Underlined UI at all.
 **Backend verification**
 ```elixir
 # Pick any post id from Test 6 and confirm there's still exactly one row for it
-Repo.aggregate(from(a in CommunityAction, where: a.event_key == "post:create:<id>"), :count)
+event_key = "post:create:<id>"
+Repo.aggregate(from(a in CommunityAction, where: a.event_key == ^event_key), :count)
 # => 1
 ```
 **Pass criteria:** the count stays **1** — `event_key` is the idempotency contract, so
@@ -304,3 +313,13 @@ If every row's "UI must look like" column holds, Step 3's Community Health integ
 is safe to run in production with `COMMUNITY_HEALTH_ENABLED=false` while HealthyCommunity
 itself stays local/undeployed — the same posture [Step 1's doc](step_1_plus_integration_tests.md)
 established, now proven for posts as well as accounts.
+
+---
+
+## Cleanup
+
+Run both truncate snippets from
+[Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty).
+That leaves Underlined's and HealthyCommunity's databases empty — schema and containers
+untouched, zero rows — so [Step 4's tests](step_4_plus_integration_tests.md) can start
+from the same clean slate this file assumed at the top.
