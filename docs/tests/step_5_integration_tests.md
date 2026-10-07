@@ -27,6 +27,12 @@ For raw setup commands (starting stacks, registering the platform), see
 
 ## Before you start
 
+- **Start from empty databases.** This file assumes both Underlined's and
+  HealthyCommunity's databases are empty before Test 1 (then builds up a post to like,
+  per the next bullet). If you're re-running this file, empty both first with the two
+  snippets from
+  [Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty)
+  — the same snippets this file's [Cleanup](#cleanup) section ends with.
 - Both repos checked out: `Underlined` and `HealthyCommunity`.
 - You have one **enabled** user to log in with (see
   [Step 1's doc](step_1_plus_integration_tests.md#finding-a-users-id-and-why-signing-up-isnt-enough-to-log-in)).
@@ -278,3 +284,13 @@ If every row's "UI must look like" column holds, Step 5's Community Health integ
 is safe to run in production with `COMMUNITY_HEALTH_ENABLED=false` while HealthyCommunity
 itself stays local/undeployed — the same posture Steps 1 and 3 established, now proven
 for likes as well.
+
+---
+
+## Cleanup
+
+Run both truncate snippets from
+[Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty).
+That leaves Underlined's and HealthyCommunity's databases empty — schema and containers
+untouched, zero rows — so [Step 6's tests](step_6_integration_tests.md) can start from
+the same clean slate this file assumed at the top.

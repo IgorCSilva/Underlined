@@ -21,6 +21,12 @@ For raw setup commands (starting stacks, registering the platform), see
 
 ## Before you start
 
+- **Start from empty databases.** This file assumes both Underlined's and
+  HealthyCommunity's databases are empty before Test 1 (then builds up everything it
+  needs — platform, reputation rules, posts, users — per the bullets below). If you're
+  re-running this file, empty both first with the two snippets from
+  [Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty)
+  — the same snippets this file's [Cleanup](#cleanup) section ends with.
 - Both repos checked out: `Underlined` and `HealthyCommunity`.
 - Start HealthyCommunity: `cd HealthyCommunity && docker compose up -d postgres app`.
 - Register the platform once and copy the printed API key (skip if already registered
@@ -66,7 +72,7 @@ For raw setup commands (starting stacks, registering the platform), see
 
 **Backend verification**
 ```
-curl -s http://localhost:4000/api/users/<your id>/community_health | python3 -m json.tool
+curl -s http://localhost:4000/api/users/244c5127-8801-44fc-8c71-e4c596ac5af3/community_health | python3 -m json.tool
 ```
 Expect `community_health_available: true` and `reputation_level` > 0 once at least one
 `CREATE` action has landed. Cross-check the raw score directly against CH:
@@ -237,3 +243,13 @@ interest profile and can discover people who think about the same ideas they do,
 — for the first time since Step 7 — a real Community Health signal (contribution
 level, trust level) is visible on the profile page, gracefully degrading whenever CH
 itself is disabled, slow, or down.
+
+---
+
+## Cleanup
+
+Run both truncate snippets from
+[Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty).
+That leaves Underlined's and HealthyCommunity's databases empty — schema and containers
+untouched, zero rows — ready for the next round of testing (or back to
+[Step 1](step_1_plus_integration_tests.md#before-you-start) for a full re-run).

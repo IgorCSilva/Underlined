@@ -15,11 +15,54 @@ see [integration.md](integration.md) — this file assumes those work and focuse
 
 ## Before you start
 
+- **Start from empty databases.** This file assumes both Underlined's and
+  HealthyCommunity's databases are empty before Test 1 — a fresh dev environment
+  already satisfies that. If you're re-running this file (or picking it up after other
+  testing), empty both first using
+  ["Resetting both databases to empty"](#resetting-both-databases-to-empty) below —
+  the same two snippets this file's [Cleanup](#cleanup) section ends with.
 - Both repos checked out: `Underlined` and `HealthyCommunity`.
 - You can bring up Underlined's stack (`docker compose up -d`) and, separately,
   HealthyCommunity's `postgres` + `app` services.
 - Underlined's `web` is reachable at `http://localhost:3000`, `api` at
   `http://localhost:4000`.
+
+### Resetting both databases to empty
+
+Truncates every application table (everything except `schema_migrations`) without
+dropping/recreating the database or restarting any container — only the rows are gone,
+schema and running services stay untouched. Every later test file's Setup/Cleanup
+sections link back here instead of repeating this.
+
+**Underlined** — `docker compose exec api iex -S mix`:
+```elixir
+alias Api.Repo
+
+{:ok, %{rows: rows}} =
+  Ecto.Adapters.SQL.query(Repo, "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename != 'schema_migrations'")
+
+tables = List.flatten(rows)
+Ecto.Adapters.SQL.query!(Repo, "TRUNCATE TABLE #{Enum.join(tables, ", ")} RESTART IDENTITY CASCADE")
+```
+
+**HealthyCommunity** — `docker compose exec app iex -S mix`:
+```elixir
+alias CommunityHealth.Repo
+
+{:ok, %{rows: rows}} =
+  Ecto.Adapters.SQL.query(Repo, "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename != 'schema_migrations'")
+
+tables = List.flatten(rows)
+Ecto.Adapters.SQL.query!(Repo, "TRUNCATE TABLE #{Enum.join(tables, ", ")} RESTART IDENTITY CASCADE")
+```
+
+Running the HealthyCommunity snippet also wipes `platforms`/`api_keys` — the platform
+registration from
+["Finding a user's id" below](#finding-a-users-id-and-why-signing-up-isnt-enough-to-log-in)
+and from every test's own Setup step doesn't survive it. That's expected: each test's
+Setup already re-registers the platform and restarts Underlined with the freshly
+printed key, so nothing extra is needed — just know the key changes every time you
+truncate.
 
 ### Finding a user's id, and why signing up isn't enough to log in
 
@@ -91,7 +134,7 @@ read it off the token, but the query above works even for users who never logged
    alias Api.Infrastructure.Repository.User.Postgres.User
    import Ecto.Query
 
-   user = Repo.one(from u in User, where: u.email == "<the email you just signed up with>")
+   user = Repo.one(from u in User, where: u.email == "igor.carneiro.silva13@gmail.com")
    user.id
    ```
 2. Open a separate iex shell inside HealthyCommunity's `app` container and check for a
@@ -515,3 +558,13 @@ membership rows) exist for the shared name — nothing in either system conflate
 If every row's "UI must look like" column holds, Step 1's Community Health integration
 is safe to run in production with `COMMUNITY_HEALTH_ENABLED=false` while HealthyCommunity
 itself stays local/undeployed — which is exactly the posture this is meant to prove.
+
+---
+
+## Cleanup
+
+Run both truncate snippets from
+["Resetting both databases to empty"](#resetting-both-databases-to-empty) above. That
+leaves Underlined's and HealthyCommunity's databases empty — schema and containers
+untouched, zero rows — so [Step 2's tests](step_2_tests.md) can start from the same
+clean slate this file assumed at the top.

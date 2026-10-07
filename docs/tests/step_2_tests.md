@@ -9,6 +9,12 @@ scoped entirely to Underlined's own UI (`http://localhost:3000`) and API
 
 ## Before you start
 
+- **Start from an empty database.** This file assumes the catalog is empty before
+  Test 1 (see the note below) — a fresh dev environment already satisfies that. If
+  you're re-running this file, empty it first with the Underlined snippet from
+  [Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty)
+  (skip the HealthyCommunity one — this step doesn't touch it), the same snippet this
+  file's [Cleanup](#cleanup) section ends with.
 - Underlined's stack is up: `docker compose up -d` (HealthyCommunity is irrelevant here —
   don't bother starting it).
 - You have one **enabled** (not just signed-up) user to log in with, since adding a book
@@ -470,3 +476,14 @@ Test 17.
 If every row holds, Step 2's catalog is safe end-to-end: reads are public, writes are
 gated, validation is enforced on the server (not just the browser), and duplicate/edge
 input is handled predictably rather than crashing or silently corrupting data.
+
+---
+
+## Cleanup
+
+Run the Underlined snippet from
+[Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty)
+(HealthyCommunity isn't touched by this step, so there's nothing to reset there). That
+leaves Underlined's database empty — schema and containers untouched, zero rows — so
+[Step 3's tests](step_3_plus_integration_tests.md) can start from the same clean slate
+this file assumed at the top.

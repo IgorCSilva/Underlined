@@ -10,6 +10,12 @@ scoped entirely to Underlined's own UI (`http://localhost:3000`) and API
 
 ## Before you start
 
+- **Start from an empty database.** This file assumes Underlined's database is empty
+  before Test 1 (then builds up posts with overlapping keywords, per the next bullet).
+  If you're re-running this file, empty it first with the Underlined snippet from
+  [Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty)
+  (skip the HealthyCommunity one — this step doesn't touch it), the same snippet this
+  file's [Cleanup](#cleanup) section ends with.
 - Underlined's stack is up: `docker compose up -d` (HealthyCommunity is irrelevant
   here — don't bother starting it).
 - You need at least one enabled user and a few posts with overlapping keywords. Sign
@@ -143,3 +149,14 @@ If every row holds, Step 11 gives every post a working, accurate "discover adjac
 ideas" module driven purely by keyword overlap — and since this step has no Community
 Health pairing, none of that behavior changes whether CH is running, disabled, or
 absent.
+
+---
+
+## Cleanup
+
+Run the Underlined snippet from
+[Step 1's "Resetting both databases to empty"](step_1_plus_integration_tests.md#resetting-both-databases-to-empty)
+(HealthyCommunity isn't touched by this step, so there's nothing to reset there). That
+leaves Underlined's database empty — schema and containers untouched, zero rows — so
+[Step 12's tests](step_12_tests.md) can start from the same clean slate this file
+assumed at the top.

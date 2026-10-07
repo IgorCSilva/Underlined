@@ -64,8 +64,17 @@ const { data: relatedPosts } = await useApiFetch<Post[]>(`/api/posts/${route.par
 // SSR always renders anonymous (no access token is available server-side),
 // so a logged-in viewer's own like never shows up in the hydrated payload.
 // Once the client is ready, re-fetch with the auth header to correct it.
+//
+// Must wait for the session restore first: `onMounted` fires well before
+// the auth plugin's `ensureInitialized()` (deferred to `onNuxtReady`), so
+// checking `auth.accessToken` immediately here almost always sees it still
+// null and skips the re-fetch — leaving `liked_by_user` stuck at the
+// anonymous `false` for the rest of the page's life, even though the user
+// really has liked the post (the next like-button click then wrongly tries
+// to "like" an already-liked post instead of unliking it).
 const auth = useAuthStore()
 onMounted(async () => {
+  await auth.ensureInitialized()
   if (!auth.accessToken || !post.value) return
   const { request } = useApi()
   const fresh = await request<{ data: Post }>(`/api/posts/${route.params.id}`)

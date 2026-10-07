@@ -76,6 +76,7 @@ const state = reactive({
 // header and correct it (without disturbing any pages already appended via
 // "Load more", which already fetch authenticated).
 onMounted(async () => {
+  await auth.ensureInitialized()
   if (!auth.accessToken || !page.value) return
   const { request } = useApi()
   const fresh = await request<{ data: KeywordPage }>(apiPath.value)

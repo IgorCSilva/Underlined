@@ -23,6 +23,7 @@ const { data: user, pending } = await useApiFetch<ProfileUser>(`/api/users/${rou
 // post-hydration reconciliation of liked_by_user.
 const auth = useAuthStore()
 onMounted(async () => {
+  await auth.ensureInitialized()
   if (!auth.accessToken || !user.value) return
   const { request } = useApi()
   const fresh = await request<{ data: ProfileUser }>(`/api/users/${route.params.id}`)

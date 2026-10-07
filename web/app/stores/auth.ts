@@ -15,14 +15,24 @@ interface UserResponse {
   data: AuthUser
 }
 
-// Dedupes concurrent ensureInitialized() callers (the client auth plugin and
-// any route middleware that lands before it resolves) so they share a single
-// /api/auth/refresh call instead of racing — the backend rotates the refresh
-// token on each call, so a second concurrent call would fail and wrongly
-// clear a session the first call just established. Keyed by store instance
-// (via WeakMap) rather than a plain module variable so each fresh Pinia
-// instance (e.g. one per test) starts with no cached promise.
-const initPromises = new WeakMap<object, Promise<void>>()
+// Dedupes concurrent refresh() callers (the client auth plugin, route
+// middleware, and useApi()'s 401 retry can all land at once — e.g. a page
+// firing several authenticated requests whose access token expires
+// together) so they share a single /api/auth/refresh call instead of
+// racing. The backend rotates the refresh token on each call, so a second
+// concurrent call would read the now-stale cookie value, fail, and wrongly
+// clear the session the first call just established — even though that
+// first call succeeded.
+//
+// Plain module-level variables rather than a WeakMap keyed by store
+// instance: in Nuxt dev mode, `useAuthStore()` has been observed to hand
+// back two reactive proxies that read/write the same underlying state
+// (same values visible through both) but fail a `===` check against each
+// other — so a WeakMap keyed on `this` silently misses the second call and
+// doesn't dedupe at all. There is only ever one "auth" store for the app's
+// lifetime, so a plain variable is both simpler and immune to that.
+let refreshPromise: Promise<boolean> | null = null
+let initPromise: Promise<void> | null = null
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -70,6 +80,15 @@ export const useAuthStore = defineStore('auth', {
 
     /** Exchanges the HttpOnly refresh cookie for a fresh access token. */
     async refresh(): Promise<boolean> {
+      if (!refreshPromise) {
+        refreshPromise = this.performRefresh().finally(() => {
+          refreshPromise = null
+        })
+      }
+      return refreshPromise
+    },
+
+    async performRefresh(): Promise<boolean> {
       try {
         const res = await $fetch<SessionResponse>('/api/auth/refresh', {
           method: 'POST',
@@ -86,14 +105,16 @@ export const useAuthStore = defineStore('auth', {
 
     async ensureInitialized() {
       if (this.initialized) return
-      let promise = initPromises.get(this)
-      if (!promise) {
-        promise = this.refresh().then(() => {
-          this.initialized = true
-        })
-        initPromises.set(this, promise)
+      if (!initPromise) {
+        initPromise = this.refresh()
+          .then(() => {
+            this.initialized = true
+          })
+          .finally(() => {
+            initPromise = null
+          })
       }
-      await promise
+      await initPromise
     },
 
     async updateProfile(payload: { name: string; bio: string; avatar_url?: string | null }) {
