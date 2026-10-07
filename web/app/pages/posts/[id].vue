@@ -8,6 +8,9 @@
         <NuxtLink :to="`/profile/${post.user.id}`" class="post-username">{{ post.user.name }}</NuxtLink>
         <span class="post-date">{{ formattedDate }}</span>
       </div>
+      <button v-if="isOwnPost && !editing" type="button" class="post-edit-toggle" @click="startEdit">
+        {{ t('posts.detail.edit') }}
+      </button>
     </div>
 
     <div class="passage-hero">
@@ -19,11 +22,60 @@
         <span class="passage-book-title serif">{{ post.book.title }}</span>
         <span class="passage-book-author">{{ post.book.author }}</span>
       </NuxtLink>
-      <p class="passage-text serif">{{ post.passage.text }}</p>
+      <p
+        v-if="!editing"
+        class="passage-text serif"
+        :class="{ 'is-spoiler': showSpoilerBlur }"
+      >
+        {{ post.passage.text }}
+      </p>
+      <textarea
+        v-else
+        v-model="editPassage"
+        class="passage-text-input serif"
+        maxlength="300"
+        :aria-label="t('posts.detail.passageEditAriaLabel')"
+        :disabled="editPending"
+      />
+      <button v-if="showSpoilerBlur" type="button" class="spoiler-reveal-badge" @click="revealed = true">
+        {{ t('posts.detail.spoilerHint') }}
+      </button>
     </div>
 
     <div class="thinking-card">
-      <p class="thinking-text serif">{{ post.thinking }}</p>
+      <p v-if="!editing" class="thinking-text serif" :class="{ 'is-spoiler': showSpoilerBlur }">
+        {{ post.thinking }}
+      </p>
+      <textarea
+        v-else
+        v-model="editThinking"
+        class="thinking-text-input serif"
+        :aria-label="t('posts.detail.thinkingEditAriaLabel')"
+        :disabled="editPending"
+      />
+    </div>
+
+    <div v-if="editing" class="post-edit-controls">
+      <button
+        type="button"
+        class="spoiler-toggle"
+        :class="{ 'is-active': editSpoiler }"
+        :aria-pressed="editSpoiler"
+        :disabled="editPending"
+        @click="editSpoiler = !editSpoiler"
+      >
+        {{ t('posts.detail.spoilerLabel') }}
+      </button>
+      <button
+        type="button"
+        class="btn-primary post-edit-save"
+        :disabled="editPending || !editPassage.trim() || !editThinking.trim()"
+        @click="onEditSave"
+      >
+        {{ editPending ? t('posts.detail.saving') : t('posts.detail.save') }}
+      </button>
+      <button type="button" class="post-edit-cancel" @click="cancelEdit">{{ t('posts.detail.cancel') }}</button>
+      <p v-if="editError" class="form-error">{{ editError }}</p>
     </div>
 
     <div v-if="post.keywords.length" class="post-keywords">
@@ -56,6 +108,7 @@ import type { Comment } from '~/stores/comments'
 
 const route = useRoute()
 const { t } = useI18n()
+const posts = usePostsStore()
 
 const { data: post } = await useApiFetch<Post>(`/api/posts/${route.params.id}`)
 const { data: comments } = await useApiFetch<Comment[]>(`/api/posts/${route.params.id}/comments`)
@@ -87,6 +140,56 @@ onMounted(async () => {
 function onCommentAdded() {
   if (!post.value) return
   post.value = { ...post.value, comment_count: post.value.comment_count + 1 }
+}
+
+const isOwnPost = computed(() => !!post.value && auth.user?.id === post.value.user.id)
+
+// Spoilers are blurred for everyone except the post's own author, who
+// already knows what they wrote.
+const revealed = ref(false)
+const showSpoilerBlur = computed(() => !!post.value?.spoiler && !isOwnPost.value && !revealed.value)
+
+const editing = ref(false)
+const editPassage = ref('')
+const editThinking = ref('')
+const editSpoiler = ref(false)
+const editPending = ref(false)
+const editError = ref('')
+
+function startEdit() {
+  if (!post.value) return
+  editPassage.value = post.value.passage.text
+  editThinking.value = post.value.thinking
+  editSpoiler.value = post.value.spoiler
+  editError.value = ''
+  editing.value = true
+}
+
+function cancelEdit() {
+  editing.value = false
+}
+
+async function onEditSave() {
+  if (!post.value || editPending.value) return
+  const passageText = editPassage.value.trim()
+  const thinking = editThinking.value.trim()
+  if (!passageText || !thinking) return
+
+  editPending.value = true
+  editError.value = ''
+  try {
+    const updated = await posts.updatePost(post.value.id, {
+      passage_text: passageText,
+      thinking,
+      spoiler: editSpoiler.value,
+    })
+    post.value = { ...post.value, passage: updated.passage, thinking: updated.thinking, spoiler: updated.spoiler }
+    editing.value = false
+  } catch (err) {
+    editError.value = extractErrorMessage(err, t)
+  } finally {
+    editPending.value = false
+  }
 }
 
 const { formatDate } = useLocaleFormat()
@@ -121,6 +224,102 @@ const formattedDate = computed(() => {
   margin-bottom: 20px;
 }
 
+.post-edit-toggle {
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-accent-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.passage-text-input {
+  flex: 1;
+  margin: 0;
+  width: 100%;
+  min-height: 80px;
+  font-size: 1.4rem;
+  line-height: 1.6;
+  font-family: inherit;
+  color: inherit;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 12px 16px;
+  resize: vertical;
+}
+
+.passage-text-input:focus {
+  outline: none;
+  border-color: var(--color-highlight);
+}
+
+.thinking-text-input {
+  width: 100%;
+  min-height: 100px;
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  font-family: inherit;
+  color: inherit;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 12px 16px;
+  resize: vertical;
+}
+
+.thinking-text-input:focus {
+  outline: none;
+  border-color: var(--color-highlight);
+}
+
+.post-edit-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.spoiler-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 20px;
+  border: 1.5px solid #e74823;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: #e74823;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.spoiler-toggle.is-active {
+  background: #e74823;
+  color: #ffffff;
+}
+
+.post-edit-save {
+  width: auto;
+  padding: 10px 24px;
+}
+
+.post-edit-cancel {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
 .post-avatar-link {
   display: inline-flex;
 }
@@ -147,6 +346,7 @@ const formattedDate = computed(() => {
 }
 
 .passage-hero {
+  position: relative;
   display: flex;
   gap: 24px;
   align-items: flex-start;
@@ -154,6 +354,30 @@ const formattedDate = computed(() => {
   border-radius: var(--radius-card);
   padding: 32px;
   margin-bottom: 20px;
+}
+
+.is-spoiler {
+  filter: blur(8px);
+  user-select: none;
+}
+
+.spoiler-reveal-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 8px 18px;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(34, 37, 43, 0.12);
+  white-space: nowrap;
+  z-index: 1;
 }
 
 .passage-book {
@@ -210,6 +434,7 @@ const formattedDate = computed(() => {
   margin: 0;
   font-size: 1.4rem;
   line-height: 1.6;
+  white-space: pre-line;
   text-decoration: underline solid var(--color-highlight) 2px;
   text-underline-offset: 8px;
 }
@@ -227,6 +452,7 @@ const formattedDate = computed(() => {
   margin: 0;
   font-size: 1.1rem;
   line-height: 1.6;
+  white-space: pre-line;
 }
 
 .post-keywords {

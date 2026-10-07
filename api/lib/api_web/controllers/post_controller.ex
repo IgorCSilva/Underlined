@@ -7,6 +7,7 @@ defmodule ApiWeb.PostController do
   alias Api.Usecases.Post.ListFollowingPosts.ListFollowingPostsUsecaseDto
   alias Api.Usecases.Post.ListPosts.ListPostsUsecaseDto
   alias Api.Usecases.Post.RelatedPosts.RelatedPostsUsecaseDto
+  alias Api.Usecases.Post.UpdatePost.UpdatePostUsecaseDto
 
   action_fallback ApiWeb.FallbackController
 
@@ -50,6 +51,17 @@ defmodule ApiWeb.PostController do
       conn
       |> put_status(:created)
       |> render(:show, post: post)
+    end
+  end
+
+  def update(conn, %{"id" => id, "post" => post_params}) do
+    with {:ok, post} <-
+           Posts.update_post(%UpdatePostUsecaseDto{
+             user: current_user(conn),
+             post_id: id,
+             attrs: post_params
+           }) do
+      render(conn, :show, post: post)
     end
   end
 

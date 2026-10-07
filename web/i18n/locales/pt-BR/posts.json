@@ -1,7 +1,15 @@
 {
   "posts": {
     "detail": {
-      "notFound": "Post não encontrado."
+      "notFound": "Post não encontrado.",
+      "edit": "Editar",
+      "save": "Salvar",
+      "saving": "Salvando…",
+      "cancel": "Cancelar",
+      "passageEditAriaLabel": "Editar a passagem",
+      "thinkingEditAriaLabel": "Editar o que eu penso sobre isso",
+      "spoilerLabel": "Spoiler",
+      "spoilerHint": "Spoiler — clique para revelar"
     },
     "related": {
       "title": "Ideias relacionadas"
@@ -10,6 +18,7 @@
       "published": "Publicado!",
       "liveMessage": "Seu post sobre \"{title}\" está no ar.",
       "viewPost": "Ver post",
+      "loadingPost": "Carregando…",
       "writeAnother": "Escrever outro",
       "pickBookTitle": "Escolha um livro para escrever sobre",
       "passageLabel": "A passagem",
@@ -20,6 +29,7 @@
       "keywordPlaceholder": "Adicione uma palavra-chave…",
       "keywordAriaLabel": "Adicionar palavra-chave",
       "removeKeyword": "Remover palavra-chave {keyword}",
+      "spoilerLabel": "Spoiler",
       "publishing": "Publicando…",
       "publish": "Publicar"
     }

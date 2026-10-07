@@ -42,6 +42,7 @@ defmodule ApiWeb.Router do
 
       get "/posts/following", PostController, :following
       post "/posts", PostController, :create
+      put "/posts/:id", PostController, :update
 
       post "/posts/:post_id/likes", LikeController, :create
       delete "/posts/:post_id/likes", LikeController, :delete

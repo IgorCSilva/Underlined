@@ -15,6 +15,7 @@ const post: Post = {
   bookmarked_by_user: false,
   comment_count: 3,
   user: { id: 'user-1', name: 'Reader One', avatar_url: null },
+  spoiler: false,
 }
 
 const stubs = {
@@ -64,5 +65,32 @@ describe('PostFeedItem', () => {
   it('links to the post detail page', () => {
     const wrapper = mount(PostFeedItem, { props: { post }, global: { stubs } })
     expect(wrapper.find('a').exists()).toBe(true)
+  })
+
+  it('does not blur a post without the spoiler flag', () => {
+    const wrapper = mount(PostFeedItem, { props: { post }, global: { stubs } })
+    expect(wrapper.find('.feed-passage').classes()).not.toContain('is-spoiler')
+    expect(wrapper.find('.feed-spoiler-hint').exists()).toBe(false)
+  })
+
+  it('blurs a spoiler post behind a non-navigating reveal control', () => {
+    const wrapper = mount(PostFeedItem, { props: { post: { ...post, spoiler: true } }, global: { stubs } })
+
+    expect(wrapper.find('.feed-passage').classes()).toContain('is-spoiler')
+    expect(wrapper.find('.feed-thinking').classes()).toContain('is-spoiler')
+    expect(wrapper.find('.feed-spoiler-hint').exists()).toBe(true)
+    // Blurred content must not be a link — otherwise clicking to reveal would
+    // also navigate away to the post page.
+    expect(wrapper.find('.feed-content-link').element.tagName).toBe('DIV')
+  })
+
+  it('reveals a spoiler post on click without navigating', async () => {
+    const wrapper = mount(PostFeedItem, { props: { post: { ...post, spoiler: true } }, global: { stubs } })
+
+    await wrapper.find('.feed-spoiler-hint').trigger('click')
+
+    expect(wrapper.find('.feed-passage').classes()).not.toContain('is-spoiler')
+    expect(wrapper.find('.feed-spoiler-hint').exists()).toBe(false)
+    expect(wrapper.find('.feed-content-link').element.tagName).toBe('A')
   })
 })

@@ -16,6 +16,7 @@ const makePost = (overrides: Partial<Post>): Post => ({
   comment_count: 3,
   user: { id: 'user-1', name: 'Reader One', avatar_url: null },
   ...overrides,
+  spoiler: overrides.spoiler ?? false,
 })
 
 const stubs = { NuxtLink: { template: '<a><slot /></a>' } }

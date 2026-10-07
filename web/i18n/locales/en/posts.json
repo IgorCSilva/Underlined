@@ -1,7 +1,15 @@
 {
   "posts": {
     "detail": {
-      "notFound": "Post not found."
+      "notFound": "Post not found.",
+      "edit": "Edit",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "passageEditAriaLabel": "Edit the passage",
+      "thinkingEditAriaLabel": "Edit what I think about it",
+      "spoilerLabel": "Spoiler",
+      "spoilerHint": "Spoiler — click to reveal"
     },
     "related": {
       "title": "Related ideas"
@@ -10,6 +18,7 @@
       "published": "Published!",
       "liveMessage": "Your post about \"{title}\" is live.",
       "viewPost": "View post",
+      "loadingPost": "Loading…",
       "writeAnother": "Write another",
       "pickBookTitle": "Pick a book to write about",
       "passageLabel": "The passage",
@@ -20,6 +29,7 @@
       "keywordPlaceholder": "Add a keyword…",
       "keywordAriaLabel": "Add a keyword",
       "removeKeyword": "Remove keyword {keyword}",
+      "spoilerLabel": "Spoiler",
       "publishing": "Publishing…",
       "publish": "Publish"
     }

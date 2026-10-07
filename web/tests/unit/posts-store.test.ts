@@ -44,6 +44,25 @@ describe('posts store', () => {
     ).rejects.toThrow('validation failed')
   })
 
+  it('updatePost puts to /api/posts/:id and returns the updated post', async () => {
+    const updated = { ...fakePost, passage: { id: 'p1', text: 'A fixed passage.' }, thinking: 'A fixed thought.' }
+    const fetchMock = vi.fn().mockResolvedValue({ data: updated })
+    vi.stubGlobal('$fetch', fetchMock)
+
+    const posts = usePostsStore()
+    const payload = { passage_text: 'A fixed passage.', thinking: 'A fixed thought.' }
+    const result = await posts.updatePost('1', payload)
+
+    expect(result).toEqual(updated)
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/posts/1',
+      expect.objectContaining({
+        method: 'PUT',
+        body: { post: payload },
+      }),
+    )
+  })
+
   it('bookmarkPost posts to /api/posts/:id/bookmarks and returns the result', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ data: { bookmarked: true } })
     vi.stubGlobal('$fetch', fetchMock)

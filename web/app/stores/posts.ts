@@ -12,6 +12,7 @@ export interface Post {
   bookmarked_by_user: boolean
   comment_count: number
   user: { id: string; name: string; avatar_url: string | null }
+  spoiler: boolean
 }
 
 export interface LikeResult {
@@ -42,10 +43,23 @@ export const usePostsStore = defineStore('posts', {
       passage_text: string
       thinking: string
       keywords?: string[]
+      spoiler?: boolean
     }): Promise<Post> {
       const { request } = useApi()
       const res = await request<PostResponse>('/api/posts', {
         method: 'POST',
+        body: { post: payload },
+      })
+      return res.data
+    },
+
+    async updatePost(
+      postId: string,
+      payload: { passage_text: string; thinking: string; spoiler?: boolean },
+    ): Promise<Post> {
+      const { request } = useApi()
+      const res = await request<PostResponse>(`/api/posts/${postId}`, {
+        method: 'PUT',
         body: { post: payload },
       })
       return res.data
