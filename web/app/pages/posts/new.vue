@@ -4,7 +4,14 @@
       <h2 class="serif">{{ t('posts.composer.published') }}</h2>
       <p class="status-text">{{ t('posts.composer.liveMessage', { title: published.book.title }) }}</p>
       <div class="success-actions">
-        <NuxtLink :to="`/posts/${published.id}`" class="btn-primary btn-publish">{{ t('posts.composer.viewPost') }}</NuxtLink>
+        <button
+          class="btn-primary btn-publish"
+          type="button"
+          :disabled="navigatingToPost"
+          @click="goToPost"
+        >
+          {{ navigatingToPost ? t('posts.composer.loadingPost') : t('posts.composer.viewPost') }}
+        </button>
         <button class="btn-publish-secondary" type="button" @click="reset">{{ t('posts.composer.writeAnother') }}</button>
       </div>
     </div>
@@ -58,6 +65,7 @@
             v-model="passageText"
             class="passage-input serif"
             rows="2"
+            maxlength="300"
             :placeholder="t('posts.composer.passagePlaceholder')"
             required
             @input="autoGrowPassage"
@@ -79,6 +87,16 @@
           <label>{{ t('posts.composer.keywordsLabel') }}</label>
           <KeywordChipInput v-model="keywords" />
         </div>
+
+        <button
+          type="button"
+          class="spoiler-toggle"
+          :class="{ 'is-active': spoiler }"
+          :aria-pressed="spoiler"
+          @click="spoiler = !spoiler"
+        >
+          {{ t('posts.composer.spoilerLabel') }}
+        </button>
 
         <p v-if="error" class="form-error">{{ error }}</p>
 
@@ -108,9 +126,11 @@ const passageInput = ref<HTMLTextAreaElement | null>(null)
 const passageText = ref('')
 const thinking = ref('')
 const keywords = ref<string[]>([])
+const spoiler = ref(false)
 const saving = ref(false)
 const error = ref('')
 const published = ref<Post | null>(null)
+const navigatingToPost = ref(false)
 
 const q = ref('')
 const debouncedQ = ref('')
@@ -162,6 +182,7 @@ async function onSubmit() {
       passage_text: passageText.value,
       thinking: thinking.value,
       keywords: keywords.value,
+      spoiler: spoiler.value,
     })
   } catch (err) {
     error.value = extractErrorMessage(err, t)
@@ -170,11 +191,18 @@ async function onSubmit() {
   }
 }
 
+async function goToPost() {
+  if (!published.value || navigatingToPost.value) return
+  navigatingToPost.value = true
+  await router.push(`/posts/${published.value.id}`)
+}
+
 function reset() {
   published.value = null
   passageText.value = ''
   thinking.value = ''
   keywords.value = []
+  spoiler.value = false
   router.replace({ query: {} })
 }
 </script>
@@ -322,6 +350,28 @@ function reset() {
   overflow: hidden;
   text-decoration: underline solid var(--color-highlight) 2px;
   text-underline-offset: 6px;
+}
+
+.spoiler-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  padding: 8px 20px;
+  border: 1.5px solid #e74823;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: #e74823;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.spoiler-toggle.is-active {
+  background: #e74823;
+  color: #ffffff;
 }
 
 .composer-footer {

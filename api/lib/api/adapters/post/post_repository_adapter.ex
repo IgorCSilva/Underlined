@@ -19,6 +19,15 @@ defmodule Api.Adapters.Post.PostRepositoryAdapter do
     end
   end
 
+  def update_post(user, id, attrs, adaptee) do
+    case adaptee.update_post(user, id, attrs) do
+      {:ok, db_post} -> {:ok, to_domain(db_post)}
+      {:error, :not_found} -> {:error, :not_found}
+      {:error, :forbidden} -> {:error, :forbidden}
+      {:error, changeset} -> {:error, changeset}
+    end
+  end
+
   def list_posts(before, current_user, adaptee) do
     adaptee.list_posts(before, current_user) |> Enum.map(&to_domain/1)
   end
@@ -54,6 +63,7 @@ defmodule Api.Adapters.Post.PostRepositoryAdapter do
       passage: PassageRepositoryAdapter.to_domain(db_post.passage),
       keywords: Enum.map(db_post.keywords, &KeywordRepositoryAdapter.to_domain/1),
       user: UserRepositoryAdapter.to_domain(db_post.user),
+      spoiler: db_post.spoiler,
       inserted_at: db_post.inserted_at,
       updated_at: db_post.updated_at
     }

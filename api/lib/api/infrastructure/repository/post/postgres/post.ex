@@ -26,6 +26,7 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.Post do
     field :liked_by_user, :boolean, virtual: true, default: false
     field :bookmarked_by_user, :boolean, virtual: true, default: false
     field :comment_count, :integer, default: 0
+    field :spoiler, :boolean, default: false
 
     belongs_to :user, User
     belongs_to :book, Book
@@ -37,7 +38,7 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.Post do
 
   def changeset(post, attrs) do
     post
-    |> cast(attrs, [:user_id, :book_id, :passage_id, :thinking, :keyword_names])
+    |> cast(attrs, [:user_id, :book_id, :passage_id, :thinking, :keyword_names, :spoiler])
     |> validate_required([:user_id, :book_id, :passage_id, :thinking])
     |> validate_length(:thinking, min: 1, max: 2000)
     |> validate_length(:keyword_names,
@@ -49,6 +50,14 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.Post do
     |> foreign_key_constraint(:book_id)
     |> foreign_key_constraint(:passage_id)
     |> unique_constraint(:passage_id)
+  end
+
+  @doc "Editing a post may only ever change its thinking, spoiler flag — not its author, book, passage, or keywords."
+  def update_changeset(post, attrs) do
+    post
+    |> cast(attrs, [:thinking, :spoiler])
+    |> validate_required([:thinking])
+    |> validate_length(:thinking, min: 1, max: 2000)
   end
 
   defp validate_keyword_names(changeset) do

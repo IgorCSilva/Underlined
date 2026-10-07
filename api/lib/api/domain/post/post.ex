@@ -15,6 +15,7 @@ defmodule Api.Domain.Post do
     :passage,
     :keywords,
     :user,
+    :spoiler,
     :inserted_at,
     :updated_at
   ]
@@ -30,6 +31,7 @@ defmodule Api.Domain.Post do
           passage: Api.Domain.Passage.t(),
           keywords: [Api.Domain.Keyword.t()],
           user: Api.Domain.User.t(),
+          spoiler: boolean(),
           inserted_at: DateTime.t() | nil,
           updated_at: DateTime.t() | nil
         }

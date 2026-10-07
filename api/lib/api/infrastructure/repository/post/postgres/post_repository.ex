@@ -38,7 +38,8 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
             "book_id" => book.id,
             "passage_id" => passage.id,
             "thinking" => attrs["thinking"],
-            "keyword_names" => keyword_names
+            "keyword_names" => keyword_names,
+            "spoiler" => attrs["spoiler"] || false
           })
         end)
         |> Ecto.Multi.update(:post_with_keywords, fn %{post: post} ->
@@ -54,6 +55,42 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
         {:ok, %{post_with_keywords: post}} -> {:ok, Repo.preload(post, @preloads)}
         {:error, _op, changeset, _changes} -> {:error, changeset}
       end
+    end
+  end
+
+  @doc """
+  Edits a post's thinking and its passage's text. Only the post's author
+  may edit it.
+  """
+  def update_post(user, post_id, attrs) do
+    with {:ok, post} <- fetch_own_post(user, post_id) do
+      post = Repo.preload(post, :passage)
+      spoiler = if Map.has_key?(attrs, "spoiler"), do: attrs["spoiler"], else: post.spoiler
+
+      multi =
+        Ecto.Multi.new()
+        |> Ecto.Multi.update(
+          :post,
+          Post.update_changeset(post, %{"thinking" => attrs["thinking"], "spoiler" => spoiler})
+        )
+        |> Ecto.Multi.update(
+          :passage,
+          Passage.update_changeset(post.passage, %{"text" => attrs["passage_text"]})
+        )
+
+      case Repo.transaction(multi) do
+        {:ok, %{post: updated_post}} -> {:ok, Repo.preload(updated_post, @preloads, force: true)}
+        {:error, :post, changeset, _changes} -> {:error, changeset}
+        {:error, :passage, changeset, _changes} -> {:error, changeset}
+      end
+    end
+  end
+
+  defp fetch_own_post(user, post_id) do
+    case fetch_post(post_id) do
+      nil -> {:error, :not_found}
+      %Post{user_id: user_id} when user_id != user.id -> {:error, :forbidden}
+      post -> {:ok, post}
     end
   end
 

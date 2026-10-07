@@ -19,6 +19,7 @@ defmodule Api.Adapters.Posts do
   alias Api.Usecases.Post.ListFollowingPosts.ListFollowingPostsUsecase
   alias Api.Usecases.Post.ListPosts.ListPostsUsecase
   alias Api.Usecases.Post.RelatedPosts.RelatedPostsUsecase
+  alias Api.Usecases.Post.UpdatePost.UpdatePostUsecase
   alias Api.Usecases.Report.CreateReport.CreateReportUsecase
   alias Api.Usecases.Report.ListReportReasons.ListReportReasonsUsecase
 
@@ -28,6 +29,10 @@ defmodule Api.Adapters.Posts do
       community_health_enqueuer: community_health_enqueuer(),
       interest_profile_enqueuer: interest_profile_enqueuer()
     })
+  end
+
+  def update_post(dto) do
+    UpdatePostUsecase.call(dto, %UpdatePostUsecase{repository: post_repository()})
   end
 
   def list_posts(dto) do
