@@ -72,6 +72,7 @@ defmodule ApiWeb.Router do
 
       get "/users/:id", ProfileController, :show
       get "/users/:id/interests", ProfileController, :interests
+      get "/users/:id/graph", ProfileController, :graph
       get "/users/:id/community_health", ProfileController, :community_health
       get "/posts", PostController, :index
       get "/posts/:id", PostController, :show

@@ -1,0 +1,12 @@
+{
+  "graph": {
+    "title": "Meu mapa de ideias",
+    "loading": "Carregando seu mapa…",
+    "empty": "Escreva um post para começar seu mapa de ideias.",
+    "zoomIn": "Aumentar zoom",
+    "zoomOut": "Diminuir zoom",
+    "filterByKeyword": "Filtrar por palavra-chave",
+    "allKeywords": "Todas as palavras-chave",
+    "postsTagged": "{count} posts marcados"
+  }
+}

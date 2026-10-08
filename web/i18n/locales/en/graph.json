@@ -1,0 +1,12 @@
+{
+  "graph": {
+    "title": "My idea graph",
+    "loading": "Loading your graph…",
+    "empty": "Write a post to start your idea graph.",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "filterByKeyword": "Filter by keyword",
+    "allKeywords": "All keywords",
+    "postsTagged": "{count} posts tagged"
+  }
+}

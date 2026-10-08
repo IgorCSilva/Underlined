@@ -68,6 +68,10 @@ config :api, :chain_repository,
   adapter: Api.Adapters.Chain.ChainRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.Chain.Postgres.ChainRepository
 
+config :api, :graph_repository,
+  adapter: Api.Adapters.Graph.GraphRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Graph.Postgres.GraphRepository
+
 config :api, cors_origin: "http://localhost:3000"
 config :api, web_base_url: "http://localhost:3000"
 
