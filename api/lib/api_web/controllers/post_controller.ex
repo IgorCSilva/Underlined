@@ -6,10 +6,18 @@ defmodule ApiWeb.PostController do
   alias Api.Usecases.Post.GetPost.GetPostUsecaseDto
   alias Api.Usecases.Post.ListFollowingPosts.ListFollowingPostsUsecaseDto
   alias Api.Usecases.Post.ListPosts.ListPostsUsecaseDto
+  alias Api.Usecases.Post.SearchPosts.SearchPostsUsecaseDto
   alias Api.Usecases.Post.RelatedPosts.RelatedPostsUsecaseDto
   alias Api.Usecases.Post.UpdatePost.UpdatePostUsecaseDto
 
   action_fallback ApiWeb.FallbackController
+
+  def index(conn, %{"search" => search}) when is_binary(search) and search != "" do
+    posts =
+      Posts.search_posts(%SearchPostsUsecaseDto{search: search, current_user: current_user(conn)})
+
+    render(conn, :index, posts: posts)
+  end
 
   def index(conn, params) do
     posts =

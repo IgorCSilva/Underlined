@@ -18,7 +18,7 @@ import type { Comment } from '~/stores/comments'
 
 const props = withDefaults(
   defineProps<{
-    postId: string
+    basePath: string
     parentCommentId?: string | null
     placeholder?: string
   }>(),
@@ -38,7 +38,7 @@ async function onSubmit() {
   pending.value = true
   error.value = ''
   try {
-    const comment = await comments.createComment(props.postId, {
+    const comment = await comments.createComment(props.basePath, {
       body: body.value.trim(),
       parent_comment_id: props.parentCommentId,
     })

@@ -36,7 +36,7 @@
 
       <div v-if="replying" class="comment-reply-composer">
         <CommentComposer
-          :post-id="postId"
+          :base-path="basePath"
           :parent-comment-id="comment.id"
           :placeholder="t('comments.replyPlaceholder')"
           @posted="onReplyPosted"
@@ -48,7 +48,7 @@
           v-for="reply in comment.replies"
           :key="reply.id"
           :comment="reply"
-          :post-id="postId"
+          :base-path="basePath"
           is-reply
         />
       </div>
@@ -60,7 +60,7 @@
 import type { Comment } from '~/stores/comments'
 import CommentComposer from './CommentComposer.vue'
 
-const props = withDefaults(defineProps<{ comment: Comment; postId: string; isReply?: boolean }>(), {
+const props = withDefaults(defineProps<{ comment: Comment; basePath: string; isReply?: boolean }>(), {
   isReply: false,
 })
 
@@ -110,7 +110,7 @@ async function onEditSave() {
   editPending.value = true
   editError.value = ''
   try {
-    const updated = await comments.updateComment(props.postId, props.comment.id, { body: editBody.value.trim() })
+    const updated = await comments.updateComment(props.basePath, props.comment.id, { body: editBody.value.trim() })
     props.comment.body = updated.body
     props.comment.updated_at = updated.updated_at
     editing.value = false

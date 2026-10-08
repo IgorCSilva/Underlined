@@ -4,11 +4,11 @@
       v-for="comment in list"
       :key="comment.id"
       :comment="comment"
-      :post-id="postId"
+      :base-path="basePath"
       @posted="onCommentAdded"
     />
     <div class="comment-thread-composer">
-      <CommentComposer :post-id="postId" @posted="onTopLevelPosted" />
+      <CommentComposer :base-path="basePath" @posted="onTopLevelPosted" />
     </div>
   </div>
 </template>
@@ -18,7 +18,7 @@ import type { Comment } from '~/stores/comments'
 import CommentItem from './CommentItem.vue'
 import CommentComposer from './CommentComposer.vue'
 
-const props = defineProps<{ postId: string; comments: Comment[] }>()
+const props = defineProps<{ basePath: string; comments: Comment[] }>()
 const emit = defineEmits<{ 'comment-added': [] }>()
 
 const list = ref<Comment[]>(props.comments)

@@ -1,17 +1,21 @@
 <template>
   <div v-if="connections.length" class="post-connections">
-    <NuxtLink
-      v-for="connection in connections"
-      :key="connection.id"
-      :to="`/posts/${connection.connected_post.id}`"
-      class="connection-row"
-    >
-      <span class="connection-pill" :class="`is-${connection.relationship_type}`">
-        <span class="connection-icon" aria-hidden="true">{{ icon(connection.relationship_type) }}</span>
-        {{ t(`posts.connections.types.${connection.relationship_type}`) }}
-      </span>
-      <span class="connection-book">{{ connection.connected_post.book.title }}</span>
-    </NuxtLink>
+    <div v-for="connection in connections" :key="connection.id" class="connection-row">
+      <NuxtLink :to="`/posts/${connection.connected_post.id}`" class="connection-link">
+        <span class="connection-pill" :class="`is-${connection.relationship_type}`">
+          <span class="connection-icon" aria-hidden="true">{{ icon(connection.relationship_type) }}</span>
+          {{ t(`posts.connections.types.${connection.relationship_type}`) }}
+        </span>
+        <span class="connection-book">{{ connection.connected_post.book.title }}</span>
+      </NuxtLink>
+      <NuxtLink
+        v-if="connection.relationship_type === 'contradicts'"
+        :to="`/debates/${connection.id}`"
+        class="connection-debate-link"
+      >
+        {{ t('posts.connections.openDebate') }}
+      </NuxtLink>
+    </div>
   </div>
 </template>
 
@@ -48,8 +52,25 @@ function icon(type: RelationshipType): string {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+.connection-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   text-decoration: none;
   color: inherit;
+}
+
+.connection-debate-link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-accent-primary);
+  text-decoration: none;
+}
+
+.connection-debate-link:hover {
+  text-decoration: underline;
 }
 
 .connection-pill {

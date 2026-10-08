@@ -100,7 +100,7 @@
 
     <PostConnections :connections="connections ?? []" />
 
-    <CommentThread :post-id="post.id" :comments="comments ?? []" @comment-added="onCommentAdded" />
+    <CommentThread :base-path="`/api/posts/${post.id}`" :comments="comments ?? []" @comment-added="onCommentAdded" />
 
     <RelatedPosts :posts="relatedPosts ?? []" />
   </div>

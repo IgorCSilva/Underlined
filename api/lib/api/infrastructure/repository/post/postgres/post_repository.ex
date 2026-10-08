@@ -121,6 +121,39 @@ defmodule Api.Infrastructure.Repository.Post.Postgres.PostRepository do
   defp maybe_before(query, _before), do: query
 
   @doc """
+  Posts whose book title or thinking matches `search` (case-insensitive,
+  substring), newest first, across every author — not just `current_user`'s
+  own posts, since this backs "connect to another post"/"add to chain"
+  pickers that search the whole platform. Blank/whitespace-only `search`
+  falls back to the plain chronological feed, same as `list_posts/2`, so
+  the picker has something to show before the user types anything.
+  """
+  def search_posts(search, current_user \\ nil)
+
+  def search_posts(search, current_user) when is_binary(search) do
+    case String.trim(search) do
+      "" ->
+        list_posts(nil, current_user)
+
+      term ->
+        pattern = "%#{term}%"
+
+        Post
+        |> join(:inner, [p], b in Book, on: b.id == p.book_id)
+        |> where([p, b], ilike(p.thinking, ^pattern) or ilike(b.title, ^pattern))
+        |> order_by(desc: :inserted_at)
+        |> limit(^@page_size)
+        |> select([p, b], p)
+        |> Repo.all()
+        |> Repo.preload(@preloads)
+        |> annotate_liked(current_user)
+        |> annotate_bookmarked(current_user)
+    end
+  end
+
+  def search_posts(_search, current_user), do: list_posts(nil, current_user)
+
+  @doc """
   Chronological feed of posts by users that `user` follows, newest first.
   Same `before`-cursor pagination as `list_posts/2`, and likewise annotates
   `liked_by_user` for `user`.

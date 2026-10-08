@@ -22,7 +22,7 @@ function makeComment(overrides: Partial<Comment> = {}): Comment {
 describe('CommentThread', () => {
   it('renders the initial comments', () => {
     const wrapper = mount(CommentThread, {
-      props: { postId: 'post-1', comments: [makeComment(), makeComment({ id: 'c2', body: 'Second!' })] },
+      props: { basePath: '/api/posts/post-1', comments: [makeComment(), makeComment({ id: 'c2', body: 'Second!' })] },
       global: { stubs },
     })
 
@@ -31,7 +31,7 @@ describe('CommentThread', () => {
   })
 
   it('appends a newly posted top-level comment without refetching and emits comment-added', async () => {
-    const wrapper = mount(CommentThread, { props: { postId: 'post-1', comments: [] }, global: { stubs } })
+    const wrapper = mount(CommentThread, { props: { basePath: '/api/posts/post-1', comments: [] }, global: { stubs } })
 
     expect(wrapper.findAllComponents({ name: 'CommentItem' })).toHaveLength(0)
 
@@ -44,7 +44,7 @@ describe('CommentThread', () => {
 
   it('emits comment-added when a reply is posted on a child comment', async () => {
     const wrapper = mount(CommentThread, {
-      props: { postId: 'post-1', comments: [makeComment()] },
+      props: { basePath: '/api/posts/post-1', comments: [makeComment()] },
       global: { stubs },
     })
 

@@ -11,15 +11,20 @@ defmodule Api.Adapters.Posts do
   alias Api.Usecases.Bookmark.UnbookmarkPost.UnbookmarkPostUsecase
   alias Api.Usecases.Connection.ConnectPosts.ConnectPostsUsecase
   alias Api.Usecases.Connection.ListConnections.ListConnectionsUsecase
+  alias Api.Usecases.ConnectionComment.CreateConnectionComment.CreateConnectionCommentUsecase
+  alias Api.Usecases.ConnectionComment.ListConnectionComments.ListConnectionCommentsUsecase
+  alias Api.Usecases.ConnectionComment.UpdateConnectionComment.UpdateConnectionCommentUsecase
   alias Api.Usecases.Comment.CreateComment.CreateCommentUsecase
   alias Api.Usecases.Comment.ListComments.ListCommentsUsecase
   alias Api.Usecases.Comment.UpdateComment.UpdateCommentUsecase
+  alias Api.Usecases.Debate.GetDebate.GetDebateUsecase
   alias Api.Usecases.Like.LikePost.LikePostUsecase
   alias Api.Usecases.Like.UnlikePost.UnlikePostUsecase
   alias Api.Usecases.Post.CreatePost.CreatePostUsecase
   alias Api.Usecases.Post.GetPost.GetPostUsecase
   alias Api.Usecases.Post.ListFollowingPosts.ListFollowingPostsUsecase
   alias Api.Usecases.Post.ListPosts.ListPostsUsecase
+  alias Api.Usecases.Post.SearchPosts.SearchPostsUsecase
   alias Api.Usecases.Post.RelatedPosts.RelatedPostsUsecase
   alias Api.Usecases.Post.UpdatePost.UpdatePostUsecase
   alias Api.Usecases.Report.CreateReport.CreateReportUsecase
@@ -41,6 +46,10 @@ defmodule Api.Adapters.Posts do
     ListPostsUsecase.call(dto, %ListPostsUsecase{repository: post_repository()})
   end
 
+  def search_posts(dto) do
+    SearchPostsUsecase.call(dto, %SearchPostsUsecase{repository: post_repository()})
+  end
+
   def get_post(dto) do
     GetPostUsecase.call(dto, %GetPostUsecase{repository: post_repository()})
   end
@@ -59,6 +68,28 @@ defmodule Api.Adapters.Posts do
 
   def list_connections(dto) do
     ListConnectionsUsecase.call(dto, %ListConnectionsUsecase{repository: connection_repository()})
+  end
+
+  def get_debate(dto) do
+    GetDebateUsecase.call(dto, %GetDebateUsecase{repository: debate_repository()})
+  end
+
+  def create_connection_comment(dto) do
+    CreateConnectionCommentUsecase.call(dto, %CreateConnectionCommentUsecase{
+      repository: connection_comment_repository()
+    })
+  end
+
+  def list_connection_comments(dto) do
+    ListConnectionCommentsUsecase.call(dto, %ListConnectionCommentsUsecase{
+      repository: connection_comment_repository()
+    })
+  end
+
+  def update_connection_comment(dto) do
+    UpdateConnectionCommentUsecase.call(dto, %UpdateConnectionCommentUsecase{
+      repository: connection_comment_repository()
+    })
   end
 
   def like_post(dto) do
@@ -118,6 +149,10 @@ defmodule Api.Adapters.Posts do
 
   defp post_repository, do: Application.get_env(:api, :post_repository) |> Map.new()
   defp connection_repository, do: Application.get_env(:api, :connection_repository) |> Map.new()
+  defp debate_repository, do: Application.get_env(:api, :debate_repository) |> Map.new()
+
+  defp connection_comment_repository,
+    do: Application.get_env(:api, :connection_comment_repository) |> Map.new()
   defp like_repository, do: Application.get_env(:api, :like_repository) |> Map.new()
   defp comment_repository, do: Application.get_env(:api, :comment_repository) |> Map.new()
   defp bookmark_repository, do: Application.get_env(:api, :bookmark_repository) |> Map.new()

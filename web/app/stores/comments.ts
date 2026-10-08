@@ -15,21 +15,25 @@ interface CommentResponse {
 
 export const useCommentsStore = defineStore('comments', {
   actions: {
+    // `basePath` is the parent resource's own API path (e.g. `/api/posts/:id`
+    // or `/api/connections/:id`) — a comment thread can be scoped to either,
+    // and the two are otherwise identical (same reply nesting, same rate
+    // limit), so the store only needs to know where to nest `/comments`.
     async createComment(
-      postId: string,
+      basePath: string,
       payload: { body: string; parent_comment_id?: string | null },
     ): Promise<Comment> {
       const { request } = useApi()
-      const res = await request<CommentResponse>(`/api/posts/${postId}/comments`, {
+      const res = await request<CommentResponse>(`${basePath}/comments`, {
         method: 'POST',
         body: { comment: payload },
       })
       return res.data
     },
 
-    async updateComment(postId: string, commentId: string, payload: { body: string }): Promise<Comment> {
+    async updateComment(basePath: string, commentId: string, payload: { body: string }): Promise<Comment> {
       const { request } = useApi()
-      const res = await request<CommentResponse>(`/api/posts/${postId}/comments/${commentId}`, {
+      const res = await request<CommentResponse>(`${basePath}/comments/${commentId}`, {
         method: 'PUT',
         body: { comment: payload },
       })
