@@ -19,8 +19,10 @@
           <img v-if="post.book.cover_url" :src="post.book.cover_url" alt="" />
           <span v-else class="passage-book-placeholder">📖</span>
         </span>
-        <span class="passage-book-title serif">{{ post.book.title }}</span>
-        <span class="passage-book-author">{{ post.book.author }}</span>
+        <span class="passage-book-info">
+          <span class="passage-book-title serif">{{ post.book.title }}</span>
+          <span class="passage-book-author">{{ post.book.author }}</span>
+        </span>
       </NuxtLink>
       <p
         v-if="!editing"
@@ -348,8 +350,8 @@ const formattedDate = computed(() => {
 .passage-hero {
   position: relative;
   display: flex;
-  gap: 24px;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 20px;
   background: var(--color-highlight-fill);
   border-radius: var(--radius-card);
   padding: 32px;
@@ -381,14 +383,18 @@ const formattedDate = computed(() => {
 }
 
 .passage-book {
-  flex: 0 0 96px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 6px;
+  text-align: left;
+  gap: 12px;
   color: inherit;
   text-decoration: none;
+}
+
+.passage-book-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
 }
 
 .passage-book:hover .passage-book-title {
@@ -397,8 +403,9 @@ const formattedDate = computed(() => {
 }
 
 .passage-book-cover {
-  width: 64px;
-  height: 96px;
+  flex: 0 0 auto;
+  width: 66px;
+  height: 99px;
   border-radius: 4px;
   overflow: hidden;
   border: 1px solid var(--color-border);
@@ -419,7 +426,7 @@ const formattedDate = computed(() => {
 }
 
 .passage-book-title {
-  font-size: 0.85rem;
+  font-size: 1.4rem;
   font-weight: 600;
   color: var(--color-ink);
 }
