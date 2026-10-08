@@ -1,0 +1,27 @@
+{
+  "chains": {
+    "browseTitle": "Idea chains",
+    "newChain": "+ New chain",
+    "empty": "No idea chains yet.",
+    "by": "by {name}",
+    "stepCount": "{count} posts",
+    "newChainTitle": "Start a new chain",
+    "newChainHint": "Give it a name, then add posts to it in order.",
+    "titleLabel": "Chain title",
+    "titlePlaceholder": "e.g. Four books that changed how I think about decision making",
+    "creating": "Creating…",
+    "create": "Create",
+    "notFound": "Chain not found.",
+    "noItems": "This chain doesn't have any posts yet.",
+    "addAction": "+ Add a post",
+    "addModalTitle": "Add a post to this chain",
+    "searchLabel": "Find a post",
+    "searchPlaceholder": "Search by book title or reflection…",
+    "noResults": "No posts found.",
+    "cancel": "Cancel",
+    "adding": "Adding…",
+    "add": "Add",
+    "error": "Couldn't add that post. Please try again.",
+    "dragToReorder": "Drag to reorder"
+  }
+}

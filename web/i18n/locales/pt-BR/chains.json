@@ -1,0 +1,27 @@
+{
+  "chains": {
+    "browseTitle": "Cadeias de ideias",
+    "newChain": "+ Nova cadeia",
+    "empty": "Ainda não há cadeias de ideias.",
+    "by": "por {name}",
+    "stepCount": "{count} posts",
+    "newChainTitle": "Comece uma nova cadeia",
+    "newChainHint": "Dê um nome a ela e depois adicione posts em ordem.",
+    "titleLabel": "Título da cadeia",
+    "titlePlaceholder": "ex.: Quatro livros que mudaram como penso sobre decisões",
+    "creating": "Criando…",
+    "create": "Criar",
+    "notFound": "Cadeia não encontrada.",
+    "noItems": "Esta cadeia ainda não tem posts.",
+    "addAction": "+ Adicionar um post",
+    "addModalTitle": "Adicionar um post a esta cadeia",
+    "searchLabel": "Encontrar um post",
+    "searchPlaceholder": "Busque pelo título do livro ou reflexão…",
+    "noResults": "Nenhum post encontrado.",
+    "cancel": "Cancelar",
+    "adding": "Adicionando…",
+    "add": "Adicionar",
+    "error": "Não foi possível adicionar esse post. Tente novamente.",
+    "dragToReorder": "Arraste para reordenar"
+  }
+}

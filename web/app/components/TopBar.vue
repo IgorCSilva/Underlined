@@ -62,6 +62,7 @@ const links = computed<NavLink[]>(() => {
   const common: NavLink[] = [
     { to: '/feed', label: t('nav.feed') },
     { to: '/books', label: t('nav.books') },
+    { to: '/chains', label: t('nav.chains') },
   ]
 
   if (auth.user) {
@@ -160,7 +161,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   flex-direction: column;
   justify-content: center;
   gap: 4px;
-  width: 36px;
+  width: 26px;
   height: 36px;
   border: none;
   background: none;

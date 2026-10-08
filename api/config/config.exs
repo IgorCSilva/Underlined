@@ -64,6 +64,10 @@ config :api, :interest_profile_repository,
   adapter: Api.Adapters.InterestProfile.InterestProfileRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.InterestProfile.Postgres.InterestProfileRepository
 
+config :api, :chain_repository,
+  adapter: Api.Adapters.Chain.ChainRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Chain.Postgres.ChainRepository
+
 config :api, cors_origin: "http://localhost:3000"
 config :api, web_base_url: "http://localhost:3000"
 

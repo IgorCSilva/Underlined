@@ -55,6 +55,17 @@ defmodule ApiWeb.FallbackController do
     })
   end
 
+  def call(conn, {:error, :invalid_item_ids}) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> json(%{
+      errors: %{
+        detail: gettext("must list every item in the chain, each exactly once"),
+        code: "invalid_item_ids"
+      }
+    })
+  end
+
   def call(conn, {:error, :invalid_parent}) do
     conn
     |> put_status(:unprocessable_entity)

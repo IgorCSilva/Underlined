@@ -28,10 +28,16 @@
 
 * {
   box-sizing: border-box;
+  overflow-wrap: break-word;
+}
+
+html {
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
+  overflow-x: hidden;
   background: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
