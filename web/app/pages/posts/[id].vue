@@ -95,7 +95,10 @@
       <LikeButton :post-id="post.id" :liked-by-user="post.liked_by_user" :like-count="post.like_count" />
       <span class="post-icon">💬 {{ post.comment_count }}</span>
       <ReportButton resource-type="post" :resource-id="post.id" />
+      <ConnectPostButton :post-id="post.id" @connected="onConnected" />
     </div>
+
+    <PostConnections :connections="connections ?? []" />
 
     <CommentThread :post-id="post.id" :comments="comments ?? []" @comment-added="onCommentAdded" />
 
@@ -105,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Post } from '~/stores/posts'
+import type { Connection, Post } from '~/stores/posts'
 import type { Comment } from '~/stores/comments'
 
 const route = useRoute()
@@ -115,6 +118,16 @@ const posts = usePostsStore()
 const { data: post } = await useApiFetch<Post>(`/api/posts/${route.params.id}`)
 const { data: comments } = await useApiFetch<Comment[]>(`/api/posts/${route.params.id}/comments`)
 const { data: relatedPosts } = await useApiFetch<Post[]>(`/api/posts/${route.params.id}/related`)
+const { data: connections } = await useApiFetch<Connection[]>(`/api/posts/${route.params.id}/connections`)
+
+// Reconnecting the same pair+type is idempotent on the backend and returns
+// the existing connection's id — prepending it unconditionally would show a
+// duplicate pill until the next full reload re-fetched the deduped list.
+function onConnected(connection: Connection) {
+  const existing = connections.value ?? []
+  if (existing.some((c) => c.id === connection.id)) return
+  connections.value = [connection, ...existing]
+}
 
 // SSR always renders anonymous (no access token is available server-side),
 // so a logged-in viewer's own like never shows up in the hydrated payload.
@@ -488,5 +501,6 @@ const formattedDate = computed(() => {
   gap: 20px;
   color: var(--color-accent-secondary);
   font-size: 0.9rem;
+  align-items: center;
 }
 </style>
