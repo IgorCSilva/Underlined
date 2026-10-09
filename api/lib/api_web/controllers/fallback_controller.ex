@@ -47,6 +47,14 @@ defmodule ApiWeb.FallbackController do
     |> json(%{errors: %{detail: gettext("can't follow yourself"), code: "cannot_follow_self"}})
   end
 
+  def call(conn, {:error, :cannot_connect_self}) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> json(%{
+      errors: %{detail: gettext("can't connect a post to itself"), code: "cannot_connect_self"}
+    })
+  end
+
   def call(conn, {:error, :invalid_parent}) do
     conn
     |> put_status(:unprocessable_entity)
