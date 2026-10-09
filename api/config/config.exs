@@ -80,6 +80,10 @@ config :api, :connection_comment_repository,
   adapter: Api.Adapters.ConnectionComment.ConnectionCommentRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.ConnectionComment.Postgres.ConnectionCommentRepository
 
+config :api, :club_repository,
+  adapter: Api.Adapters.Club.ClubRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Club.Postgres.ClubRepository
+
 config :api, cors_origin: "http://localhost:3000"
 config :api, web_base_url: "http://localhost:3000"
 

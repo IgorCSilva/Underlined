@@ -68,6 +68,10 @@ defmodule ApiWeb.Router do
 
       post "/users/:id/follow", FollowController, :create
       delete "/users/:id/follow", FollowController, :delete
+
+      post "/books/:book_id/clubs", ClubController, :create
+      post "/clubs/:id/membership", ClubController, :join
+      delete "/clubs/:id/membership", ClubController, :leave
     end
 
     scope "/" do
@@ -86,6 +90,9 @@ defmodule ApiWeb.Router do
       get "/chains", ChainController, :index
       get "/chains/:id", ChainController, :show
       get "/books/:id/page", BookController, :page
+      get "/books/:book_id/clubs", ClubController, :index
+      get "/clubs/:id", ClubController, :show
+      get "/clubs/:id/members", ClubController, :members
       get "/keywords/:name", KeywordController, :show
     end
   end

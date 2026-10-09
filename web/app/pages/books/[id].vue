@@ -15,6 +15,17 @@
       </div>
     </div>
 
+    <div class="club-section">
+      <div class="club-section-header">
+        <h2 class="serif club-section-title">{{ t('clubs.sectionTitle') }}</h2>
+        <CreateClubButton :book-id="page.id" @created="onClubCreated" />
+      </div>
+      <p v-if="!clubs.length" class="club-section-empty">{{ t('clubs.empty') }}</p>
+      <div v-else class="club-list">
+        <ClubCard v-for="club in clubs" :key="club.id" :club="club" />
+      </div>
+    </div>
+
     <p v-if="!state.posts.length" class="status-text">{{ t('books.page.empty') }}</p>
     <div v-else class="feed-list">
       <PostFeedItem v-for="post in state.posts" :key="post.id" :post="post" />
@@ -34,6 +45,7 @@
 </template>
 
 <script setup lang="ts">
+import type { Club } from '~/stores/clubs'
 import type { Post } from '~/stores/posts'
 
 interface BookStats {
@@ -63,6 +75,13 @@ const state = reactive({
   hasMore: (page.value?.posts.length ?? 0) === PAGE_SIZE,
   loadingMore: false,
 })
+
+const { data: clubsData } = await useApiFetch<Club[]>(`/api/books/${route.params.id}/clubs`)
+const clubs = ref<Club[]>(clubsData.value ?? [])
+
+function onClubCreated(club: Club) {
+  clubs.value = [club, ...clubs.value]
+}
 
 // SSR always renders anonymous (no access token is available server-side),
 // so a logged-in viewer's own likes/bookmarks never show up in the hydrated
@@ -161,6 +180,33 @@ async function loadMore() {
   font-family: var(--font-sans);
   font-size: 0.85rem;
   color: var(--color-ink);
+}
+
+.club-section {
+  margin-bottom: 40px;
+}
+
+.club-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.club-section-title {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.club-section-empty {
+  color: var(--color-text-secondary);
+}
+
+.club-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .status-text {

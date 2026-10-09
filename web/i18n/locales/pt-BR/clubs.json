@@ -1,0 +1,28 @@
+{
+  "clubs": {
+    "sectionTitle": "Clubes",
+    "empty": "Ainda não há clubes para este livro.",
+    "create": "Criar um clube",
+    "new": {
+      "title": "Novo clube",
+      "nameLabel": "Nome do clube",
+      "descriptionLabel": "Descrição (opcional)",
+      "cancel": "Cancelar",
+      "creating": "Criando…",
+      "submit": "Criar clube",
+      "error": "Não foi possível criar o clube. Tente novamente."
+    },
+    "join": "Participar",
+    "joined": "Participando",
+    "memberCount": "{count} membros",
+    "moreMembers": "+{count}",
+    "tabs": {
+      "discussion": "Discussão",
+      "members": "Membros",
+      "schedule": "Cronograma"
+    },
+    "discussionComingSoon": "A discussão organizada por capítulo chega em uma atualização futura.",
+    "scheduleComingSoon": "Os cronogramas de leitura chegam em uma atualização futura.",
+    "notFound": "Este clube não existe."
+  }
+}

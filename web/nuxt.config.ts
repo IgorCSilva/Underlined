@@ -21,6 +21,9 @@ export default defineNuxtConfig({
     // used by the post page so that redesigning it can never regress the
     // post page's nested-reply behavior.
     { path: '~/components/debate', pathPrefix: false },
+    // Book-club (Step 17) UI, kept separate from the generic post/book
+    // components it's built from.
+    { path: '~/components/clubs', pathPrefix: false },
   ],
   runtimeConfig: {
     // Server-side (SSR) requests run inside the docker network, so they use
@@ -37,13 +40,13 @@ export default defineNuxtConfig({
         code: 'en',
         language: 'en-US',
         name: 'English',
-        files: ['en/common.json', 'en/nav.json', 'en/auth.json', 'en/feed.json', 'en/posts.json', 'en/books.json', 'en/comments.json', 'en/profile.json', 'en/errors.json', 'en/health.json', 'en/saved.json', 'en/keywords.json', 'en/chains.json', 'en/graph.json', 'en/debates.json'],
+        files: ['en/common.json', 'en/nav.json', 'en/auth.json', 'en/feed.json', 'en/posts.json', 'en/books.json', 'en/comments.json', 'en/profile.json', 'en/errors.json', 'en/health.json', 'en/saved.json', 'en/keywords.json', 'en/chains.json', 'en/graph.json', 'en/debates.json', 'en/clubs.json'],
       },
       {
         code: 'pt-BR',
         language: 'pt-BR',
         name: 'Português (Brasil)',
-        files: ['pt-BR/common.json', 'pt-BR/nav.json', 'pt-BR/auth.json', 'pt-BR/feed.json', 'pt-BR/posts.json', 'pt-BR/books.json', 'pt-BR/comments.json', 'pt-BR/profile.json', 'pt-BR/errors.json', 'pt-BR/health.json', 'pt-BR/saved.json', 'pt-BR/keywords.json', 'pt-BR/chains.json', 'pt-BR/graph.json', 'pt-BR/debates.json'],
+        files: ['pt-BR/common.json', 'pt-BR/nav.json', 'pt-BR/auth.json', 'pt-BR/feed.json', 'pt-BR/posts.json', 'pt-BR/books.json', 'pt-BR/comments.json', 'pt-BR/profile.json', 'pt-BR/errors.json', 'pt-BR/health.json', 'pt-BR/saved.json', 'pt-BR/keywords.json', 'pt-BR/chains.json', 'pt-BR/graph.json', 'pt-BR/debates.json', 'pt-BR/clubs.json'],
       },
     ],
     defaultLocale: 'en',
