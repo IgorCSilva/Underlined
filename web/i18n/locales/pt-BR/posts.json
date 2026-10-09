@@ -14,6 +14,27 @@
     "related": {
       "title": "Ideias relacionadas"
     },
+    "connections": {
+      "connectAction": "+ Conectar a outro post",
+      "modalTitle": "Conectar a outro post",
+      "searchLabel": "Encontrar um post",
+      "searchPlaceholder": "Busque pelo título do livro ou reflexão…",
+      "noResults": "Nenhum post encontrado.",
+      "relationshipLabel": "Relação",
+      "relationshipPlaceholder": "Escolha uma relação…",
+      "cancel": "Cancelar",
+      "connecting": "Conectando…",
+      "connect": "Conectar",
+      "error": "Não foi possível criar a conexão. Tente novamente.",
+      "types": {
+        "similar_idea": "Ideia parecida",
+        "opposite_idea": "Ideia oposta",
+        "expands_on": "Expande",
+        "contradicts": "Contradiz",
+        "example_of": "Dá um exemplo de",
+        "personal_connection": "Conexão pessoal"
+      }
+    },
     "composer": {
       "published": "Publicado!",
       "liveMessage": "Seu post sobre \"{title}\" está no ar.",

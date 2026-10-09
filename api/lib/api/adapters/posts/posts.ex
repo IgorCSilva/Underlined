@@ -9,6 +9,8 @@ defmodule Api.Adapters.Posts do
   alias Api.Usecases.Bookmark.BookmarkPost.BookmarkPostUsecase
   alias Api.Usecases.Bookmark.ListBookmarkedPosts.ListBookmarkedPostsUsecase
   alias Api.Usecases.Bookmark.UnbookmarkPost.UnbookmarkPostUsecase
+  alias Api.Usecases.Connection.ConnectPosts.ConnectPostsUsecase
+  alias Api.Usecases.Connection.ListConnections.ListConnectionsUsecase
   alias Api.Usecases.Comment.CreateComment.CreateCommentUsecase
   alias Api.Usecases.Comment.ListComments.ListCommentsUsecase
   alias Api.Usecases.Comment.UpdateComment.UpdateCommentUsecase
@@ -49,6 +51,14 @@ defmodule Api.Adapters.Posts do
 
   def related_posts(dto) do
     RelatedPostsUsecase.call(dto, %RelatedPostsUsecase{repository: post_repository()})
+  end
+
+  def connect_posts(dto) do
+    ConnectPostsUsecase.call(dto, %ConnectPostsUsecase{repository: connection_repository()})
+  end
+
+  def list_connections(dto) do
+    ListConnectionsUsecase.call(dto, %ListConnectionsUsecase{repository: connection_repository()})
   end
 
   def like_post(dto) do
@@ -107,6 +117,7 @@ defmodule Api.Adapters.Posts do
   end
 
   defp post_repository, do: Application.get_env(:api, :post_repository) |> Map.new()
+  defp connection_repository, do: Application.get_env(:api, :connection_repository) |> Map.new()
   defp like_repository, do: Application.get_env(:api, :like_repository) |> Map.new()
   defp comment_repository, do: Application.get_env(:api, :comment_repository) |> Map.new()
   defp bookmark_repository, do: Application.get_env(:api, :bookmark_repository) |> Map.new()
