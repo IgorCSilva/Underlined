@@ -1,5 +1,14 @@
 {
   "debates": {
-    "notFound": "Debate não encontrado."
+    "notFound": "Debate não encontrado.",
+    "comments": {
+      "addPlaceholder": "Compartilhe sua opinião sobre este debate…",
+      "agreeA": "Concordar com o primeiro post",
+      "neutral": "Neutro",
+      "agreeB": "Concordar com o segundo post",
+      "replyingTo": "Respondendo a {name}",
+      "cancelReply": "Cancelar resposta",
+      "replyReferenceAriaLabel": "Ir para o comentário respondido"
+    }
   }
 }

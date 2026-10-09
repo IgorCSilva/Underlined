@@ -109,6 +109,70 @@ defmodule ApiWeb.ConnectionCommentControllerTest do
       assert data["parent_comment_id"] == parent_id
     end
 
+    test "persists the given side", %{conn: conn, connection: connection, access_token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/connections/#{connection.id}/comments",
+          comment: %{"body" => "I agree with the first post", "side" => "post_a"}
+        )
+
+      assert %{"data" => data} = json_response(conn, 201)
+      assert data["side"] == "post_a"
+    end
+
+    test "defaults side to neutral when omitted", %{
+      conn: conn,
+      connection: connection,
+      access_token: token
+    } do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/connections/#{connection.id}/comments", comment: %{"body" => "No side taken"})
+
+      assert %{"data" => data} = json_response(conn, 201)
+      assert data["side"] == "neutral"
+    end
+
+    test "rejects an invalid side", %{conn: conn, connection: connection, access_token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/connections/#{connection.id}/comments",
+          comment: %{"body" => "Hi", "side" => "bogus"}
+        )
+
+      assert json_response(conn, 422)
+    end
+
+    test "a reply may take a different side than its parent", %{
+      conn: conn,
+      connection: connection,
+      access_token: token
+    } do
+      conn = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      parent_conn =
+        post(conn, ~p"/api/connections/#{connection.id}/comments",
+          comment: %{"body" => "I disagree!", "side" => "post_a"}
+        )
+
+      %{"data" => %{"id" => parent_id}} = json_response(parent_conn, 201)
+
+      reply_conn =
+        post(conn, ~p"/api/connections/#{connection.id}/comments",
+          comment: %{
+            "body" => "Actually I think the other side has a point",
+            "parent_comment_id" => parent_id,
+            "side" => "post_b"
+          }
+        )
+
+      assert %{"data" => data} = json_response(reply_conn, 201)
+      assert data["side"] == "post_b"
+    end
+
     test "rejects an unauthenticated request", %{conn: conn, connection: connection} do
       conn =
         post(conn, ~p"/api/connections/#{connection.id}/comments", comment: %{"body" => "Hi"})

@@ -12,7 +12,12 @@
       </div>
     </div>
 
-    <CommentThread :base-path="`/api/connections/${debate.id}`" :comments="comments ?? []" class="debate-discussion" />
+    <DebateCommentThread
+      :connection-id="debate.id"
+      :base-path="`/api/connections/${debate.id}`"
+      :comments="comments ?? []"
+      class="debate-discussion"
+    />
   </div>
   <p v-else class="status-text">{{ t('debates.notFound') }}</p>
 </template>

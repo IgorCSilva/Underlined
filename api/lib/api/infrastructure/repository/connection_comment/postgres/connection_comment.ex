@@ -17,6 +17,7 @@ defmodule Api.Infrastructure.Repository.ConnectionComment.Postgres.ConnectionCom
   schema "connection_comments" do
     field :type, :string
     field :body, :string
+    field :side, :string, default: "neutral"
 
     belongs_to :user, User
     belongs_to :connection, Connection
@@ -28,9 +29,10 @@ defmodule Api.Infrastructure.Repository.ConnectionComment.Postgres.ConnectionCom
 
   def changeset(comment, attrs) do
     comment
-    |> cast(attrs, [:user_id, :connection_id, :parent_comment_id, :type, :body])
+    |> cast(attrs, [:user_id, :connection_id, :parent_comment_id, :type, :body, :side])
     |> validate_required([:user_id, :connection_id, :type, :body])
     |> validate_inclusion(:type, ["comment", "reply"])
+    |> validate_inclusion(:side, ["post_a", "post_b", "neutral"])
     |> validate_length(:body, min: 1, max: 1000)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:connection_id)

@@ -2,6 +2,9 @@ export interface Comment {
   id: string
   type: 'comment' | 'reply'
   body: string
+  // Only present on a connection's (debate) comment thread — which debate
+  // post this comment agrees with. Absent on a post's own comment thread.
+  side?: 'post_a' | 'post_b' | 'neutral'
   inserted_at: string
   updated_at: string
   parent_comment_id: string | null
@@ -21,7 +24,7 @@ export const useCommentsStore = defineStore('comments', {
     // limit), so the store only needs to know where to nest `/comments`.
     async createComment(
       basePath: string,
-      payload: { body: string; parent_comment_id?: string | null },
+      payload: { body: string; parent_comment_id?: string | null; side?: 'post_a' | 'post_b' | 'neutral' },
     ): Promise<Comment> {
       const { request } = useApi()
       const res = await request<CommentResponse>(`${basePath}/comments`, {

@@ -33,13 +33,16 @@ defmodule Api.Infrastructure.Repository.ConnectionComment.Postgres.ConnectionCom
     with :ok <- check_comment_rate_limit(user),
          {:ok, type, parent_comment_id} <- resolve_parent(connection, attrs["parent_comment_id"]) do
       %ConnectionComment{}
-      |> ConnectionComment.changeset(%{
-        "user_id" => user.id,
-        "connection_id" => connection.id,
-        "parent_comment_id" => parent_comment_id,
-        "type" => type,
-        "body" => attrs["body"]
-      })
+      |> ConnectionComment.changeset(
+        %{
+          "user_id" => user.id,
+          "connection_id" => connection.id,
+          "parent_comment_id" => parent_comment_id,
+          "type" => type,
+          "body" => attrs["body"]
+        }
+        |> maybe_put_side(attrs["side"])
+      )
       |> Repo.insert()
       |> case do
         {:ok, comment} -> {:ok, Repo.preload(comment, [:user, :replies])}
@@ -109,6 +112,9 @@ defmodule Api.Infrastructure.Repository.ConnectionComment.Postgres.ConnectionCom
       {:deny, _retry_after} -> {:error, :rate_limited}
     end
   end
+
+  defp maybe_put_side(map, nil), do: map
+  defp maybe_put_side(map, side), do: Map.put(map, "side", side)
 
   defp resolve_parent(_connection, nil), do: {:ok, "comment", nil}
 

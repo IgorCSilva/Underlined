@@ -46,6 +46,26 @@ describe('comments store', () => {
     )
   })
 
+  it('posts a side when provided (connection/debate comments)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ data: { ...fakeComment, side: 'post_a' } })
+    vi.stubGlobal('$fetch', fetchMock)
+
+    const comments = useCommentsStore()
+    const result = await comments.createComment('/api/connections/conn-1', {
+      body: 'I agree with the first post',
+      side: 'post_a',
+    })
+
+    expect(result.side).toBe('post_a')
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/connections/conn-1/comments',
+      expect.objectContaining({
+        method: 'POST',
+        body: { comment: { body: 'I agree with the first post', side: 'post_a' } },
+      }),
+    )
+  })
+
   it('propagates errors from the API', async () => {
     vi.stubGlobal('$fetch', vi.fn().mockRejectedValue(new Error('validation failed')))
 

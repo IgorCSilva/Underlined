@@ -1,5 +1,14 @@
 {
   "debates": {
-    "notFound": "Debate not found."
+    "notFound": "Debate not found.",
+    "comments": {
+      "addPlaceholder": "Share your take on this debate…",
+      "agreeA": "Agree with the first post",
+      "neutral": "Neutral",
+      "agreeB": "Agree with the second post",
+      "replyingTo": "Replying to {name}",
+      "cancelReply": "Cancel reply",
+      "replyReferenceAriaLabel": "Jump to the comment being replied to"
+    }
   }
 }

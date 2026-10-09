@@ -16,6 +16,11 @@ export default defineNuxtConfig({
     // independently of core domain components — mirrors the backend's
     // api/lib/api/infrastructure/health/healthy_community grouping.
     { path: '~/components/health', pathPrefix: false },
+    // The debate (Step 16) comment UI is its own side-aware component set,
+    // kept separate from the generic CommentThread/CommentItem/Composer
+    // used by the post page so that redesigning it can never regress the
+    // post page's nested-reply behavior.
+    { path: '~/components/debate', pathPrefix: false },
   ],
   runtimeConfig: {
     // Server-side (SSR) requests run inside the docker network, so they use

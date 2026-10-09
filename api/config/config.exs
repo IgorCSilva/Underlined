@@ -77,7 +77,7 @@ config :api, :debate_repository,
   adaptee: Api.Infrastructure.Repository.Connection.Postgres.ConnectionRepository
 
 config :api, :connection_comment_repository,
-  adapter: Api.Adapters.Comment.CommentRepositoryAdapter,
+  adapter: Api.Adapters.ConnectionComment.ConnectionCommentRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.ConnectionComment.Postgres.ConnectionCommentRepository
 
 config :api, cors_origin: "http://localhost:3000"

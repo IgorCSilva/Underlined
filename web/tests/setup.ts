@@ -9,6 +9,7 @@ import enAuth from '../i18n/locales/en/auth.json'
 import enBooks from '../i18n/locales/en/books.json'
 import enComments from '../i18n/locales/en/comments.json'
 import enCommon from '../i18n/locales/en/common.json'
+import enDebates from '../i18n/locales/en/debates.json'
 import enErrors from '../i18n/locales/en/errors.json'
 import enFeed from '../i18n/locales/en/feed.json'
 import enNav from '../i18n/locales/en/nav.json'
@@ -41,6 +42,7 @@ const messages: Record<string, unknown> = {
   ...enBooks,
   ...enComments,
   ...enCommon,
+  ...enDebates,
   ...enErrors,
   ...enFeed,
   ...enNav,
@@ -86,6 +88,10 @@ vi.stubGlobal('useLocaleFormat', () => ({
 // Individual tests override this via `vi.stubGlobal('$fetch', ...)`.
 vi.stubGlobal('$fetch', vi.fn())
 
+// happy-dom doesn't implement scrolling; the debate comment UI uses
+// scrollIntoView to jump to the composer / a referenced comment card.
+Element.prototype.scrollIntoView = vi.fn()
+
 // `stores/auth.ts` calls `defineStore(...)` at module scope, so the globals
 // above must exist before it's evaluated — a dynamic import (after the stubs
 // run) guarantees that ordering; a static import would not.
@@ -96,6 +102,8 @@ const { usePostsStore } = await import('../app/stores/posts')
 const { useCommentsStore } = await import('../app/stores/comments')
 const { useFollowsStore } = await import('../app/stores/follows')
 const { extractErrorMessage } = await import('../app/utils/errors')
+const { flattenDebateComments } = await import('../app/composables/useDebateComments')
+const { useDebateReplyTarget } = await import('../app/composables/useDebateReplyTarget')
 
 vi.stubGlobal('useAuthStore', useAuthStore)
 vi.stubGlobal('useApi', useApi)
@@ -105,6 +113,8 @@ vi.stubGlobal('usePostsStore', usePostsStore)
 vi.stubGlobal('useCommentsStore', useCommentsStore)
 vi.stubGlobal('useFollowsStore', useFollowsStore)
 vi.stubGlobal('extractErrorMessage', extractErrorMessage)
+vi.stubGlobal('flattenDebateComments', flattenDebateComments)
+vi.stubGlobal('useDebateReplyTarget', useDebateReplyTarget)
 
 beforeEach(() => {
   setActivePinia(createPinia())
