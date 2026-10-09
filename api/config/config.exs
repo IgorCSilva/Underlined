@@ -56,6 +56,10 @@ config :api, :keyword_repository,
   adapter: Api.Adapters.Keyword.KeywordRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.Keyword.Postgres.KeywordRepository
 
+config :api, :connection_repository,
+  adapter: Api.Adapters.Connection.ConnectionRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Connection.Postgres.ConnectionRepository
+
 config :api, :interest_profile_repository,
   adapter: Api.Adapters.InterestProfile.InterestProfileRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.InterestProfile.Postgres.InterestProfileRepository

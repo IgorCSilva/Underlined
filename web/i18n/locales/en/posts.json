@@ -14,6 +14,27 @@
     "related": {
       "title": "Related ideas"
     },
+    "connections": {
+      "connectAction": "+ Connect to another post",
+      "modalTitle": "Connect to another post",
+      "searchLabel": "Find a post",
+      "searchPlaceholder": "Search by book title or takeaway…",
+      "noResults": "No posts found.",
+      "relationshipLabel": "Relationship",
+      "relationshipPlaceholder": "Choose a relationship…",
+      "cancel": "Cancel",
+      "connecting": "Connecting…",
+      "connect": "Connect",
+      "error": "Couldn't create the connection. Please try again.",
+      "types": {
+        "similar_idea": "Similar idea",
+        "opposite_idea": "Opposite idea",
+        "expands_on": "Expands on",
+        "contradicts": "Contradicts",
+        "example_of": "Provides an example of",
+        "personal_connection": "Personal connection"
+      }
+    },
     "composer": {
       "published": "Published!",
       "liveMessage": "Your post about \"{title}\" is live.",
