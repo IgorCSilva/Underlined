@@ -84,6 +84,18 @@ config :api, :club_repository,
   adapter: Api.Adapters.Club.ClubRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.Club.Postgres.ClubRepository
 
+config :api, :club_chapter_repository,
+  adapter: Api.Adapters.Club.ClubChapterRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Club.Postgres.ClubChapterRepository
+
+config :api, :club_post_repository,
+  adapter: Api.Adapters.Club.ClubPostRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Club.Postgres.ClubPostRepository
+
+config :api, :club_comment_repository,
+  adapter: Api.Adapters.ClubComment.ClubCommentRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Club.Postgres.ClubCommentRepository
+
 config :api, cors_origin: "http://localhost:3000"
 config :api, web_base_url: "http://localhost:3000"
 

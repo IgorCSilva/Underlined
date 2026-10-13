@@ -7,6 +7,7 @@ defmodule ApiWeb.ClubController do
   alias Api.Usecases.Club.JoinClub.JoinClubUsecaseDto
   alias Api.Usecases.Club.LeaveClub.LeaveClubUsecaseDto
   alias Api.Usecases.Club.ListClubMembers.ListClubMembersUsecaseDto
+  alias Api.Usecases.Club.ListClubs.ListClubsUsecaseDto
   alias Api.Usecases.Club.ListClubsForBook.ListClubsForBookUsecaseDto
 
   action_fallback ApiWeb.FallbackController
@@ -18,6 +19,11 @@ defmodule ApiWeb.ClubController do
         current_user: current_user(conn)
       })
 
+    render(conn, :index, clubs: clubs)
+  end
+
+  def all(conn, _params) do
+    clubs = Clubs.list_clubs(%ListClubsUsecaseDto{current_user: current_user(conn)})
     render(conn, :index, clubs: clubs)
   end
 

@@ -20,6 +20,8 @@ defmodule ApiWeb.ClubJSON do
       member_count: club.member_count,
       members_preview: Enum.map(club.members_preview, &user_data/1),
       joined_by_user: club.joined_by_user,
+      chapter_unit_label: club.chapter_unit_label,
+      current_chapter_label: club.current_chapter_label,
       inserted_at: club.inserted_at
     }
   end

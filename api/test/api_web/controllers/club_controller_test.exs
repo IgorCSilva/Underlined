@@ -136,6 +136,46 @@ defmodule ApiWeb.ClubControllerTest do
     end
   end
 
+  describe "GET /api/clubs" do
+    test "lists clubs across every book, newest first, annotated for the viewer", %{
+      conn: conn,
+      creator_token: creator_token,
+      other_token: other_token,
+      book: book
+    } do
+      create_club(conn, creator_token, book, %{"name" => "First Club"})
+      create_club(conn, creator_token, book, %{"name" => "Second Club"})
+
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{other_token}")
+        |> get(~p"/api/clubs")
+
+      assert %{
+               "data" => [
+                 %{"name" => "Second Club", "joined_by_user" => false},
+                 %{"name" => "First Club", "joined_by_user" => false}
+               ]
+             } = json_response(conn, 200)
+    end
+
+    test "works unauthenticated, with every club reported as not joined", %{
+      conn: conn,
+      creator_token: token,
+      book: book
+    } do
+      create_club(conn, token, book)
+
+      conn = get(conn, ~p"/api/clubs")
+      assert %{"data" => [%{"joined_by_user" => false}]} = json_response(conn, 200)
+    end
+
+    test "returns an empty list when there are no clubs", %{conn: conn} do
+      conn = get(conn, ~p"/api/clubs")
+      assert json_response(conn, 200) == %{"data" => []}
+    end
+  end
+
   describe "GET /api/clubs/:id" do
     test "returns the club annotated for the viewer", %{
       conn: conn,

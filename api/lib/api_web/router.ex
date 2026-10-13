@@ -72,6 +72,14 @@ defmodule ApiWeb.Router do
       post "/books/:book_id/clubs", ClubController, :create
       post "/clubs/:id/membership", ClubController, :join
       delete "/clubs/:id/membership", ClubController, :leave
+
+      post "/clubs/:club_id/chapters", ClubChapterController, :create
+      put "/clubs/:club_id/chapters/:id/current", ClubChapterController, :set_current
+
+      post "/clubs/:club_id/posts", ClubPostController, :create
+
+      post "/club_posts/:club_post_id/comments", ClubCommentController, :create
+      put "/club_posts/:club_post_id/comments/:id", ClubCommentController, :update
     end
 
     scope "/" do
@@ -91,8 +99,12 @@ defmodule ApiWeb.Router do
       get "/chains/:id", ChainController, :show
       get "/books/:id/page", BookController, :page
       get "/books/:book_id/clubs", ClubController, :index
+      get "/clubs", ClubController, :all
       get "/clubs/:id", ClubController, :show
       get "/clubs/:id/members", ClubController, :members
+      get "/clubs/:club_id/chapters", ClubChapterController, :index
+      get "/clubs/:club_id/posts", ClubPostController, :index
+      get "/club_posts/:club_post_id/comments", ClubCommentController, :index
       get "/keywords/:name", KeywordController, :show
     end
   end

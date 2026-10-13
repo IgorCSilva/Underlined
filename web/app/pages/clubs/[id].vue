@@ -14,8 +14,20 @@
           <span class="club-member-count">{{ t('clubs.memberCount', { count: club.member_count }) }}</span>
           <ClubMembershipButton :club-id="club.id" :joined-by-user="club.joined_by_user" />
         </div>
+        <p v-if="club.current_chapter_label" class="club-current-chapter">
+          {{ t('clubs.chapters.currentlyReading', { label: club.current_chapter_label }) }}
+        </p>
       </div>
     </div>
+
+    <ClubChapterStrip
+      :club-id="club.id"
+      :chapters="chapters"
+      :unit-label="club.chapter_unit_label"
+      :can-manage="isCreator"
+      @chapter-added="onChapterAdded"
+      @current-changed="onCurrentChanged"
+    />
 
     <div class="club-tabs" role="tablist">
       <button
@@ -32,7 +44,14 @@
       </button>
     </div>
 
-    <p v-if="activeTab === 'discussion'" class="status-text">{{ t('clubs.discussionComingSoon') }}</p>
+    <ClubDiscussionFeed
+      v-if="activeTab === 'discussion'"
+      :club-id="club.id"
+      :posts="posts"
+      :chapters="chapters"
+      :can-post="club.joined_by_user"
+      @post-added="onPostAdded"
+    />
     <p v-else-if="activeTab === 'schedule'" class="status-text">{{ t('clubs.scheduleComingSoon') }}</p>
     <ul v-else class="club-member-list">
       <li v-for="member in members" :key="member.id" class="club-member-row">
@@ -45,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Club, ClubMember } from '~/stores/clubs'
+import type { Club, ClubChapter, ClubMember, ClubPost } from '~/stores/clubs'
 
 const TABS = ['discussion', 'members', 'schedule'] as const
 
@@ -54,6 +73,11 @@ const { t } = useI18n()
 const clubsStore = useClubsStore()
 
 const { data: club } = await useApiFetch<Club>(`/api/clubs/${route.params.id}`)
+const { data: chaptersData } = await useApiFetch<ClubChapter[]>(`/api/clubs/${route.params.id}/chapters`)
+const { data: postsData } = await useApiFetch<ClubPost[]>(`/api/clubs/${route.params.id}/posts`)
+
+const chapters = ref<ClubChapter[]>(chaptersData.value ?? [])
+const posts = ref<ClubPost[]>(postsData.value ?? [])
 
 // SSR always renders anonymous (no access token is available server-side),
 // so a logged-in viewer's own `joined_by_user` never shows up in the
@@ -66,6 +90,8 @@ onMounted(async () => {
   club.value = await clubsStore.getClub(club.value.id)
 })
 
+const isCreator = computed(() => !!club.value && auth.user?.id === club.value.creator.id)
+
 const activeTab = ref<(typeof TABS)[number]>('discussion')
 const members = ref<ClubMember[]>([])
 const membersLoaded = ref(false)
@@ -75,6 +101,28 @@ watch(activeTab, async (tab) => {
   members.value = await clubsStore.listMembers(club.value.id)
   membersLoaded.value = true
 })
+
+async function onChapterAdded(chapter: ClubChapter) {
+  chapters.value = [...chapters.value, chapter]
+  // Adding a chapter may have also renamed the club's schedule unit word
+  // (e.g. "Chapter" -> "Letter"), so re-fetch the club to pick that up.
+  if (club.value) club.value = await clubsStore.getClub(club.value.id)
+}
+
+function onCurrentChanged(chapter: ClubChapter) {
+  chapters.value = chapters.value.map((c) => ({ ...c, current: c.id === chapter.id }))
+  if (club.value) club.value.current_chapter_label = chapter.label
+}
+
+function onPostAdded(post: ClubPost) {
+  const chapterPosition = post.chapter?.position ?? -1
+  const insertAt = posts.value.findIndex((p) => (p.chapter?.position ?? -1) > chapterPosition)
+  if (insertAt === -1) {
+    posts.value = [...posts.value, post]
+  } else {
+    posts.value = [...posts.value.slice(0, insertAt), post, ...posts.value.slice(insertAt)]
+  }
+}
 </script>
 
 <style scoped>
@@ -143,6 +191,13 @@ watch(activeTab, async (tab) => {
 .club-member-count {
   font-size: 0.85rem;
   color: var(--color-text-secondary);
+}
+
+.club-current-chapter {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  font-style: italic;
 }
 
 .club-tabs {
