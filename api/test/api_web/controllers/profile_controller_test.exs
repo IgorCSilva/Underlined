@@ -10,6 +10,7 @@ defmodule ApiWeb.ProfileControllerTest do
   alias Api.Infrastructure.Health.HealthyCommunity.CommunityHealthWorker
   alias Api.Infrastructure.Repository.InterestProfile.Postgres.InterestProfileRepository
   alias Api.Usecases.Book.AddBook.AddBookUsecaseDto
+  alias Api.Usecases.Connection.ConnectPosts.ConnectPostsUsecaseDto
   alias Api.Usecases.Post.CreatePost.CreatePostUsecaseDto
   alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
   alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
@@ -260,6 +261,93 @@ defmodule ApiWeb.ProfileControllerTest do
 
     test "returns 404 for an unknown user", %{conn: conn} do
       conn = get(conn, ~p"/api/users/999999/interests")
+      assert json_response(conn, 404)
+    end
+  end
+
+  describe "GET /api/users/:id/graph" do
+    setup do
+      {:ok, book} =
+        Catalog.add_book(%AddBookUsecaseDto{attrs: %{"title" => "Sapiens", "author" => "Harari"}})
+
+      %{book: book}
+    end
+
+    test "returns post and keyword nodes, keyword edges, for a user with posts", %{
+      conn: conn,
+      user: user,
+      book: book
+    } do
+      post = create_post(user, book, ["attention", "nature-writing"], "First.")
+
+      conn = get(conn, ~p"/api/users/#{user.id}/graph")
+
+      assert %{"data" => %{"nodes" => nodes, "edges" => edges}} = json_response(conn, 200)
+
+      post_nodes = Enum.filter(nodes, &(&1["type"] == "post"))
+      keyword_nodes = Enum.filter(nodes, &(&1["type"] == "keyword"))
+      assert [%{"id" => post_id, "post" => %{"id" => post_id}}] = post_nodes
+      assert post_id == post.id
+      assert Enum.map(keyword_nodes, & &1["keyword"]["name"]) |> Enum.sort() ==
+               ["attention", "nature-writing"]
+
+      keyword_edges = Enum.filter(edges, &(&1["type"] == "keyword"))
+      assert length(keyword_edges) == 2
+      assert Enum.all?(keyword_edges, &(&1["source_id"] == post.id))
+    end
+
+    test "includes a connection edge only between the user's own posts", %{
+      conn: conn,
+      user: user,
+      book: book
+    } do
+      post_a = create_post(user, book, [], "First.")
+      post_b = create_post(user, book, [], "Second.")
+
+      {:ok, other} =
+        Accounts.register_user(%RegisterUserUsecaseDto{
+          attrs: %{"email" => "other@example.com", "password" => "supersecret", "name" => "Other"}
+        })
+
+      other_post = create_post(other, book, [], "Not mine.")
+
+      {:ok, _connection} =
+        Posts.connect_posts(%ConnectPostsUsecaseDto{
+          user: user,
+          post_id: post_a.id,
+          related_post_id: post_b.id,
+          relationship_type: "expands_on"
+        })
+
+      {:ok, _connection} =
+        Posts.connect_posts(%ConnectPostsUsecaseDto{
+          user: user,
+          post_id: post_a.id,
+          related_post_id: other_post.id,
+          relationship_type: "contradicts"
+        })
+
+      conn = get(conn, ~p"/api/users/#{user.id}/graph")
+
+      assert %{"data" => %{"nodes" => nodes, "edges" => edges}} = json_response(conn, 200)
+
+      post_ids = nodes |> Enum.filter(&(&1["type"] == "post")) |> Enum.map(& &1["id"])
+      assert Enum.sort(post_ids) == Enum.sort([post_a.id, post_b.id])
+
+      connection_edges = Enum.reject(edges, &(&1["type"] == "keyword"))
+      assert [%{"source_id" => source_id, "target_id" => target_id, "type" => "expands_on"}] =
+               connection_edges
+
+      assert Enum.sort([source_id, target_id]) == Enum.sort([post_a.id, post_b.id])
+    end
+
+    test "returns empty nodes/edges for a user with no posts", %{conn: conn, user: user} do
+      conn = get(conn, ~p"/api/users/#{user.id}/graph")
+      assert json_response(conn, 200) == %{"data" => %{"nodes" => [], "edges" => []}}
+    end
+
+    test "returns 404 for an unknown user", %{conn: conn} do
+      conn = get(conn, ~p"/api/users/999999/graph")
       assert json_response(conn, 404)
     end
   end
