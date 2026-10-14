@@ -77,6 +77,17 @@ defmodule ApiWeb.FallbackController do
     })
   end
 
+  def call(conn, {:error, :no_neighbor}) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> json(%{
+      errors: %{
+        detail: gettext("that chapter has no neighbor in that direction"),
+        code: "no_neighbor"
+      }
+    })
+  end
+
   def call(conn, {:error, :invalid_parent}) do
     conn
     |> put_status(:unprocessable_entity)

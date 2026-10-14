@@ -60,7 +60,15 @@
       :can-post="club.joined_by_user"
       @post-added="onPostAdded"
     />
-    <p v-else-if="activeTab === 'schedule'" class="status-text">{{ t('clubs.scheduleComingSoon') }}</p>
+    <ClubScheduleView
+      v-else-if="activeTab === 'schedule'"
+      :club-id="club.id"
+      :chapters="chapters"
+      :unit-label="club.chapter_unit_label"
+      :can-manage="isCreator"
+      @chapter-changed="onScheduleChanged"
+      @chapter-added="onChapterAdded"
+    />
     <ul v-else class="club-member-list">
       <li v-for="member in members" :key="member.id" class="club-member-row">
         <AvatarCircle :name="member.name" :avatar-url="member.avatar_url" :size="40" />
@@ -131,6 +139,15 @@ async function onChapterAdded(chapter: ClubChapter) {
 function onCurrentChanged(chapter: ClubChapter) {
   chapters.value = chapters.value.map((c) => ({ ...c, current: c.id === chapter.id }))
   if (club.value) club.value.current_chapter_label = chapter.label
+}
+
+// Editing a label/target date or reordering can touch more than the one
+// chapter the event carries (a move also shifts its neighbor's position),
+// so re-fetch the whole schedule rather than patching it in place.
+async function onScheduleChanged() {
+  if (!club.value) return
+  chapters.value = await clubsStore.listChapters(club.value.id)
+  club.value = await clubsStore.getClub(club.value.id)
 }
 
 function onPostAdded(post: ClubPost) {

@@ -190,6 +190,219 @@ defmodule ApiWeb.ClubDiscussionControllerTest do
     end
   end
 
+  describe "PUT /api/clubs/:club_id/chapters/:id" do
+    test "the creator can edit a chapter's label and target date", %{
+      conn: conn,
+      creator_token: token,
+      club_id: club_id
+    } do
+      create_response = create_chapter(conn, token, club_id, %{"label" => "Chapter 1"})
+      %{"data" => %{"id" => chapter_id}} = json_response(create_response, 201)
+
+      conn =
+        conn
+        |> auth(token)
+        |> put(~p"/api/clubs/#{club_id}/chapters/#{chapter_id}", %{
+          "chapter" => %{"label" => "Chapter 1 - The first day", "target_date" => "2026-11-01"}
+        })
+
+      assert %{
+               "data" => %{
+                 "id" => ^chapter_id,
+                 "label" => "Chapter 1 - The first day",
+                 "target_date" => "2026-11-01"
+               }
+             } = json_response(conn, 200)
+    end
+
+    test "a non-creator member cannot edit a chapter", %{
+      conn: conn,
+      creator_token: creator_token,
+      other_token: other_token,
+      club_id: club_id
+    } do
+      create_response = create_chapter(conn, creator_token, club_id, %{"label" => "Chapter 1"})
+      %{"data" => %{"id" => chapter_id}} = json_response(create_response, 201)
+
+      conn =
+        conn
+        |> auth(other_token)
+        |> put(~p"/api/clubs/#{club_id}/chapters/#{chapter_id}", %{
+          "chapter" => %{"label" => "Hijacked"}
+        })
+
+      assert json_response(conn, 403)
+    end
+
+    test "rejects a blank label", %{conn: conn, creator_token: token, club_id: club_id} do
+      create_response = create_chapter(conn, token, club_id, %{"label" => "Chapter 1"})
+      %{"data" => %{"id" => chapter_id}} = json_response(create_response, 201)
+
+      conn =
+        conn
+        |> auth(token)
+        |> put(~p"/api/clubs/#{club_id}/chapters/#{chapter_id}", %{
+          "chapter" => %{"label" => ""}
+        })
+
+      assert json_response(conn, 422)
+    end
+
+    test "rejects an unauthenticated request", %{
+      conn: conn,
+      creator_token: token,
+      club_id: club_id
+    } do
+      create_response = create_chapter(conn, token, club_id, %{"label" => "Chapter 1"})
+      %{"data" => %{"id" => chapter_id}} = json_response(create_response, 201)
+
+      conn =
+        put(conn, ~p"/api/clubs/#{club_id}/chapters/#{chapter_id}", %{
+          "chapter" => %{"label" => "Nope"}
+        })
+
+      assert json_response(conn, 401)
+    end
+  end
+
+  describe "PUT /api/clubs/:club_id/chapters/:id/move" do
+    test "the creator moves a chapter down, swapping positions with its neighbor", %{
+      conn: conn,
+      creator_token: token,
+      club_id: club_id
+    } do
+      ch1 = create_chapter(conn, token, club_id, %{"label" => "Chapter 1"})
+      %{"data" => %{"id" => chapter_1_id}} = json_response(ch1, 201)
+
+      ch2 = create_chapter(conn, token, club_id, %{"label" => "Chapter 2"})
+      %{"data" => %{"id" => chapter_2_id}} = json_response(ch2, 201)
+
+      conn =
+        conn
+        |> auth(token)
+        |> put(~p"/api/clubs/#{club_id}/chapters/#{chapter_1_id}/move", %{"direction" => "down"})
+
+      assert %{"data" => %{"id" => ^chapter_1_id, "position" => 2}} = json_response(conn, 200)
+
+      list_conn = get(build_conn(), ~p"/api/clubs/#{club_id}/chapters")
+
+      assert %{
+               "data" => [
+                 %{"id" => ^chapter_2_id, "position" => 1},
+                 %{"id" => ^chapter_1_id, "position" => 2}
+               ]
+             } = json_response(list_conn, 200)
+    end
+
+    test "the creator moves a chapter up, swapping positions with its neighbor", %{
+      conn: conn,
+      creator_token: token,
+      club_id: club_id
+    } do
+      ch1 = create_chapter(conn, token, club_id, %{"label" => "Chapter 1"})
+      %{"data" => %{"id" => chapter_1_id}} = json_response(ch1, 201)
+
+      ch2 = create_chapter(conn, token, club_id, %{"label" => "Chapter 2"})
+      %{"data" => %{"id" => chapter_2_id}} = json_response(ch2, 201)
+
+      conn =
+        conn
+        |> auth(token)
+        |> put(~p"/api/clubs/#{club_id}/chapters/#{chapter_2_id}/move", %{"direction" => "up"})
+
+      assert %{"data" => %{"id" => ^chapter_2_id, "position" => 1}} = json_response(conn, 200)
+
+      list_conn = get(build_conn(), ~p"/api/clubs/#{club_id}/chapters")
+
+      assert %{
+               "data" => [
+                 %{"id" => ^chapter_2_id, "position" => 1},
+                 %{"id" => ^chapter_1_id, "position" => 2}
+               ]
+             } = json_response(list_conn, 200)
+    end
+
+    test "preserves which chapter is current across a swap", %{
+      conn: conn,
+      creator_token: token,
+      club_id: club_id
+    } do
+      ch1 = create_chapter(conn, token, club_id, %{"label" => "Chapter 1"})
+      %{"data" => %{"id" => chapter_1_id}} = json_response(ch1, 201)
+
+      ch2 = create_chapter(conn, token, club_id, %{"label" => "Chapter 2"})
+      %{"data" => %{"id" => chapter_2_id}} = json_response(ch2, 201)
+
+      conn
+      |> auth(token)
+      |> put(~p"/api/clubs/#{club_id}/chapters/#{chapter_1_id}/current")
+
+      conn
+      |> auth(token)
+      |> put(~p"/api/clubs/#{club_id}/chapters/#{chapter_1_id}/move", %{"direction" => "down"})
+
+      list_conn = get(build_conn(), ~p"/api/clubs/#{club_id}/chapters")
+
+      assert %{
+               "data" => [
+                 %{"id" => ^chapter_2_id, "current" => false},
+                 %{"id" => ^chapter_1_id, "current" => true}
+               ]
+             } = json_response(list_conn, 200)
+    end
+
+    test "returns 422 moving the first chapter up (no earlier neighbor)", %{
+      conn: conn,
+      creator_token: token,
+      club_id: club_id
+    } do
+      ch1 = create_chapter(conn, token, club_id, %{"label" => "Chapter 1"})
+      %{"data" => %{"id" => chapter_1_id}} = json_response(ch1, 201)
+
+      conn =
+        conn
+        |> auth(token)
+        |> put(~p"/api/clubs/#{club_id}/chapters/#{chapter_1_id}/move", %{"direction" => "up"})
+
+      assert json_response(conn, 422)
+    end
+
+    test "a non-creator member cannot move a chapter", %{
+      conn: conn,
+      creator_token: creator_token,
+      other_token: other_token,
+      club_id: club_id
+    } do
+      ch1 = create_chapter(conn, creator_token, club_id, %{"label" => "Chapter 1"})
+      %{"data" => %{"id" => chapter_1_id}} = json_response(ch1, 201)
+      create_chapter(conn, creator_token, club_id, %{"label" => "Chapter 2"})
+
+      conn =
+        conn
+        |> auth(other_token)
+        |> put(~p"/api/clubs/#{club_id}/chapters/#{chapter_1_id}/move", %{"direction" => "down"})
+
+      assert json_response(conn, 403)
+    end
+
+    test "rejects an unauthenticated request", %{
+      conn: conn,
+      creator_token: token,
+      club_id: club_id
+    } do
+      ch1 = create_chapter(conn, token, club_id, %{"label" => "Chapter 1"})
+      %{"data" => %{"id" => chapter_1_id}} = json_response(ch1, 201)
+      create_chapter(conn, token, club_id, %{"label" => "Chapter 2"})
+
+      conn =
+        put(conn, ~p"/api/clubs/#{club_id}/chapters/#{chapter_1_id}/move", %{
+          "direction" => "down"
+        })
+
+      assert json_response(conn, 401)
+    end
+  end
+
   describe "POST /api/clubs/:club_id/posts" do
     test "a member can post to the discussion, optionally tagged to a chapter", %{
       conn: conn,

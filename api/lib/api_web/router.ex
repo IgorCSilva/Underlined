@@ -75,6 +75,8 @@ defmodule ApiWeb.Router do
 
       post "/clubs/:club_id/chapters", ClubChapterController, :create
       put "/clubs/:club_id/chapters/:id/current", ClubChapterController, :set_current
+      put "/clubs/:club_id/chapters/:id", ClubChapterController, :update
+      put "/clubs/:club_id/chapters/:id/move", ClubChapterController, :move
 
       post "/clubs/:club_id/posts", ClubPostController, :create
 
