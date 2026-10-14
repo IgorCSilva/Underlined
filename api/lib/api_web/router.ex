@@ -56,6 +56,10 @@ defmodule ApiWeb.Router do
 
       post "/posts/:post_id/connections", ConnectionController, :create
 
+      post "/chains", ChainController, :create
+      post "/chains/:chain_id/items", ChainController, :add_item
+      put "/chains/:chain_id/items", ChainController, :reorder_items
+
       get "/reports/reasons", ReportController, :reasons
       post "/reports", ReportController, :create
 
@@ -73,6 +77,8 @@ defmodule ApiWeb.Router do
       get "/posts/:id", PostController, :show
       get "/posts/:id/related", PostController, :related
       get "/posts/:id/connections", ConnectionController, :index
+      get "/chains", ChainController, :index
+      get "/chains/:id", ChainController, :show
       get "/books/:id/page", BookController, :page
       get "/keywords/:name", KeywordController, :show
     end
