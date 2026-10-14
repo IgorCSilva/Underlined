@@ -29,6 +29,14 @@
       @current-changed="onCurrentChanged"
     />
 
+    <ClubReadingProgressSlider
+      v-if="auth.user && chapters.length"
+      :club-id="club.id"
+      :chapters="chapters"
+      :current-chapter-id="myProgressChapterId"
+      @progress-changed="onProgressChanged"
+    />
+
     <div class="club-tabs" role="tablist">
       <button
         v-for="tab in TABS"
@@ -84,13 +92,24 @@ const posts = ref<ClubPost[]>(postsData.value ?? [])
 // hydrated payload. Once the client is ready, re-fetch with the auth header
 // to correct it — same pattern as the book page's post list.
 const auth = useAuthStore()
+const myProgressChapterId = ref<string | null>(null)
+
 onMounted(async () => {
   await auth.ensureInitialized()
   if (!auth.accessToken || !club.value) return
   club.value = await clubsStore.getClub(club.value.id)
+  posts.value = await clubsStore.listPosts(club.value.id)
+
+  const progress = await clubsStore.getReadingProgress(club.value.id)
+  myProgressChapterId.value = progress.chapter?.id ?? null
 })
 
 const isCreator = computed(() => !!club.value && auth.user?.id === club.value.creator.id)
+
+async function onProgressChanged(chapter: ClubChapter | null) {
+  myProgressChapterId.value = chapter?.id ?? null
+  if (club.value) posts.value = await clubsStore.listPosts(club.value.id)
+}
 
 const activeTab = ref<(typeof TABS)[number]>('discussion')
 const members = ref<ClubMember[]>([])

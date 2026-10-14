@@ -12,6 +12,7 @@ defmodule Api.Adapters.Clubs do
   alias Api.Usecases.Club.CreateClubComment.CreateClubCommentUsecase
   alias Api.Usecases.Club.CreateClubPost.CreateClubPostUsecase
   alias Api.Usecases.Club.GetClub.GetClubUsecase
+  alias Api.Usecases.Club.GetClubReadingProgress.GetClubReadingProgressUsecase
   alias Api.Usecases.Club.JoinClub.JoinClubUsecase
   alias Api.Usecases.Club.LeaveClub.LeaveClubUsecase
   alias Api.Usecases.Club.ListClubChapters.ListClubChaptersUsecase
@@ -20,6 +21,8 @@ defmodule Api.Adapters.Clubs do
   alias Api.Usecases.Club.ListClubPosts.ListClubPostsUsecase
   alias Api.Usecases.Club.ListClubs.ListClubsUsecase
   alias Api.Usecases.Club.ListClubsForBook.ListClubsForBookUsecase
+  alias Api.Usecases.Club.RevealClubPost.RevealClubPostUsecase
+  alias Api.Usecases.Club.SetClubReadingProgress.SetClubReadingProgressUsecase
   alias Api.Usecases.Club.SetCurrentClubChapter.SetCurrentClubChapterUsecase
   alias Api.Usecases.Club.UpdateClubComment.UpdateClubCommentUsecase
 
@@ -81,6 +84,22 @@ defmodule Api.Adapters.Clubs do
     ListClubPostsUsecase.call(dto, %ListClubPostsUsecase{repository: club_post_repository()})
   end
 
+  def reveal_club_post(dto) do
+    RevealClubPostUsecase.call(dto, %RevealClubPostUsecase{repository: club_post_repository()})
+  end
+
+  def set_club_reading_progress(dto) do
+    SetClubReadingProgressUsecase.call(dto, %SetClubReadingProgressUsecase{
+      repository: club_reading_progress_repository()
+    })
+  end
+
+  def get_club_reading_progress(dto) do
+    GetClubReadingProgressUsecase.call(dto, %GetClubReadingProgressUsecase{
+      repository: club_reading_progress_repository()
+    })
+  end
+
   def create_club_comment(dto) do
     CreateClubCommentUsecase.call(dto, %CreateClubCommentUsecase{
       repository: club_comment_repository()
@@ -108,6 +127,9 @@ defmodule Api.Adapters.Clubs do
 
   defp club_comment_repository,
     do: Application.get_env(:api, :club_comment_repository) |> Map.new()
+
+  defp club_reading_progress_repository,
+    do: Application.get_env(:api, :club_reading_progress_repository) |> Map.new()
 
   defp community_health_enqueuer,
     do:

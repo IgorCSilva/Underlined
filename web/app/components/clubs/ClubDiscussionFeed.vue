@@ -32,19 +32,36 @@
           <NuxtLink :to="`/profile/${post.user.id}`" class="discussion-post-author">{{ post.user.name }}</NuxtLink>
           <span class="discussion-post-date">{{ formatDate(post.inserted_at, { year: 'numeric', month: 'short', day: 'numeric' }) }}</span>
         </div>
-        <p class="discussion-post-body">{{ post.body }}</p>
-
-        <button type="button" class="discussion-post-comments-toggle" @click="toggleComments(post)">
-          {{ t('clubs.discussion.commentCount', { count: post.comment_count }) }}
-        </button>
-
-        <div v-if="expanded.has(post.id)" class="discussion-post-comments">
-          <CommentThread
-            :base-path="`/api/club_posts/${post.id}`"
-            :comments="loadedComments[post.id] ?? []"
-            @comment-added="post.comment_count++"
-          />
+        <div v-if="isBlocked(post)" class="discussion-post-spoiler">
+          <span class="discussion-post-spoiler-icon" aria-hidden="true">🔒</span>
+          <p class="discussion-post-spoiler-text">
+            {{ t('clubs.spoiler.blocked', { label: post.chapter?.label }) }}
+          </p>
+          <button
+            type="button"
+            class="discussion-post-spoiler-reveal"
+            :disabled="revealing.has(post.id)"
+            @click="revealPost(post)"
+          >
+            {{ t('clubs.spoiler.revealAnyway') }}
+          </button>
         </div>
+
+        <template v-else>
+          <p class="discussion-post-body">{{ displayBody(post) }}</p>
+
+          <button type="button" class="discussion-post-comments-toggle" @click="toggleComments(post)">
+            {{ t('clubs.discussion.commentCount', { count: post.comment_count }) }}
+          </button>
+
+          <div v-if="expanded.has(post.id)" class="discussion-post-comments">
+            <CommentThread
+              :base-path="`/api/club_posts/${post.id}`"
+              :comments="loadedComments[post.id] ?? []"
+              @comment-added="post.comment_count++"
+            />
+          </div>
+        </template>
       </div>
     </div>
   </div>
@@ -68,6 +85,29 @@ const error = ref('')
 
 const expanded = ref(new Set<string>())
 const loadedComments = reactive<Record<string, Comment[]>>({})
+
+const revealing = ref(new Set<string>())
+const revealedBodies = reactive<Record<string, string>>({})
+
+function isBlocked(post: ClubPost) {
+  return post.spoiler_blocked && !(post.id in revealedBodies)
+}
+
+function displayBody(post: ClubPost) {
+  return revealedBodies[post.id] ?? post.body ?? ''
+}
+
+async function revealPost(post: ClubPost) {
+  if (revealing.value.has(post.id)) return
+  revealing.value = new Set(revealing.value).add(post.id)
+  try {
+    const full = await clubs.revealPost(post.id)
+    revealedBodies[post.id] = full.body ?? ''
+  } finally {
+    revealing.value = new Set(revealing.value)
+    revealing.value.delete(post.id)
+  }
+}
 
 interface Group {
   key: string
@@ -263,5 +303,48 @@ async function onSubmit() {
 
 .discussion-post-comments {
   margin-top: 10px;
+}
+
+.discussion-post-spoiler {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 72px;
+  justify-content: center;
+  padding: 20px 16px;
+  border-radius: 12px;
+  background: rgba(250, 247, 241, 0.85);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.discussion-post-spoiler-icon {
+  font-size: 1.4rem;
+}
+
+.discussion-post-spoiler-text {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.discussion-post-spoiler-reveal {
+  background: none;
+  border: 1.5px solid var(--color-accent-primary);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent-primary);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 6px 16px;
+  cursor: pointer;
+}
+
+.discussion-post-spoiler-reveal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

@@ -30,12 +30,17 @@ export interface ClubChapter {
 
 export interface ClubPost {
   id: string
-  body: string
+  body: string | null
   chapter: ClubChapter | null
   comment_count: number
+  spoiler_blocked: boolean
   inserted_at: string
   updated_at: string
   user: ClubMember
+}
+
+export interface ClubReadingProgress {
+  chapter: ClubChapter | null
 }
 
 export interface MembershipResult {
@@ -72,6 +77,10 @@ interface ClubPostResponse {
 
 interface ClubPostListResponse {
   data: ClubPost[]
+}
+
+interface ClubReadingProgressResponse {
+  data: ClubReadingProgress
 }
 
 export const useClubsStore = defineStore('clubs', {
@@ -158,6 +167,27 @@ export const useClubsStore = defineStore('clubs', {
       const res = await request<ClubPostResponse>(`/api/clubs/${clubId}/posts`, {
         method: 'POST',
         body: { post: payload },
+      })
+      return res.data
+    },
+
+    async revealPost(postId: string): Promise<ClubPost> {
+      const { request } = useApi()
+      const res = await request<ClubPostResponse>(`/api/club_posts/${postId}/reveal`)
+      return res.data
+    },
+
+    async getReadingProgress(clubId: string): Promise<ClubReadingProgress> {
+      const { request } = useApi()
+      const res = await request<ClubReadingProgressResponse>(`/api/clubs/${clubId}/reading_progress`)
+      return res.data
+    },
+
+    async setReadingProgress(clubId: string, chapterId: string | null): Promise<ClubReadingProgress> {
+      const { request } = useApi()
+      const res = await request<ClubReadingProgressResponse>(`/api/clubs/${clubId}/reading_progress`, {
+        method: 'PUT',
+        body: { reading_progress: { chapter_id: chapterId } },
       })
       return res.data
     },

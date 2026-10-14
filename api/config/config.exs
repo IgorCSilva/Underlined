@@ -96,6 +96,10 @@ config :api, :club_comment_repository,
   adapter: Api.Adapters.ClubComment.ClubCommentRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.Club.Postgres.ClubCommentRepository
 
+config :api, :club_reading_progress_repository,
+  adapter: Api.Adapters.Club.ClubReadingProgressRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Club.Postgres.ClubReadingProgressRepository
+
 config :api, cors_origin: "http://localhost:3000"
 config :api, web_base_url: "http://localhost:3000"
 

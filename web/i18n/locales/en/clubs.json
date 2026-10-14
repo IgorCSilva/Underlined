@@ -27,6 +27,14 @@
       "title": "Book Clubs",
       "empty": "No clubs have been created yet."
     },
+    "readingProgress": {
+      "label": "Your reading progress",
+      "notStarted": "Not started"
+    },
+    "spoiler": {
+      "blocked": "Spoiler beyond {label}",
+      "revealAnyway": "Reveal anyway"
+    },
     "chapters": {
       "add": "Add {unit}",
       "none": "No reading schedule yet.",

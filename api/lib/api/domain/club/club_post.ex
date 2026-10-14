@@ -7,14 +7,24 @@ defmodule Api.Domain.ClubPost do
   of Ecto, Postgres, or any other persistence detail.
   """
 
-  defstruct [:id, :body, :chapter, :user, :comment_count, :inserted_at, :updated_at]
+  defstruct [
+    :id,
+    :body,
+    :chapter,
+    :user,
+    :comment_count,
+    :spoiler_blocked,
+    :inserted_at,
+    :updated_at
+  ]
 
   @type t :: %__MODULE__{
           id: String.t(),
-          body: String.t(),
+          body: String.t() | nil,
           chapter: Api.Domain.ClubChapter.t() | nil,
           user: Api.Domain.User.t(),
           comment_count: non_neg_integer(),
+          spoiler_blocked: boolean(),
           inserted_at: DateTime.t() | nil,
           updated_at: DateTime.t() | nil
         }

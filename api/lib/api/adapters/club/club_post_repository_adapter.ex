@@ -16,9 +16,16 @@ defmodule Api.Adapters.Club.ClubPostRepositoryAdapter do
     end
   end
 
-  def list_posts(club_id, adaptee) do
-    case adaptee.list_posts(club_id) do
+  def list_posts(club_id, viewer, adaptee) do
+    case adaptee.list_posts(club_id, viewer) do
       {:ok, db_posts} -> {:ok, Enum.map(db_posts, &to_domain/1)}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  def get_post(id, adaptee) do
+    case adaptee.get_post(id) do
+      {:ok, db_post} -> {:ok, to_domain(db_post)}
       {:error, reason} -> {:error, reason}
     end
   end
@@ -31,6 +38,7 @@ defmodule Api.Adapters.Club.ClubPostRepositoryAdapter do
       chapter: chapter_to_domain(db_post.chapter),
       user: UserRepositoryAdapter.to_domain(db_post.user),
       comment_count: db_post.comment_count,
+      spoiler_blocked: db_post.spoiler_blocked,
       inserted_at: db_post.inserted_at,
       updated_at: db_post.updated_at
     }

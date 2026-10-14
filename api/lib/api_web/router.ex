@@ -80,6 +80,9 @@ defmodule ApiWeb.Router do
 
       post "/club_posts/:club_post_id/comments", ClubCommentController, :create
       put "/club_posts/:club_post_id/comments/:id", ClubCommentController, :update
+
+      get "/clubs/:club_id/reading_progress", ClubReadingProgressController, :show
+      put "/clubs/:club_id/reading_progress", ClubReadingProgressController, :update
     end
 
     scope "/" do
@@ -104,6 +107,7 @@ defmodule ApiWeb.Router do
       get "/clubs/:id/members", ClubController, :members
       get "/clubs/:club_id/chapters", ClubChapterController, :index
       get "/clubs/:club_id/posts", ClubPostController, :index
+      get "/club_posts/:id/reveal", ClubPostController, :reveal
       get "/club_posts/:club_post_id/comments", ClubCommentController, :index
       get "/keywords/:name", KeywordController, :show
     end

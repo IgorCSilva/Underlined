@@ -11,6 +11,7 @@ defmodule ApiWeb.ClubPostJSON do
       body: post.body,
       chapter: post.chapter && ClubChapterJSON.data(post.chapter),
       comment_count: post.comment_count,
+      spoiler_blocked: post.spoiler_blocked,
       inserted_at: post.inserted_at,
       updated_at: post.updated_at,
       user: %{

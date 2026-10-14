@@ -27,6 +27,14 @@
       "title": "Clubes do Livro",
       "empty": "Ainda não há clubes criados."
     },
+    "readingProgress": {
+      "label": "Seu progresso de leitura",
+      "notStarted": "Não iniciado"
+    },
+    "spoiler": {
+      "blocked": "Espoiler além de {label}",
+      "revealAnyway": "Revelar mesmo assim"
+    },
     "chapters": {
       "add": "Adicionar {unit}",
       "none": "Ainda não há um cronograma de leitura.",

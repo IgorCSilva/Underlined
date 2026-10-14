@@ -279,7 +279,96 @@ defmodule ApiWeb.ClubDiscussionControllerTest do
 
       conn = get(conn, ~p"/api/clubs/#{club_id}/posts")
 
-      assert %{"data" => [%{"body" => "General chat"}, %{"body" => "Tagged to chapter 1"}]} =
+      assert %{
+               "data" => [
+                 %{"body" => "General chat", "spoiler_blocked" => false},
+                 %{"body" => nil, "spoiler_blocked" => true}
+               ]
+             } = json_response(conn, 200)
+    end
+  end
+
+  describe "spoiler protection on GET /api/clubs/:club_id/posts" do
+    setup %{conn: conn, creator_token: token, club_id: club_id} do
+      ch1 = create_chapter(conn, token, club_id, %{"label" => "Chapter 1"})
+      %{"data" => %{"id" => chapter_1_id}} = json_response(ch1, 201)
+
+      ch2 = create_chapter(conn, token, club_id, %{"label" => "Chapter 2"})
+      %{"data" => %{"id" => chapter_2_id}} = json_response(ch2, 201)
+
+      conn
+      |> auth(token)
+      |> post(~p"/api/clubs/#{club_id}/posts", %{
+        "post" => %{"body" => "Thoughts on chapter 1", "chapter_id" => chapter_1_id}
+      })
+
+      conn
+      |> auth(token)
+      |> post(~p"/api/clubs/#{club_id}/posts", %{
+        "post" => %{"body" => "Thoughts on chapter 2", "chapter_id" => chapter_2_id}
+      })
+
+      %{chapter_1_id: chapter_1_id, chapter_2_id: chapter_2_id}
+    end
+
+    test "a reader who hasn't set any progress has every chapter-tagged post blocked", %{
+      conn: conn,
+      other_token: token,
+      club_id: club_id
+    } do
+      conn = conn |> auth(token) |> get(~p"/api/clubs/#{club_id}/posts")
+
+      assert %{
+               "data" => [
+                 %{"body" => nil, "spoiler_blocked" => true, "chapter" => %{"position" => 1}},
+                 %{"body" => nil, "spoiler_blocked" => true, "chapter" => %{"position" => 2}}
+               ]
+             } = json_response(conn, 200)
+    end
+
+    test "setting progress to chapter 1 reveals chapter 1 but keeps chapter 2 blocked", %{
+      conn: conn,
+      other_token: token,
+      club_id: club_id,
+      chapter_1_id: chapter_1_id
+    } do
+      conn
+      |> auth(token)
+      |> put(~p"/api/clubs/#{club_id}/reading_progress", %{
+        "reading_progress" => %{"chapter_id" => chapter_1_id}
+      })
+
+      conn = conn |> auth(token) |> get(~p"/api/clubs/#{club_id}/posts")
+
+      assert %{
+               "data" => [
+                 %{"body" => "Thoughts on chapter 1", "spoiler_blocked" => false},
+                 %{"body" => nil, "spoiler_blocked" => true}
+               ]
+             } = json_response(conn, 200)
+    end
+
+    test "the club's creator still has their own unset progress block chapter posts", %{
+      conn: conn,
+      creator_token: token,
+      club_id: club_id
+    } do
+      conn = conn |> auth(token) |> get(~p"/api/clubs/#{club_id}/posts")
+
+      assert %{"data" => [%{"spoiler_blocked" => true}, %{"spoiler_blocked" => true}]} =
+               json_response(conn, 200)
+    end
+
+    test "GET /api/club_posts/:id/reveal returns the full post regardless of progress", %{
+      conn: conn,
+      club_id: club_id
+    } do
+      index_conn = get(conn, ~p"/api/clubs/#{club_id}/posts")
+      %{"data" => [%{"id" => post_id} | _]} = json_response(index_conn, 200)
+
+      conn = get(conn, ~p"/api/club_posts/#{post_id}/reveal")
+
+      assert %{"data" => %{"body" => "Thoughts on chapter 1", "spoiler_blocked" => false}} =
                json_response(conn, 200)
     end
   end

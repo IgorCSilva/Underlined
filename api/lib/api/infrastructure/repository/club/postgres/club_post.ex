@@ -18,6 +18,7 @@ defmodule Api.Infrastructure.Repository.Club.Postgres.ClubPost do
   schema "club_posts" do
     field :body, :string
     field :comment_count, :integer, default: 0
+    field :spoiler_blocked, :boolean, virtual: true, default: false
 
     belongs_to :club, Club
     belongs_to :chapter, ClubChapter
