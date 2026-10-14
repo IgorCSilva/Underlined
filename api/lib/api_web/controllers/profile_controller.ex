@@ -2,7 +2,9 @@ defmodule ApiWeb.ProfileController do
   use ApiWeb, :controller
 
   alias Api.Adapters.Accounts
+  alias Api.Adapters.Graphs
   alias Api.Adapters.InterestProfiles
+  alias Api.Usecases.Graph.GetGraph.GetGraphUsecaseDto
   alias Api.Usecases.InterestProfile.GetInterestProfile.GetInterestProfileUsecaseDto
   alias Api.Usecases.User.GetCommunityHealth.GetCommunityHealthUsecaseDto
   alias Api.Usecases.User.GetUser.GetUserUsecaseDto
@@ -32,6 +34,17 @@ defmodule ApiWeb.ProfileController do
       _user ->
         {:ok, result} = InterestProfiles.get_interest_profile(%GetInterestProfileUsecaseDto{user_id: id})
         render(conn, :interests, result: result)
+    end
+  end
+
+  def graph(conn, %{"id" => id}) do
+    case Accounts.get_user(%GetUserUsecaseDto{id: id, current_user: current_user(conn)}) do
+      nil ->
+        {:error, :not_found}
+
+      _user ->
+        graph = Graphs.get_graph(%GetGraphUsecaseDto{user_id: id})
+        render(conn, :graph, graph: graph)
     end
   end
 
