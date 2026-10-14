@@ -83,6 +83,10 @@ defmodule ApiWeb.Router do
 
       get "/clubs/:club_id/reading_progress", ClubReadingProgressController, :show
       put "/clubs/:club_id/reading_progress", ClubReadingProgressController, :update
+
+      post "/books/:book_id/questions", QuestionController, :create
+      post "/questions/:question_id/answers", AnswerController, :create
+      put "/answers/:id/best", AnswerController, :mark_best
     end
 
     scope "/" do
@@ -110,6 +114,8 @@ defmodule ApiWeb.Router do
       get "/club_posts/:id/reveal", ClubPostController, :reveal
       get "/club_posts/:club_post_id/comments", ClubCommentController, :index
       get "/keywords/:name", KeywordController, :show
+      get "/questions/:id", QuestionController, :show
+      get "/questions/:question_id/answers", AnswerController, :index
     end
   end
 end

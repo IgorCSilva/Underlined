@@ -1,0 +1,22 @@
+{
+  "questions": {
+    "notFound": "Question not found.",
+    "answersHeading": "{count} answers",
+    "answerPlaceholder": "Write an answer…",
+    "answerSubmit": "Answer",
+    "bestAnswer": "Best answer",
+    "markBest": "Mark as best",
+    "markingBest": "Marking…",
+    "composer": {
+      "published": "Asked!",
+      "liveMessage": "Your question about \"{title}\" is live.",
+      "viewQuestion": "View question",
+      "loadingQuestion": "Loading…",
+      "askAnother": "Ask another",
+      "bodyLabel": "Your question",
+      "bodyPlaceholder": "What do you want to ask about this passage?",
+      "asking": "Asking…",
+      "ask": "Ask"
+    }
+  }
+}
