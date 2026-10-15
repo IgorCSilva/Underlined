@@ -100,6 +100,14 @@ config :api, :club_reading_progress_repository,
   adapter: Api.Adapters.Club.ClubReadingProgressRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.Club.Postgres.ClubReadingProgressRepository
 
+config :api, :question_repository,
+  adapter: Api.Adapters.Question.QuestionRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Question.Postgres.QuestionRepository
+
+config :api, :answer_repository,
+  adapter: Api.Adapters.Answer.AnswerRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Answer.Postgres.AnswerRepository
+
 config :api, cors_origin: "http://localhost:3000"
 config :api, web_base_url: "http://localhost:3000"
 

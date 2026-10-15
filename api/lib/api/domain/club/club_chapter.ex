@@ -6,13 +6,14 @@ defmodule Api.Domain.ClubChapter do
   knowledge of Ecto, Postgres, or any other persistence detail.
   """
 
-  defstruct [:id, :position, :label, :current, :inserted_at, :updated_at]
+  defstruct [:id, :position, :label, :current, :target_date, :inserted_at, :updated_at]
 
   @type t :: %__MODULE__{
           id: String.t(),
           position: integer(),
           label: String.t(),
           current: boolean(),
+          target_date: Date.t() | nil,
           inserted_at: DateTime.t() | nil,
           updated_at: DateTime.t() | nil
         }

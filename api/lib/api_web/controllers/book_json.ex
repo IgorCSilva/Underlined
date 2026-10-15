@@ -1,6 +1,7 @@
 defmodule ApiWeb.BookJSON do
   alias Api.Domain.Book
   alias ApiWeb.PostJSON
+  alias ApiWeb.QuestionJSON
 
   def index(%{books: books}), do: %{data: Enum.map(books, &data/1)}
 
@@ -11,7 +12,8 @@ defmodule ApiWeb.BookJSON do
       data:
         Map.merge(data(page.book), %{
           stats: page.stats,
-          posts: Enum.map(page.posts, &PostJSON.data/1)
+          posts: Enum.map(page.posts, &PostJSON.data/1),
+          questions: Enum.map(page.questions, &QuestionJSON.data/1)
         })
     }
   end

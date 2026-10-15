@@ -1,0 +1,22 @@
+{
+  "questions": {
+    "notFound": "Pergunta não encontrada.",
+    "answersHeading": "{count} respostas",
+    "answerPlaceholder": "Escreva uma resposta…",
+    "answerSubmit": "Responder",
+    "bestAnswer": "Melhor resposta",
+    "markBest": "Marcar como melhor",
+    "markingBest": "Marcando…",
+    "composer": {
+      "published": "Perguntado!",
+      "liveMessage": "Sua pergunta sobre \"{title}\" está no ar.",
+      "viewQuestion": "Ver pergunta",
+      "loadingQuestion": "Carregando…",
+      "askAnother": "Fazer outra pergunta",
+      "bodyLabel": "Sua pergunta",
+      "bodyPlaceholder": "O que você quer perguntar sobre esta passagem?",
+      "asking": "Perguntando…",
+      "ask": "Perguntar"
+    }
+  }
+}
