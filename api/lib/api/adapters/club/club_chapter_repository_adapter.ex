@@ -28,6 +28,20 @@ defmodule Api.Adapters.Club.ClubChapterRepositoryAdapter do
     end
   end
 
+  def update_chapter(user, club_id, chapter_id, attrs, adaptee) do
+    case adaptee.update_chapter(user, club_id, chapter_id, attrs) do
+      {:ok, db_chapter} -> {:ok, to_domain(db_chapter)}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  def move_chapter(user, club_id, chapter_id, direction, adaptee) do
+    case adaptee.move_chapter(user, club_id, chapter_id, direction) do
+      {:ok, db_chapter} -> {:ok, to_domain(db_chapter)}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
   @doc "Converts a Postgres club-chapter entity into the pure domain entity."
   def to_domain(db_chapter) do
     %DomainClubChapter{
@@ -35,6 +49,7 @@ defmodule Api.Adapters.Club.ClubChapterRepositoryAdapter do
       position: db_chapter.position,
       label: db_chapter.label,
       current: db_chapter.current,
+      target_date: db_chapter.target_date,
       inserted_at: db_chapter.inserted_at,
       updated_at: db_chapter.updated_at
     }

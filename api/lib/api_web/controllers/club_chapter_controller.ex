@@ -4,7 +4,9 @@ defmodule ApiWeb.ClubChapterController do
   alias Api.Adapters.Clubs
   alias Api.Usecases.Club.CreateClubChapter.CreateClubChapterUsecaseDto
   alias Api.Usecases.Club.ListClubChapters.ListClubChaptersUsecaseDto
+  alias Api.Usecases.Club.MoveClubChapter.MoveClubChapterUsecaseDto
   alias Api.Usecases.Club.SetCurrentClubChapter.SetCurrentClubChapterUsecaseDto
+  alias Api.Usecases.Club.UpdateClubChapter.UpdateClubChapterUsecaseDto
 
   action_fallback ApiWeb.FallbackController
 
@@ -34,6 +36,30 @@ defmodule ApiWeb.ClubChapterController do
              user: current_user(conn),
              club_id: club_id,
              chapter_id: chapter_id
+           }) do
+      render(conn, :show, chapter: chapter)
+    end
+  end
+
+  def update(conn, %{"club_id" => club_id, "id" => chapter_id, "chapter" => chapter_params}) do
+    with {:ok, chapter} <-
+           Clubs.update_club_chapter(%UpdateClubChapterUsecaseDto{
+             user: current_user(conn),
+             club_id: club_id,
+             chapter_id: chapter_id,
+             attrs: chapter_params
+           }) do
+      render(conn, :show, chapter: chapter)
+    end
+  end
+
+  def move(conn, %{"club_id" => club_id, "id" => chapter_id, "direction" => direction}) do
+    with {:ok, chapter} <-
+           Clubs.move_club_chapter(%MoveClubChapterUsecaseDto{
+             user: current_user(conn),
+             club_id: club_id,
+             chapter_id: chapter_id,
+             direction: direction
            }) do
       render(conn, :show, chapter: chapter)
     end

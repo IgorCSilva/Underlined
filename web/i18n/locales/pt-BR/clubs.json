@@ -21,7 +21,6 @@
       "members": "Membros",
       "schedule": "Cronograma"
     },
-    "scheduleComingSoon": "Os cronogramas de leitura chegam em uma atualização futura.",
     "notFound": "Este clube não existe.",
     "browse": {
       "title": "Clubes do Livro",
@@ -43,6 +42,19 @@
       "save": "Salvar",
       "cancel": "Cancelar",
       "currentlyReading": "Lendo agora: {label}"
+    },
+    "schedule": {
+      "empty": "Ainda não há um cronograma de leitura. Adicione um {unit} na faixa acima para começar.",
+      "targetDate": "Meta: {date}",
+      "moveUp": "Mover para cima",
+      "moveDown": "Mover para baixo",
+      "edit": "Editar",
+      "save": "Salvar",
+      "cancel": "Cancelar",
+      "labelPlaceholder": "Nome do {unit}",
+      "targetDatePlaceholder": "Data alvo (opcional)",
+      "add": "Adicionar {unit}",
+      "error": "Não foi possível salvar essa alteração. Tente novamente."
     },
     "discussion": {
       "addPlaceholder": "Compartilhe algo com o clube…",

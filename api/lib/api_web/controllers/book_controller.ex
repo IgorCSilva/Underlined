@@ -2,10 +2,12 @@ defmodule ApiWeb.BookController do
   use ApiWeb, :controller
 
   alias Api.Adapters.Catalog
+  alias Api.Adapters.Questions
   alias Api.Usecases.Book.AddBook.AddBookUsecaseDto
   alias Api.Usecases.Book.GetBook.GetBookUsecaseDto
   alias Api.Usecases.Book.GetBookPage.GetBookPageUsecaseDto
   alias Api.Usecases.Book.ListBooks.ListBooksUsecaseDto
+  alias Api.Usecases.Question.ListQuestions.ListQuestionsUsecaseDto
 
   action_fallback ApiWeb.FallbackController
 
@@ -27,8 +29,9 @@ defmodule ApiWeb.BookController do
              id: id,
              before: params["before"],
              current_user: current_user(conn)
-           }) do
-      render(conn, :page, page: page)
+           }),
+         {:ok, questions} <- Questions.list_questions(%ListQuestionsUsecaseDto{book_id: id}) do
+      render(conn, :page, page: Map.put(page, :questions, questions))
     end
   end
 

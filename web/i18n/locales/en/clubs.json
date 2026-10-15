@@ -21,7 +21,6 @@
       "members": "Members",
       "schedule": "Schedule"
     },
-    "scheduleComingSoon": "Reading schedules are coming in a future update.",
     "notFound": "This club doesn't exist.",
     "browse": {
       "title": "Book Clubs",
@@ -43,6 +42,19 @@
       "save": "Save",
       "cancel": "Cancel",
       "currentlyReading": "Currently reading: {label}"
+    },
+    "schedule": {
+      "empty": "No reading schedule yet. Add a {unit} from the strip above to get started.",
+      "targetDate": "Target: {date}",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "labelPlaceholder": "{unit} label",
+      "targetDatePlaceholder": "Target date (optional)",
+      "add": "Add {unit}",
+      "error": "Couldn't save that change. Please try again."
     },
     "discussion": {
       "addPlaceholder": "Share a thought with the club…",

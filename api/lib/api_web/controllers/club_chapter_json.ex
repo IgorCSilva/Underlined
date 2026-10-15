@@ -10,6 +10,7 @@ defmodule ApiWeb.ClubChapterJSON do
       position: chapter.position,
       label: chapter.label,
       current: chapter.current,
+      target_date: chapter.target_date,
       inserted_at: chapter.inserted_at
     }
   end
