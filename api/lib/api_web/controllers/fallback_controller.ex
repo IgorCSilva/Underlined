@@ -66,6 +66,17 @@ defmodule ApiWeb.FallbackController do
     })
   end
 
+  def call(conn, {:error, :invalid_chapter}) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> json(%{
+      errors: %{
+        detail: gettext("that chapter doesn't belong to this club"),
+        code: "invalid_chapter"
+      }
+    })
+  end
+
   def call(conn, {:error, :invalid_parent}) do
     conn
     |> put_status(:unprocessable_entity)

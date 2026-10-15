@@ -13,12 +13,7 @@
 
     <p v-if="pending" class="status-text">{{ t('books.search.searching') }}</p>
     <div v-else class="book-grid">
-      <NuxtLink
-        v-for="book in books ?? []"
-        :key="book.id"
-        :to="`/posts/new?bookId=${book.id}`"
-        class="book-tile-link"
-      >
+      <NuxtLink v-for="book in books ?? []" :key="book.id" :to="`/books/${book.id}`" class="book-tile-link">
         <BookTile :book="book" />
       </NuxtLink>
       <NuxtLink to="/books/new" class="add-book-tile">
@@ -30,8 +25,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Book } from '~/stores/books'
-
 const { t } = useI18n()
 const q = ref('')
 const debouncedQ = ref('')

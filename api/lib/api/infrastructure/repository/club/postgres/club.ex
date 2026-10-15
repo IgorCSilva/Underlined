@@ -9,7 +9,7 @@ defmodule Api.Infrastructure.Repository.Club.Postgres.Club do
   import Ecto.Changeset
 
   alias Api.Infrastructure.Repository.Book.Postgres.Book
-  alias Api.Infrastructure.Repository.Club.Postgres.ClubMembership
+  alias Api.Infrastructure.Repository.Club.Postgres.{ClubChapter, ClubMembership}
   alias Api.Infrastructure.Repository.User.Postgres.User
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -18,12 +18,15 @@ defmodule Api.Infrastructure.Repository.Club.Postgres.Club do
   schema "clubs" do
     field :name, :string
     field :description, :string
+    field :chapter_unit_label, :string, default: "Chapter"
     field :member_count, :integer, virtual: true, default: 0
     field :members_preview, {:array, :map}, virtual: true, default: []
     field :joined_by_user, :boolean, virtual: true, default: false
+    field :current_chapter_label, :string, virtual: true
 
     belongs_to :book, Book
     belongs_to :creator, User
+    belongs_to :current_chapter, ClubChapter
     has_many :memberships, ClubMembership
 
     timestamps(type: :utc_datetime_usec)
@@ -37,5 +40,13 @@ defmodule Api.Infrastructure.Repository.Club.Postgres.Club do
     |> validate_length(:description, max: 500)
     |> foreign_key_constraint(:book_id)
     |> foreign_key_constraint(:creator_id)
+  end
+
+  @doc "Sets the club's current chapter, or chooses the word used for its reading-schedule segments."
+  def chapter_settings_changeset(club, attrs) do
+    club
+    |> cast(attrs, [:chapter_unit_label, :current_chapter_id])
+    |> validate_length(:chapter_unit_label, min: 1, max: 30)
+    |> foreign_key_constraint(:current_chapter_id)
   end
 end

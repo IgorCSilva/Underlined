@@ -2,7 +2,9 @@
   "nav": {
     "feed": "Feed",
     "books": "Books",
+    "clubs": "Clubs",
     "chains": "Chains",
+    "addPost": "Add post",
     "addBook": "Add book",
     "profile": "Profile",
     "saved": "Saved",

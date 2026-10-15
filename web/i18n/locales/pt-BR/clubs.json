@@ -21,8 +21,35 @@
       "members": "Membros",
       "schedule": "Cronograma"
     },
-    "discussionComingSoon": "A discussão organizada por capítulo chega em uma atualização futura.",
     "scheduleComingSoon": "Os cronogramas de leitura chegam em uma atualização futura.",
-    "notFound": "Este clube não existe."
+    "notFound": "Este clube não existe.",
+    "browse": {
+      "title": "Clubes do Livro",
+      "empty": "Ainda não há clubes criados."
+    },
+    "readingProgress": {
+      "label": "Seu progresso de leitura",
+      "notStarted": "Não iniciado"
+    },
+    "spoiler": {
+      "blocked": "Espoiler além de {label}",
+      "revealAnyway": "Revelar mesmo assim"
+    },
+    "chapters": {
+      "add": "Adicionar {unit}",
+      "none": "Ainda não há um cronograma de leitura.",
+      "labelPlaceholder": "Nome do {unit} (ex.: \"Capítulo 1 - O primeiro dia\")",
+      "unitPlaceholder": "Como chamar? (Capítulo, Carta, Data…)",
+      "save": "Salvar",
+      "cancel": "Cancelar",
+      "currentlyReading": "Lendo agora: {label}"
+    },
+    "discussion": {
+      "addPlaceholder": "Compartilhe algo com o clube…",
+      "post": "Publicar",
+      "generalHeading": "Discussão geral",
+      "empty": "Ainda não há discussão. Seja o primeiro a publicar.",
+      "commentCount": "{count} comentários"
+    }
   }
 }
