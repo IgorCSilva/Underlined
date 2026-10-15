@@ -13,12 +13,12 @@ const fakeComment = {
 }
 
 describe('comments store', () => {
-  it('createComment posts to /api/posts/:postId/comments and returns the created comment', async () => {
+  it('createComment posts to basePath/comments and returns the created comment', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ data: fakeComment })
     vi.stubGlobal('$fetch', fetchMock)
 
     const comments = useCommentsStore()
-    const result = await comments.createComment('post-1', { body: 'Great read!' })
+    const result = await comments.createComment('/api/posts/post-1', { body: 'Great read!' })
 
     expect(result).toEqual(fakeComment)
     expect(fetchMock).toHaveBeenCalledWith(
@@ -35,7 +35,7 @@ describe('comments store', () => {
     vi.stubGlobal('$fetch', fetchMock)
 
     const comments = useCommentsStore()
-    await comments.createComment('post-1', { body: 'Agreed!', parent_comment_id: 'c1' })
+    await comments.createComment('/api/posts/post-1', { body: 'Agreed!', parent_comment_id: 'c1' })
 
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/posts/post-1/comments',
@@ -46,10 +46,30 @@ describe('comments store', () => {
     )
   })
 
+  it('posts a side when provided (connection/debate comments)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ data: { ...fakeComment, side: 'post_a' } })
+    vi.stubGlobal('$fetch', fetchMock)
+
+    const comments = useCommentsStore()
+    const result = await comments.createComment('/api/connections/conn-1', {
+      body: 'I agree with the first post',
+      side: 'post_a',
+    })
+
+    expect(result.side).toBe('post_a')
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/connections/conn-1/comments',
+      expect.objectContaining({
+        method: 'POST',
+        body: { comment: { body: 'I agree with the first post', side: 'post_a' } },
+      }),
+    )
+  })
+
   it('propagates errors from the API', async () => {
     vi.stubGlobal('$fetch', vi.fn().mockRejectedValue(new Error('validation failed')))
 
     const comments = useCommentsStore()
-    await expect(comments.createComment('post-1', { body: '' })).rejects.toThrow('validation failed')
+    await expect(comments.createComment('/api/posts/post-1', { body: '' })).rejects.toThrow('validation failed')
   })
 })

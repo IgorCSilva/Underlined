@@ -321,6 +321,76 @@ defmodule ApiWeb.PostControllerTest do
       conn = get(conn, ~p"/api/posts")
       assert json_response(conn, 200) == %{"data" => []}
     end
+
+    test "?search matches a book title beyond the most recent page, case-insensitively", %{
+      conn: conn,
+      user: user
+    } do
+      {:ok, image_book} =
+        Catalog.add_book(%AddBookUsecaseDto{attrs: %{"title" => "Image", "author" => "Some Author"}})
+
+      {:ok, old_post} =
+        Posts.create_post(%CreatePostUsecaseDto{
+          user: user,
+          attrs: @valid_post_params |> Map.put("book_id", image_book.id)
+        })
+
+      # Push `old_post` off the default feed's first page (@page_size is 20)
+      # so a plain `GET /api/posts` would never surface it, proving the
+      # search actually queries the database instead of filtering whatever
+      # page happened to already be fetched.
+      {:ok, filler_book} =
+        Catalog.add_book(%AddBookUsecaseDto{attrs: %{"title" => "Filler", "author" => "Someone"}})
+
+      for n <- 1..20 do
+        Posts.create_post(%CreatePostUsecaseDto{
+          user: user,
+          attrs: @valid_post_params |> Map.put("book_id", filler_book.id) |> Map.put("passage_text", "Filler #{n}.")
+        })
+      end
+
+      conn = get(conn, ~p"/api/posts?search=image")
+      assert %{"data" => [%{"id" => found_id, "book" => %{"title" => "Image"}}]} = json_response(conn, 200)
+      assert found_id == old_post.id
+    end
+
+    test "?search also matches a post's thinking text", %{conn: conn, user: user, book: book} do
+      {:ok, post} =
+        Posts.create_post(%CreatePostUsecaseDto{
+          user: user,
+          attrs: @valid_post_params |> Map.put("book_id", book.id) |> Map.put("thinking", "A unique phrase here.")
+        })
+
+      conn = get(conn, ~p"/api/posts?search=unique+phrase")
+      assert %{"data" => [%{"id" => found_id}]} = json_response(conn, 200)
+      assert found_id == post.id
+    end
+
+    test "?search with no matches returns an empty list", %{conn: conn, user: user, book: book} do
+      Posts.create_post(%CreatePostUsecaseDto{
+        user: user,
+        attrs: @valid_post_params |> Map.put("book_id", book.id)
+      })
+
+      conn = get(conn, ~p"/api/posts?search=nonexistent-term-xyz")
+      assert json_response(conn, 200) == %{"data" => []}
+    end
+
+    test "blank ?search falls back to the normal chronological feed", %{
+      conn: conn,
+      user: user,
+      book: book
+    } do
+      {:ok, post} =
+        Posts.create_post(%CreatePostUsecaseDto{
+          user: user,
+          attrs: @valid_post_params |> Map.put("book_id", book.id)
+        })
+
+      conn = get(conn, ~p"/api/posts?search=")
+      assert %{"data" => [%{"id" => found_id}]} = json_response(conn, 200)
+      assert found_id == post.id
+    end
   end
 
   describe "GET /api/posts/following" do
