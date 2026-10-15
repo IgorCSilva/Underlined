@@ -22,7 +22,10 @@
           <span class="book-stat-badge">{{ t('books.page.stats.posts', { count: page.stats.post_count }) }}</span>
           <span class="book-stat-badge">{{ t('books.page.stats.readers', { count: page.stats.reader_count }) }}</span>
         </div>
-        <BookShelfControl v-if="auth.user" :book-id="page.id" class="book-shelf-control" />
+        <div v-if="auth.user" class="book-actions-row">
+          <BookShelfControl :book-id="page.id" />
+          <WishlistButton :book-id="page.id" />
+        </div>
       </div>
     </div>
 
@@ -251,7 +254,10 @@ async function loadMore() {
   color: var(--color-ink);
 }
 
-.book-shelf-control {
+.book-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   margin-top: 16px;
 }
 

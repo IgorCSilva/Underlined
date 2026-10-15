@@ -15,7 +15,10 @@
     <p v-if="pending" class="status-text">{{ t('books.search.searching') }}</p>
     <div v-else class="book-grid">
       <NuxtLink v-for="book in books ?? []" :key="book.id" :to="`/books/${book.id}`" class="book-tile-link">
-        <BookTile :book="book" />
+        <div class="book-tile-wrap">
+          <BookTile :book="book" />
+          <WishlistButton v-if="auth.user" :book-id="book.id" class="tile-wishlist-button" />
+        </div>
       </NuxtLink>
       <NuxtLink to="/books/new" class="add-book-tile">
         <span class="add-book-plus" aria-hidden="true">+</span>
@@ -28,6 +31,7 @@
 <script setup lang="ts">
 const { t } = useI18n()
 const route = useRoute()
+const auth = useAuthStore()
 const q = ref('')
 const debouncedQ = ref('')
 const seriesName = ref(typeof route.query.series === 'string' ? route.query.series : '')
@@ -110,6 +114,22 @@ const { data: books, pending } = useApiFetch<Book[]>('/api/books', {
 .book-tile-link {
   color: inherit;
   text-decoration: none;
+}
+
+.book-tile-wrap {
+  position: relative;
+}
+
+.tile-wishlist-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: 0 1px 3px rgba(34, 37, 43, 0.15);
 }
 
 .add-book-tile {
