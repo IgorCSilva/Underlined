@@ -56,6 +56,9 @@ defmodule ApiWeb.Router do
 
       post "/posts/:post_id/connections", ConnectionController, :create
 
+      post "/connections/:connection_id/comments", ConnectionCommentController, :create
+      put "/connections/:connection_id/comments/:id", ConnectionCommentController, :update
+
       post "/chains", ChainController, :create
       post "/chains/:chain_id/items", ChainController, :add_item
       put "/chains/:chain_id/items", ChainController, :reorder_items
@@ -65,6 +68,10 @@ defmodule ApiWeb.Router do
 
       post "/users/:id/follow", FollowController, :create
       delete "/users/:id/follow", FollowController, :delete
+
+      post "/books/:book_id/clubs", ClubController, :create
+      post "/clubs/:id/membership", ClubController, :join
+      delete "/clubs/:id/membership", ClubController, :leave
     end
 
     scope "/" do
@@ -78,9 +85,14 @@ defmodule ApiWeb.Router do
       get "/posts/:id", PostController, :show
       get "/posts/:id/related", PostController, :related
       get "/posts/:id/connections", ConnectionController, :index
+      get "/connections/:id", DebateController, :show
+      get "/connections/:connection_id/comments", ConnectionCommentController, :index
       get "/chains", ChainController, :index
       get "/chains/:id", ChainController, :show
       get "/books/:id/page", BookController, :page
+      get "/books/:book_id/clubs", ClubController, :index
+      get "/clubs/:id", ClubController, :show
+      get "/clubs/:id/members", ClubController, :members
       get "/keywords/:name", KeywordController, :show
     end
   end

@@ -88,24 +88,32 @@ const relationshipType = ref<RelationshipType | ''>('')
 const selectedPostId = ref('')
 const pending = ref(false)
 const error = ref('')
-const allPosts = ref<Post[]>([])
+const searchResults = ref<Post[]>([])
 
-const candidates = computed(() => {
-  const q = query.value.trim().toLowerCase()
-  return allPosts.value
-    .filter((post) => post.id !== props.postId)
-    .filter((post) => !q || post.book.title.toLowerCase().includes(q) || post.thinking.toLowerCase().includes(q))
-    .slice(0, 8)
+const candidates = computed(() => searchResults.value.filter((post) => post.id !== props.postId).slice(0, 8))
+
+// Searches the whole platform server-side rather than filtering a single
+// locally-cached page: the feed only ever fetches the most recent 20 posts,
+// so a client-side filter could never find an older post no matter what was
+// typed — the search box looked functional but silently only ever searched
+// whatever page happened to load first.
+async function runSearch() {
+  const { request } = useApi()
+  const q = query.value.trim()
+  const res = await request<{ data: Post[] }>(`/api/posts${q ? `?search=${encodeURIComponent(q)}` : ''}`)
+  searchResults.value = res.data
+}
+
+let debounceTimer: ReturnType<typeof setTimeout> | undefined
+watch(query, () => {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(runSearch, 300)
 })
 
 async function open() {
   isOpen.value = true
   error.value = ''
-  if (!allPosts.value.length) {
-    const { request } = useApi()
-    const res = await request<{ data: Post[] }>('/api/posts')
-    allPosts.value = res.data
-  }
+  await runSearch()
 }
 
 function close() {

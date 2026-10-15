@@ -75,4 +75,20 @@ defmodule Api.Infrastructure.Repository.Connection.Postgres.ConnectionRepository
         {:ok, connections}
     end
   end
+
+  @doc """
+  Fetches a single connection by its own id, with both posts preloaded.
+  Returns `nil` if `id` isn't a valid UUID or no connection exists with it.
+  """
+  def get_connection(id) do
+    case Ecto.UUID.cast(id) do
+      {:ok, uuid} ->
+        Connection
+        |> Repo.get(uuid)
+        |> Repo.preload(post: @post_preloads, related_post: @post_preloads)
+
+      :error ->
+        nil
+    end
+  end
 end

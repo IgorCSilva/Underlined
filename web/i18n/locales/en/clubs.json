@@ -1,0 +1,28 @@
+{
+  "clubs": {
+    "sectionTitle": "Clubs",
+    "empty": "No clubs for this book yet.",
+    "create": "Create a club",
+    "new": {
+      "title": "New club",
+      "nameLabel": "Club name",
+      "descriptionLabel": "Description (optional)",
+      "cancel": "Cancel",
+      "creating": "Creating…",
+      "submit": "Create club",
+      "error": "Couldn't create the club. Please try again."
+    },
+    "join": "Join",
+    "joined": "Joined",
+    "memberCount": "{count} members",
+    "moreMembers": "+{count}",
+    "tabs": {
+      "discussion": "Discussion",
+      "members": "Members",
+      "schedule": "Schedule"
+    },
+    "discussionComingSoon": "Chapter-scoped discussion is coming in a future update.",
+    "scheduleComingSoon": "Reading schedules are coming in a future update.",
+    "notFound": "This club doesn't exist."
+  }
+}
