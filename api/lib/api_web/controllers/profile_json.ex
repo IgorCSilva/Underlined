@@ -5,6 +5,9 @@ defmodule ApiWeb.ProfileJSON do
 
   def graph(%{graph: graph}), do: ApiWeb.GraphJSON.show(%{graph: graph})
 
+  def bookcase(%{user_books: user_books}),
+    do: ApiWeb.UserBookJSON.index(%{user_books: user_books})
+
   def interests(%{result: %{interest_profile: interest_profile, similar_readers: similar_readers}}) do
     %{
       data: %{

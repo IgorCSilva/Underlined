@@ -1,0 +1,22 @@
+{
+  "bookcase": {
+    "yourTitle": "Your bookcase",
+    "title": "{name}'s bookcase",
+    "loading": "Loading the bookcase…",
+    "empty": "Nothing shelved here yet.",
+    "tabs": {
+      "all": "All",
+      "read": "Already Read",
+      "reading": "Currently Reading",
+      "to_read": "To Be Read"
+    },
+    "status": {
+      "to_read": "To be read",
+      "reading": "Reading",
+      "read": "Read"
+    },
+    "shelfControl": {
+      "label": "Shelf this book"
+    }
+  }
+}
