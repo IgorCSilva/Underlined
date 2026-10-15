@@ -25,6 +25,7 @@ export interface ClubChapter {
   position: number
   label: string
   current: boolean
+  target_date: string | null
   inserted_at: string
 }
 
@@ -138,7 +139,7 @@ export const useClubsStore = defineStore('clubs', {
 
     async createChapter(
       clubId: string,
-      payload: { label: string; chapter_unit_label?: string },
+      payload: { label: string; chapter_unit_label?: string; target_date?: string | null },
     ): Promise<ClubChapter> {
       const { request } = useApi()
       const res = await request<ClubChapterResponse>(`/api/clubs/${clubId}/chapters`, {
@@ -152,6 +153,28 @@ export const useClubsStore = defineStore('clubs', {
       const { request } = useApi()
       const res = await request<ClubChapterResponse>(`/api/clubs/${clubId}/chapters/${chapterId}/current`, {
         method: 'PUT',
+      })
+      return res.data
+    },
+
+    async updateChapter(
+      clubId: string,
+      chapterId: string,
+      payload: { label: string; target_date?: string | null },
+    ): Promise<ClubChapter> {
+      const { request } = useApi()
+      const res = await request<ClubChapterResponse>(`/api/clubs/${clubId}/chapters/${chapterId}`, {
+        method: 'PUT',
+        body: { chapter: payload },
+      })
+      return res.data
+    },
+
+    async moveChapter(clubId: string, chapterId: string, direction: 'up' | 'down'): Promise<ClubChapter> {
+      const { request } = useApi()
+      const res = await request<ClubChapterResponse>(`/api/clubs/${clubId}/chapters/${chapterId}/move`, {
+        method: 'PUT',
+        body: { direction },
       })
       return res.data
     },

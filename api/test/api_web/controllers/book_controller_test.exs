@@ -6,8 +6,10 @@ defmodule ApiWeb.BookControllerTest do
   alias Api.Adapters.Accounts
   alias Api.Adapters.Catalog
   alias Api.Adapters.Posts
+  alias Api.Adapters.Questions
   alias Api.Usecases.Book.AddBook.AddBookUsecaseDto
   alias Api.Usecases.Post.CreatePost.CreatePostUsecaseDto
+  alias Api.Usecases.Question.CreateQuestion.CreateQuestionUsecaseDto
   alias Api.Usecases.Session.CreateSession.CreateSessionUsecaseDto
   alias Api.Usecases.User.RegisterUser.RegisterUserUsecaseDto
 
@@ -38,7 +40,11 @@ defmodule ApiWeb.BookControllerTest do
         user: user,
         attrs:
           Map.merge(
-            %{"book_id" => book.id, "passage_text" => "A short passage.", "thinking" => "Thinking."},
+            %{
+              "book_id" => book.id,
+              "passage_text" => "A short passage.",
+              "thinking" => "Thinking."
+            },
             attrs
           )
       })
@@ -150,7 +156,11 @@ defmodule ApiWeb.BookControllerTest do
     setup %{user: author} do
       {:ok, reader} =
         Accounts.register_user(%RegisterUserUsecaseDto{
-          attrs: %{"email" => "other@example.com", "password" => "supersecret", "name" => "Other Reader"}
+          attrs: %{
+            "email" => "other@example.com",
+            "password" => "supersecret",
+            "name" => "Other Reader"
+          }
         })
 
       {:ok, book} =
@@ -178,6 +188,25 @@ defmodule ApiWeb.BookControllerTest do
       assert Enum.map(data["posts"], & &1["thinking"]) == [newer.thinking, "Older."]
     end
 
+    test "includes the book's questions", %{conn: conn, author: author, book: book} do
+      {:ok, question} =
+        Questions.create_question(%CreateQuestionUsecaseDto{
+          user: author,
+          attrs: %{
+            "book_id" => book.id,
+            "passage_text" => "A short passage.",
+            "body" => "What does this mean?"
+          }
+        })
+
+      conn = get(conn, ~p"/api/books/#{book.id}/page")
+
+      assert %{"data" => data} = json_response(conn, 200)
+      assert [question_data] = data["questions"]
+      assert question_data["id"] == question.id
+      assert question_data["body"] == "What does this mean?"
+    end
+
     test "counts distinct readers, not posts", %{
       conn: conn,
       author: author,
@@ -203,7 +232,8 @@ defmodule ApiWeb.BookControllerTest do
       middle = create_post(author, book, %{"thinking" => "Middle."})
       _newest = create_post(author, book, %{"thinking" => "Newest."})
 
-      conn = get(conn, ~p"/api/books/#{book.id}/page", before: DateTime.to_iso8601(middle.inserted_at))
+      conn =
+        get(conn, ~p"/api/books/#{book.id}/page", before: DateTime.to_iso8601(middle.inserted_at))
 
       assert %{"data" => data} = json_response(conn, 200)
       assert Enum.map(data["posts"], & &1["thinking"]) == ["Oldest."]

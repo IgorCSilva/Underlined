@@ -21,9 +21,11 @@ defmodule Api.Adapters.Clubs do
   alias Api.Usecases.Club.ListClubPosts.ListClubPostsUsecase
   alias Api.Usecases.Club.ListClubs.ListClubsUsecase
   alias Api.Usecases.Club.ListClubsForBook.ListClubsForBookUsecase
+  alias Api.Usecases.Club.MoveClubChapter.MoveClubChapterUsecase
   alias Api.Usecases.Club.RevealClubPost.RevealClubPostUsecase
   alias Api.Usecases.Club.SetClubReadingProgress.SetClubReadingProgressUsecase
   alias Api.Usecases.Club.SetCurrentClubChapter.SetCurrentClubChapterUsecase
+  alias Api.Usecases.Club.UpdateClubChapter.UpdateClubChapterUsecase
   alias Api.Usecases.Club.UpdateClubComment.UpdateClubCommentUsecase
 
   def create_club(dto) do
@@ -72,6 +74,18 @@ defmodule Api.Adapters.Clubs do
 
   def set_current_club_chapter(dto) do
     SetCurrentClubChapterUsecase.call(dto, %SetCurrentClubChapterUsecase{
+      repository: club_chapter_repository()
+    })
+  end
+
+  def update_club_chapter(dto) do
+    UpdateClubChapterUsecase.call(dto, %UpdateClubChapterUsecase{
+      repository: club_chapter_repository()
+    })
+  end
+
+  def move_club_chapter(dto) do
+    MoveClubChapterUsecase.call(dto, %MoveClubChapterUsecase{
       repository: club_chapter_repository()
     })
   end

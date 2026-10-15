@@ -26,9 +26,12 @@
       </div>
     </div>
 
-    <p v-if="!state.posts.length" class="status-text">{{ t('books.page.empty') }}</p>
+    <p v-if="!feedItems.length" class="status-text">{{ t('books.page.empty') }}</p>
     <div v-else class="feed-list">
-      <PostFeedItem v-for="post in state.posts" :key="post.id" :post="post" />
+      <template v-for="entry in feedItems" :key="entry.item.id">
+        <PostFeedItem v-if="entry.type === 'post'" :post="entry.item" />
+        <QuestionFeedItem v-else :question="entry.item" />
+      </template>
     </div>
 
     <button
@@ -47,6 +50,7 @@
 <script setup lang="ts">
 import type { Club } from '~/stores/clubs'
 import type { Post } from '~/stores/posts'
+import type { Question } from '~/stores/questions'
 
 interface BookStats {
   post_count: number
@@ -60,7 +64,10 @@ interface BookPage {
   cover_url: string | null
   stats: BookStats
   posts: Post[]
+  questions: Question[]
 }
+
+type FeedEntry = { type: 'post'; item: Post } | { type: 'question'; item: Question }
 
 const PAGE_SIZE = 20
 const route = useRoute()
@@ -72,8 +79,22 @@ const { data: page } = await useApiFetch<BookPage>(apiPath.value)
 
 const state = reactive({
   posts: page.value?.posts ?? [],
+  questions: page.value?.questions ?? [],
   hasMore: (page.value?.posts.length ?? 0) === PAGE_SIZE,
   loadingMore: false,
+})
+
+// Posts and questions are separate resources/tables (each with its own
+// pagination needs), but the design calls for one interleaved,
+// chronological feed — so they're merged client-side purely for display.
+// Only `state.posts` grows via "load more"; `state.questions` is small
+// enough to fetch in full on every page load (see BookController.page/2).
+const feedItems = computed<FeedEntry[]>(() => {
+  const postEntries: FeedEntry[] = state.posts.map((item) => ({ type: 'post', item }))
+  const questionEntries: FeedEntry[] = state.questions.map((item) => ({ type: 'question', item }))
+  return [...postEntries, ...questionEntries].sort(
+    (a, b) => new Date(b.item.inserted_at).getTime() - new Date(a.item.inserted_at).getTime(),
+  )
 })
 
 const { data: clubsData } = await useApiFetch<Club[]>(`/api/books/${route.params.id}/clubs`)
@@ -94,6 +115,7 @@ onMounted(async () => {
   const { request } = useApi()
   const fresh = await request<{ data: BookPage }>(apiPath.value)
   state.posts = fresh.data.posts
+  state.questions = fresh.data.questions
   state.hasMore = fresh.data.posts.length === PAGE_SIZE
 })
 
@@ -107,6 +129,9 @@ async function loadMore() {
     const next = await request<{ data: BookPage }>(apiPath.value, {
       query: { before: last.inserted_at },
     })
+    // `next.data.questions` is intentionally ignored — the full question
+    // list for the book was already loaded on the first page and doesn't
+    // paginate.
     state.posts.push(...next.data.posts)
     state.hasMore = next.data.posts.length === PAGE_SIZE
   } finally {

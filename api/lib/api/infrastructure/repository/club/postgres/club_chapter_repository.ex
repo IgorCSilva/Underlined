@@ -29,7 +29,8 @@ defmodule Api.Infrastructure.Repository.Club.Postgres.ClubChapterRepository do
           ClubChapter.changeset(%ClubChapter{}, %{
             "club_id" => club_id,
             "position" => next_position,
-            "label" => attrs["label"]
+            "label" => attrs["label"],
+            "target_date" => attrs["target_date"]
           })
         )
         |> Ecto.Multi.run(:club, fn repo, _changes ->
@@ -73,6 +74,79 @@ defmodule Api.Infrastructure.Repository.Club.Postgres.ClubChapterRepository do
       end
     end
   end
+
+  @doc "Edits an existing chapter's label and/or target date. Only the club's creator may do this."
+  def update_chapter(user, club_id, chapter_id, attrs) do
+    with %Club{} = club <- Repo.get(Club, club_id) || {:error, :not_found},
+         :ok <- authorize_creator(club, user),
+         {:ok, uuid} <- cast_uuid(chapter_id),
+         %ClubChapter{} = chapter <-
+           Repo.get_by(ClubChapter, id: uuid, club_id: club_id) ||
+             {:error, :invalid_chapter} do
+      case chapter
+           |> ClubChapter.edit_changeset(attrs)
+           |> Repo.update() do
+        {:ok, updated} -> {:ok, %{updated | current: updated.id == club.current_chapter_id}}
+        {:error, changeset} -> {:error, changeset}
+      end
+    end
+  end
+
+  @doc """
+  Swaps a chapter with its immediate neighbor in the schedule ("up" = earlier
+  position, "down" = later). Only the club's creator may do this. The swap
+  passes the moving chapter through a temporary position so neither update
+  collides with the unique `[club_id, position]` index.
+  """
+  def move_chapter(user, club_id, chapter_id, direction) do
+    with %Club{} = club <- Repo.get(Club, club_id) || {:error, :not_found},
+         :ok <- authorize_creator(club, user),
+         {:ok, uuid} <- cast_uuid(chapter_id),
+         %ClubChapter{} = chapter <-
+           Repo.get_by(ClubChapter, id: uuid, club_id: club_id) ||
+             {:error, :invalid_chapter},
+         %ClubChapter{} = neighbor <-
+           find_neighbor(club_id, chapter, direction) || {:error, :no_neighbor} do
+      chapter_position = chapter.position
+      neighbor_position = neighbor.position
+
+      multi =
+        Ecto.Multi.new()
+        |> Ecto.Multi.update(:parked, ClubChapter.position_changeset(chapter, %{"position" => -1}))
+        |> Ecto.Multi.update(:neighbor, fn _ ->
+          ClubChapter.position_changeset(neighbor, %{"position" => chapter_position})
+        end)
+        |> Ecto.Multi.update(:chapter, fn _ ->
+          ClubChapter.position_changeset(chapter, %{"position" => neighbor_position})
+        end)
+
+      case Repo.transaction(multi) do
+        {:ok, %{chapter: updated}} ->
+          {:ok, %{updated | current: updated.id == club.current_chapter_id}}
+
+        {:error, _step, changeset, _changes} ->
+          {:error, changeset}
+      end
+    end
+  end
+
+  defp find_neighbor(club_id, %ClubChapter{position: position}, "up") do
+    ClubChapter
+    |> where([c], c.club_id == ^club_id and c.position < ^position)
+    |> order_by(desc: :position)
+    |> limit(1)
+    |> Repo.one()
+  end
+
+  defp find_neighbor(club_id, %ClubChapter{position: position}, "down") do
+    ClubChapter
+    |> where([c], c.club_id == ^club_id and c.position > ^position)
+    |> order_by(asc: :position)
+    |> limit(1)
+    |> Repo.one()
+  end
+
+  defp find_neighbor(_club_id, _chapter, _direction), do: nil
 
   defp cast_uuid(value) do
     case Ecto.UUID.cast(value) do
