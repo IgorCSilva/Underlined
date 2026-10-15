@@ -172,7 +172,7 @@ async function loadMore() {
 }
 
 .book-cover {
-  flex: 0 0 266px;
+  flex: 0 0 160px;
   aspect-ratio: 2 / 3;
   border: 1px solid var(--color-border);
   border-radius: 10px;
@@ -262,6 +262,10 @@ async function loadMore() {
 }
 
 @media (max-width: 490px) {
+  .book-cover {
+    flex: 0 0 266px;
+  }
+  
   .book-header {
     flex-direction: column;
     align-items: center;
