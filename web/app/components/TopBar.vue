@@ -74,6 +74,7 @@ const links = computed<NavLink[]>(() => {
       { to: '/books/new', label: t('nav.addBook') },
       { to: '/saved', label: t('nav.saved') },
       { to: '/graph', label: t('nav.graph') },
+      { to: '/bookcase', label: t('nav.bookcase') },
       { to: '/profile', label: t('nav.profile') },
     ]
   }

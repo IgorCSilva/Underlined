@@ -12,6 +12,7 @@
           <span class="book-stat-badge">{{ t('books.page.stats.posts', { count: page.stats.post_count }) }}</span>
           <span class="book-stat-badge">{{ t('books.page.stats.readers', { count: page.stats.reader_count }) }}</span>
         </div>
+        <BookShelfControl v-if="auth.user" :book-id="page.id" class="book-shelf-control" />
       </div>
     </div>
 
@@ -205,6 +206,10 @@ async function loadMore() {
   font-family: var(--font-sans);
   font-size: 0.85rem;
   color: var(--color-ink);
+}
+
+.book-shelf-control {
+  margin-top: 16px;
 }
 
 .club-section {
