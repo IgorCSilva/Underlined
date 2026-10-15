@@ -17,11 +17,19 @@ defmodule Api.Infrastructure.Repository.Book.Postgres.BookRepository do
   @cache :book_page_cache
   @cache_ttl :timer.minutes(1)
 
-  def list_books(query) when is_binary(query) do
+  def list_books(_query, series) when is_binary(series) and series != "" do
+    Book
+    |> where([b], b.series_name == ^String.trim(series))
+    |> order_by([b], asc: b.series_position, asc: b.inserted_at)
+    |> limit(^@list_limit)
+    |> Repo.all()
+  end
+
+  def list_books(query, _series) when is_binary(query) do
     trimmed = String.trim(query)
 
     if trimmed == "" do
-      list_books(nil)
+      list_books(nil, nil)
     else
       Book
       |> where(
@@ -48,11 +56,22 @@ defmodule Api.Infrastructure.Repository.Book.Postgres.BookRepository do
     end
   end
 
-  def list_books(_query) do
+  def list_books(_query, _series) do
     Book
     |> order_by(desc: :inserted_at)
     |> limit(^@list_limit)
     |> Repo.all()
+  end
+
+  @doc "Every distinct genre already in the catalog, for add-book autocomplete."
+  def list_genres do
+    Book
+    |> where([b], b.genres != [])
+    |> select([b], b.genres)
+    |> Repo.all()
+    |> List.flatten()
+    |> Enum.uniq()
+    |> Enum.sort()
   end
 
   def get_book(id) do

@@ -8,7 +8,10 @@ defmodule Api.Adapters.Book.BookRepositoryAdapter do
   alias Api.Adapters.Post.PostRepositoryAdapter
   alias Api.Domain.Book, as: DomainBook
 
-  def list_books(query, adaptee), do: adaptee.list_books(query) |> Enum.map(&to_domain/1)
+  def list_books(query, series, adaptee),
+    do: adaptee.list_books(query, series) |> Enum.map(&to_domain/1)
+
+  def list_genres(adaptee), do: adaptee.list_genres()
 
   def get_book(id, adaptee) do
     case adaptee.get_book(id) do
@@ -50,6 +53,9 @@ defmodule Api.Adapters.Book.BookRepositoryAdapter do
       title: db_book.title,
       author: db_book.author,
       cover_url: db_book.cover_url,
+      genres: db_book.genres,
+      series_name: db_book.series_name,
+      series_position: db_book.series_position,
       inserted_at: db_book.inserted_at,
       updated_at: db_book.updated_at
     }

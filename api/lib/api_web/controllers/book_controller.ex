@@ -7,13 +7,19 @@ defmodule ApiWeb.BookController do
   alias Api.Usecases.Book.GetBook.GetBookUsecaseDto
   alias Api.Usecases.Book.GetBookPage.GetBookPageUsecaseDto
   alias Api.Usecases.Book.ListBooks.ListBooksUsecaseDto
+  alias Api.Usecases.Book.ListGenres.ListGenresUsecaseDto
   alias Api.Usecases.Question.ListQuestions.ListQuestionsUsecaseDto
 
   action_fallback ApiWeb.FallbackController
 
   def index(conn, params) do
-    books = Catalog.list_books(%ListBooksUsecaseDto{query: params["q"]})
+    books = Catalog.list_books(%ListBooksUsecaseDto{query: params["q"], series: params["series"]})
     render(conn, :index, books: books)
+  end
+
+  def genres(conn, _params) do
+    genres = Catalog.list_genres(%ListGenresUsecaseDto{})
+    render(conn, :genres, genres: genres)
   end
 
   def show(conn, %{"id" => id}) do

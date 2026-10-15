@@ -8,11 +8,24 @@
       <div class="book-header-info">
         <h1 class="serif book-title">{{ page.title }}</h1>
         <p class="book-author">{{ page.author }}</p>
+        <NuxtLink
+          v-if="page.series_name && page.series_position"
+          :to="`/books?series=${encodeURIComponent(page.series_name)}`"
+          class="book-series"
+        >
+          {{ t('books.page.seriesPosition', { position: page.series_position, series: page.series_name }) }}
+        </NuxtLink>
+        <div v-if="page.genres.length" class="genre-chips">
+          <span v-for="genre in page.genres" :key="genre" class="genre-chip">{{ genre }}</span>
+        </div>
         <div class="book-stats">
           <span class="book-stat-badge">{{ t('books.page.stats.posts', { count: page.stats.post_count }) }}</span>
           <span class="book-stat-badge">{{ t('books.page.stats.readers', { count: page.stats.reader_count }) }}</span>
         </div>
-        <BookShelfControl v-if="auth.user" :book-id="page.id" class="book-shelf-control" />
+        <div v-if="auth.user" class="book-actions-row">
+          <BookShelfControl :book-id="page.id" />
+          <WishlistButton :book-id="page.id" />
+        </div>
       </div>
     </div>
 
@@ -63,6 +76,9 @@ interface BookPage {
   title: string
   author: string
   cover_url: string | null
+  genres: string[]
+  series_name: string | null
+  series_position: number | null
   stats: BookStats
   posts: Post[]
   questions: Question[]
@@ -188,8 +204,38 @@ async function loadMore() {
 }
 
 .book-author {
-  margin: 0 0 16px;
+  margin: 0 0 4px;
   color: var(--color-text-secondary);
+}
+
+.book-series {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.book-series:hover {
+  text-decoration: underline solid var(--color-highlight) 2px;
+  text-underline-offset: 3px;
+}
+
+.genre-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.genre-chip {
+  display: inline-block;
+  border: 1px solid var(--color-chip-text);
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  color: var(--color-chip-text);
+  background: transparent;
+  font-size: 0.75rem;
 }
 
 .book-stats {
@@ -208,7 +254,10 @@ async function loadMore() {
   color: var(--color-ink);
 }
 
-.book-shelf-control {
+.book-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   margin-top: 16px;
 }
 

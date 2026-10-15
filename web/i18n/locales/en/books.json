@@ -3,7 +3,8 @@
     "search": {
       "placeholder": "Search by title or author…",
       "ariaLabel": "Search books",
-      "searching": "Searching…"
+      "searching": "Searching…",
+      "seriesHeading": "Books in the {series} series"
     },
     "addABook": "Add a book",
     "new": {
@@ -11,6 +12,13 @@
       "authorLabel": "Author",
       "coverUrlLabel": "Cover image URL (optional)",
       "coverUrlPlaceholder": "https://…",
+      "genresLabel": "Genres (optional)",
+      "genresPlaceholder": "Type a genre, press Enter…",
+      "genresAriaLabel": "Add a genre",
+      "removeGenre": "Remove {genre}",
+      "seriesToggleLabel": "Part of a series?",
+      "seriesNameLabel": "Series name",
+      "seriesPositionLabel": "Position in the series",
       "adding": "Adding…",
       "submit": "Add book"
     },
@@ -19,6 +27,7 @@
         "posts": "{count} posts",
         "readers": "{count} readers"
       },
+      "seriesPosition": "Book {position} of {series}",
       "empty": "No posts about this book yet.",
       "notFound": "This book doesn't exist."
     }

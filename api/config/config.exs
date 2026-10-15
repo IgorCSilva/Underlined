@@ -104,6 +104,10 @@ config :api, :user_book_repository,
   adapter: Api.Adapters.UserBook.UserBookRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.UserBook.Postgres.UserBookRepository
 
+config :api, :wishlist_repository,
+  adapter: Api.Adapters.Wishlist.WishlistRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.Wishlist.Postgres.WishlistRepository
+
 config :api, :question_repository,
   adapter: Api.Adapters.Question.QuestionRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.Question.Postgres.QuestionRepository

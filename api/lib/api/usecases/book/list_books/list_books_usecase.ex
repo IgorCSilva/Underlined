@@ -11,9 +11,9 @@ defmodule Api.Usecases.Book.ListBooks.ListBooksUsecase do
 
   defstruct [:repository]
 
-  def call(%ListBooksUsecaseDto{query: query}, %__MODULE__{
+  def call(%ListBooksUsecaseDto{query: query, series: series}, %__MODULE__{
         repository: %{adapter: adapter, adaptee: adaptee}
       }) do
-    adapter.list_books(query, adaptee)
+    adapter.list_books(query, series, adaptee)
   end
 end

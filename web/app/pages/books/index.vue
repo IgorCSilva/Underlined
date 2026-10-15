@@ -1,6 +1,7 @@
 <template>
   <div class="books-page">
-    <div class="search-hero">
+    <h1 v-if="seriesName" class="serif series-heading">{{ t('books.search.seriesHeading', { series: seriesName }) }}</h1>
+    <div v-else class="search-hero">
       <span class="search-icon" aria-hidden="true">🔍</span>
       <input
         v-model="q"
@@ -14,7 +15,10 @@
     <p v-if="pending" class="status-text">{{ t('books.search.searching') }}</p>
     <div v-else class="book-grid">
       <NuxtLink v-for="book in books ?? []" :key="book.id" :to="`/books/${book.id}`" class="book-tile-link">
-        <BookTile :book="book" />
+        <div class="book-tile-wrap">
+          <BookTile :book="book" />
+          <WishlistButton v-if="auth.user" :book-id="book.id" class="tile-wishlist-button" />
+        </div>
       </NuxtLink>
       <NuxtLink to="/books/new" class="add-book-tile">
         <span class="add-book-plus" aria-hidden="true">+</span>
@@ -26,8 +30,17 @@
 
 <script setup lang="ts">
 const { t } = useI18n()
+const route = useRoute()
+const auth = useAuthStore()
 const q = ref('')
 const debouncedQ = ref('')
+const seriesName = ref(typeof route.query.series === 'string' ? route.query.series : '')
+watch(
+  () => route.query.series,
+  (value) => {
+    seriesName.value = typeof value === 'string' ? value : ''
+  },
+)
 let debounceTimer: ReturnType<typeof setTimeout> | undefined
 
 watch(q, (value) => {
@@ -38,8 +51,8 @@ watch(q, (value) => {
 })
 
 const { data: books, pending } = useApiFetch<Book[]>('/api/books', {
-  query: { q: debouncedQ },
-  watch: [debouncedQ],
+  query: { q: debouncedQ, series: seriesName },
+  watch: [debouncedQ, seriesName],
 })
 </script>
 
@@ -48,6 +61,12 @@ const { data: books, pending } = useApiFetch<Book[]>('/api/books', {
   max-width: 960px;
   margin: 0 auto;
   padding: 48px 24px;
+}
+
+.series-heading {
+  text-align: center;
+  margin: 0 0 40px;
+  font-size: 1.5rem;
 }
 
 .search-hero {
@@ -95,6 +114,22 @@ const { data: books, pending } = useApiFetch<Book[]>('/api/books', {
 .book-tile-link {
   color: inherit;
   text-decoration: none;
+}
+
+.book-tile-wrap {
+  position: relative;
+}
+
+.tile-wishlist-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: 0 1px 3px rgba(34, 37, 43, 0.15);
 }
 
 .add-book-tile {
