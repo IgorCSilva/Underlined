@@ -172,7 +172,7 @@ async function loadMore() {
 }
 
 .book-cover {
-  flex: 0 0 160px;
+  flex: 0 0 266px;
   aspect-ratio: 2 / 3;
   border: 1px solid var(--color-border);
   border-radius: 10px;
@@ -259,6 +259,18 @@ async function loadMore() {
   align-items: center;
   gap: 16px;
   margin-top: 16px;
+}
+
+@media (max-width: 490px) {
+  .book-header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .book-header-info {
+    align-self: stretch;
+    padding-top: 16px;
+  }
 }
 
 .club-section {
