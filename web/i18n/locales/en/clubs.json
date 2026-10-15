@@ -21,8 +21,35 @@
       "members": "Members",
       "schedule": "Schedule"
     },
-    "discussionComingSoon": "Chapter-scoped discussion is coming in a future update.",
     "scheduleComingSoon": "Reading schedules are coming in a future update.",
-    "notFound": "This club doesn't exist."
+    "notFound": "This club doesn't exist.",
+    "browse": {
+      "title": "Book Clubs",
+      "empty": "No clubs have been created yet."
+    },
+    "readingProgress": {
+      "label": "Your reading progress",
+      "notStarted": "Not started"
+    },
+    "spoiler": {
+      "blocked": "Spoiler beyond {label}",
+      "revealAnyway": "Reveal anyway"
+    },
+    "chapters": {
+      "add": "Add {unit}",
+      "none": "No reading schedule yet.",
+      "labelPlaceholder": "{unit} label (e.g. \"Chapter 1 - The first day\")",
+      "unitPlaceholder": "What to call it? (Chapter, Letter, Date…)",
+      "save": "Save",
+      "cancel": "Cancel",
+      "currentlyReading": "Currently reading: {label}"
+    },
+    "discussion": {
+      "addPlaceholder": "Share a thought with the club…",
+      "post": "Post",
+      "generalHeading": "General discussion",
+      "empty": "No discussion yet. Be the first to post.",
+      "commentCount": "{count} comments"
+    }
   }
 }

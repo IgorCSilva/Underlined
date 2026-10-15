@@ -11,6 +11,7 @@ defmodule Api.Infrastructure.Repository.Club.Postgres.ClubRepository do
   alias Api.Repo
 
   @preview_limit 4
+  @list_limit 50
 
   @doc """
   Creates a club scoped to `attrs["book_id"]` and makes `creator` its first
@@ -60,6 +61,16 @@ defmodule Api.Infrastructure.Repository.Club.Postgres.ClubRepository do
     Club
     |> where([c], c.book_id == ^book_id)
     |> order_by([c], desc: c.inserted_at)
+    |> Repo.all()
+    |> Repo.preload([:book, :creator])
+    |> Enum.map(&annotate(&1, current_user))
+  end
+
+  @doc "Lists the most recently created clubs across every book, annotated for `current_user`."
+  def list_clubs(current_user) do
+    Club
+    |> order_by([c], desc: c.inserted_at)
+    |> limit(^@list_limit)
     |> Repo.all()
     |> Repo.preload([:book, :creator])
     |> Enum.map(&annotate(&1, current_user))
@@ -132,11 +143,14 @@ defmodule Api.Infrastructure.Repository.Club.Postgres.ClubRepository do
       )
       |> Repo.all()
 
+    club = Repo.preload(club, :current_chapter)
+
     %{
       club
       | member_count: member_count,
         members_preview: preview,
-        joined_by_user: joined?(club.id, current_user)
+        joined_by_user: joined?(club.id, current_user),
+        current_chapter_label: club.current_chapter && club.current_chapter.label
     }
   end
 

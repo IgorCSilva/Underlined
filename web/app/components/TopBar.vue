@@ -62,13 +62,14 @@ const links = computed<NavLink[]>(() => {
   const common: NavLink[] = [
     { to: '/feed', label: t('nav.feed') },
     { to: '/books', label: t('nav.books') },
+    { to: '/clubs', label: t('nav.clubs') },
     { to: '/chains', label: t('nav.chains') },
   ]
 
   if (auth.user) {
     return [
       ...common,
-      // { to: '/posts/new', label: 'New post' },
+      { to: '/posts/new', label: t('nav.addPost') },
       { to: '/books/new', label: t('nav.addBook') },
       { to: '/saved', label: t('nav.saved') },
       { to: '/graph', label: t('nav.graph') },

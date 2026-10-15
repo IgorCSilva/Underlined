@@ -13,6 +13,8 @@ defmodule Api.Domain.Club do
     :member_count,
     :members_preview,
     :joined_by_user,
+    :chapter_unit_label,
+    :current_chapter_label,
     :inserted_at,
     :updated_at
   ]
@@ -26,6 +28,8 @@ defmodule Api.Domain.Club do
           member_count: non_neg_integer(),
           members_preview: [Api.Domain.User.t()],
           joined_by_user: boolean(),
+          chapter_unit_label: String.t(),
+          current_chapter_label: String.t() | nil,
           inserted_at: DateTime.t() | nil,
           updated_at: DateTime.t() | nil
         }
