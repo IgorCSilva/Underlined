@@ -261,6 +261,22 @@ async function loadMore() {
   margin-top: 16px;
 }
 
+@media (max-width: 490px) {
+  .book-cover {
+    flex: 0 0 266px;
+  }
+  
+  .book-header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .book-header-info {
+    align-self: stretch;
+    padding-top: 16px;
+  }
+}
+
 .club-section {
   margin-bottom: 40px;
 }
