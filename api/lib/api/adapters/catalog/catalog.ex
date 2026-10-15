@@ -10,6 +10,7 @@ defmodule Api.Adapters.Catalog do
   alias Api.Usecases.Book.GetBook.GetBookUsecase
   alias Api.Usecases.Book.GetBookPage.GetBookPageUsecase
   alias Api.Usecases.Book.ListBooks.ListBooksUsecase
+  alias Api.Usecases.Book.ListGenres.ListGenresUsecase
 
   def list_books(dto) do
     ListBooksUsecase.call(dto, %ListBooksUsecase{repository: book_repository()})
@@ -25,6 +26,10 @@ defmodule Api.Adapters.Catalog do
 
   def add_book(dto) do
     AddBookUsecase.call(dto, %AddBookUsecase{repository: book_repository()})
+  end
+
+  def list_genres(dto) do
+    ListGenresUsecase.call(dto, %ListGenresUsecase{repository: book_repository()})
   end
 
   defp book_repository, do: Application.get_env(:api, :book_repository) |> Map.new()

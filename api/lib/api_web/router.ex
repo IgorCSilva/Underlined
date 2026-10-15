@@ -27,6 +27,7 @@ defmodule ApiWeb.Router do
     put "/auth/reset_password/:token", AuthController, :reset_password
 
     get "/books", BookController, :index
+    get "/books/genres", BookController, :genres
     get "/books/:id", BookController, :show
 
     get "/posts/:post_id/comments", CommentController, :index
@@ -88,6 +89,9 @@ defmodule ApiWeb.Router do
 
       put "/books/:book_id/shelf", UserBookController, :update
 
+      post "/books/:book_id/wishlist", WishlistController, :create
+      delete "/books/:book_id/wishlist", WishlistController, :delete
+
       post "/books/:book_id/questions", QuestionController, :create
       post "/questions/:question_id/answers", AnswerController, :create
       put "/answers/:id/best", AnswerController, :mark_best
@@ -100,6 +104,7 @@ defmodule ApiWeb.Router do
       get "/users/:id/interests", ProfileController, :interests
       get "/users/:id/graph", ProfileController, :graph
       get "/users/:id/bookcase", ProfileController, :bookcase
+      get "/users/:id/wishlist", ProfileController, :wishlist
       get "/users/:id/community_health", ProfileController, :community_health
       get "/posts", PostController, :index
       get "/posts/:id", PostController, :show

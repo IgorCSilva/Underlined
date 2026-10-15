@@ -30,7 +30,10 @@
       >
         <div class="bookcase-tile-wrap">
           <BookTile :book="entry.book" />
-          <span class="shelf-tag" :class="`is-${entry.status}`">{{ t(`bookcase.status.${entry.status}`) }}</span>
+          <span v-if="entry.status" class="shelf-tag" :class="`is-${entry.status}`">
+            {{ t(`bookcase.status.${entry.status}`) }}
+          </span>
+          <span v-else class="wish-tag" aria-hidden="true">♥</span>
         </div>
       </NuxtLink>
     </div>
@@ -38,20 +41,33 @@
 </template>
 
 <script setup lang="ts">
+import type { Book } from '~/stores/books'
 import type { BookcaseStatus, UserBookEntry } from '~/stores/userBooks'
+import type { WishlistEntry } from '~/stores/wishlist'
 
-const TABS = ['all', 'read', 'reading', 'to_read'] as const
+interface DisplayEntry {
+  id: string
+  book: Book
+  status: BookcaseStatus | null
+}
+
+const TABS = ['all', 'read', 'reading', 'to_read', 'wish'] as const
 
 const props = defineProps<{ user: { id: string; name: string }; own: boolean }>()
 
 const { t } = useI18n()
 const userBooks = useUserBooksStore()
+const wishlistStore = useWishlistStore()
 
 const entries = ref<UserBookEntry[]>([])
+const wishEntries = ref<WishlistEntry[]>([])
 const pending = ref(true)
 const activeTab = ref<(typeof TABS)[number]>('all')
 
-const filteredEntries = computed(() => {
+const filteredEntries = computed<DisplayEntry[]>(() => {
+  if (activeTab.value === 'wish') {
+    return wishEntries.value.map((entry) => ({ id: entry.id, book: entry.book, status: null }))
+  }
   if (activeTab.value === 'all') return entries.value
   return entries.value.filter((entry) => entry.status === (activeTab.value as BookcaseStatus))
 })
@@ -59,7 +75,12 @@ const filteredEntries = computed(() => {
 async function load() {
   pending.value = true
   try {
-    entries.value = await userBooks.listBookcase(props.user.id)
+    const [bookcase, wishlist] = await Promise.all([
+      userBooks.listBookcase(props.user.id),
+      wishlistStore.listWishlist(props.user.id),
+    ])
+    entries.value = bookcase
+    wishEntries.value = wishlist
   } finally {
     pending.value = false
   }
@@ -149,5 +170,20 @@ onMounted(load)
 .shelf-tag.is-read {
   background: var(--color-success);
   color: #fff;
+}
+
+.wish-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent-primary);
+  color: #fff;
+  font-size: 0.85rem;
 }
 </style>

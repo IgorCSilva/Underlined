@@ -8,7 +8,8 @@
       "all": "Todos",
       "read": "Já Lidos",
       "reading": "Lendo Agora",
-      "to_read": "Para Ler"
+      "to_read": "Para Ler",
+      "wish": "Desejos"
     },
     "status": {
       "to_read": "Para ler",
@@ -17,6 +18,9 @@
     },
     "shelfControl": {
       "label": "Colocar este livro na estante"
+    },
+    "wishlist": {
+      "ariaLabel": "Adicionar este livro à sua lista de desejos"
     }
   }
 }

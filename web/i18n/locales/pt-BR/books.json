@@ -3,7 +3,8 @@
     "search": {
       "placeholder": "Busque por título ou autor…",
       "ariaLabel": "Buscar livros",
-      "searching": "Buscando…"
+      "searching": "Buscando…",
+      "seriesHeading": "Livros da série {series}"
     },
     "addABook": "Adicionar um livro",
     "new": {
@@ -11,6 +12,13 @@
       "authorLabel": "Autor",
       "coverUrlLabel": "URL da capa (opcional)",
       "coverUrlPlaceholder": "https://…",
+      "genresLabel": "Gêneros (opcional)",
+      "genresPlaceholder": "Digite um gênero e pressione Enter…",
+      "genresAriaLabel": "Adicionar um gênero",
+      "removeGenre": "Remover {genre}",
+      "seriesToggleLabel": "Faz parte de uma série?",
+      "seriesNameLabel": "Nome da série",
+      "seriesPositionLabel": "Posição na série",
       "adding": "Adicionando…",
       "submit": "Adicionar livro"
     },
@@ -19,6 +27,7 @@
         "posts": "{count} publicações",
         "readers": "{count} leitores"
       },
+      "seriesPosition": "Livro {position} de {series}",
       "empty": "Nenhuma publicação sobre este livro ainda.",
       "notFound": "Este livro não existe."
     }

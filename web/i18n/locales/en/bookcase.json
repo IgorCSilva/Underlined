@@ -8,7 +8,8 @@
       "all": "All",
       "read": "Already Read",
       "reading": "Currently Reading",
-      "to_read": "To Be Read"
+      "to_read": "To Be Read",
+      "wish": "Wish"
     },
     "status": {
       "to_read": "To be read",
@@ -17,6 +18,9 @@
     },
     "shelfControl": {
       "label": "Shelf this book"
+    },
+    "wishlist": {
+      "ariaLabel": "Add this book to your wishlist"
     }
   }
 }
