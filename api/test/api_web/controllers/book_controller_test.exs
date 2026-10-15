@@ -150,6 +150,173 @@ defmodule ApiWeb.BookControllerTest do
       assert %{"data" => %{"id" => id}} = json_response(conn, 200)
       assert id == existing.id
     end
+
+    test "saves the genres and series metadata", %{conn: conn, access_token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/books",
+          book: %{
+            "title" => "The Fifth Season",
+            "author" => "N. K. Jemisin",
+            "genres" => ["Fantasy", "Science Fiction"],
+            "series_name" => "The Broken Earth",
+            "series_position" => 1
+          }
+        )
+
+      assert %{
+               "data" => %{
+                 "genres" => ["Fantasy", "Science Fiction"],
+                 "series_name" => "The Broken Earth",
+                 "series_position" => 1
+               }
+             } = json_response(conn, 200)
+    end
+
+    test "trims, drops blanks, and dedupes genres", %{conn: conn, access_token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/books",
+          book: %{
+            "title" => "The Fifth Season",
+            "author" => "N. K. Jemisin",
+            "genres" => [" Fantasy ", "", "Fantasy", "Science Fiction"]
+          }
+        )
+
+      assert %{"data" => %{"genres" => ["Fantasy", "Science Fiction"]}} = json_response(conn, 200)
+    end
+
+    test "defaults genres and series fields when omitted", %{
+      conn: conn,
+      access_token: token
+    } do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/books", book: %{"title" => "Sapiens", "author" => "Yuval Noah Harari"})
+
+      assert %{"data" => %{"genres" => [], "series_name" => nil, "series_position" => nil}} =
+               json_response(conn, 200)
+    end
+
+    test "rejects a series_position without a series_name", %{conn: conn, access_token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/books",
+          book: %{"title" => "Sapiens", "author" => "Yuval Noah Harari", "series_position" => 2}
+        )
+
+      assert json_response(conn, 422)
+    end
+
+    test "rejects a non-positive series_position", %{conn: conn, access_token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/books",
+          book: %{
+            "title" => "The Fifth Season",
+            "author" => "N. K. Jemisin",
+            "series_name" => "The Broken Earth",
+            "series_position" => 0
+          }
+        )
+
+      assert json_response(conn, 422)
+    end
+
+    test "rejects an oversized genre", %{conn: conn, access_token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/books",
+          book: %{
+            "title" => "Too Long",
+            "author" => "Someone",
+            "genres" => [String.duplicate("x", 61)]
+          }
+        )
+
+      assert json_response(conn, 422)
+    end
+  end
+
+  describe "GET /api/books?series=" do
+    test "returns only the books sharing that series name, ordered by position", %{conn: conn} do
+      {:ok, second} =
+        Catalog.add_book(%AddBookUsecaseDto{
+          attrs: %{
+            "title" => "The Obelisk Gate",
+            "author" => "N. K. Jemisin",
+            "series_name" => "The Broken Earth",
+            "series_position" => 2
+          }
+        })
+
+      {:ok, first} =
+        Catalog.add_book(%AddBookUsecaseDto{
+          attrs: %{
+            "title" => "The Fifth Season",
+            "author" => "N. K. Jemisin",
+            "series_name" => "The Broken Earth",
+            "series_position" => 1
+          }
+        })
+
+      {:ok, _unrelated} =
+        Catalog.add_book(%AddBookUsecaseDto{
+          attrs: %{"title" => "Sapiens", "author" => "Yuval Noah Harari"}
+        })
+
+      conn = get(conn, ~p"/api/books?series=The Broken Earth")
+
+      assert %{"data" => data} = json_response(conn, 200)
+      assert Enum.map(data, & &1["id"]) == [first.id, second.id]
+    end
+  end
+
+  describe "GET /api/books/genres" do
+    test "returns an empty list when no book has a genre", %{conn: conn} do
+      conn = get(conn, ~p"/api/books/genres")
+      assert json_response(conn, 200) == %{"data" => []}
+    end
+
+    test "returns distinct genres, alphabetically, flattened across every book", %{conn: conn} do
+      {:ok, _} =
+        Catalog.add_book(%AddBookUsecaseDto{
+          attrs: %{
+            "title" => "The Fifth Season",
+            "author" => "N. K. Jemisin",
+            "genres" => ["Fantasy", "Science Fiction"]
+          }
+        })
+
+      {:ok, _} =
+        Catalog.add_book(%AddBookUsecaseDto{
+          attrs: %{"title" => "Sapiens", "author" => "Yuval Noah Harari", "genres" => ["History"]}
+        })
+
+      {:ok, _} =
+        Catalog.add_book(%AddBookUsecaseDto{
+          attrs: %{
+            "title" => "The Obelisk Gate",
+            "author" => "N. K. Jemisin",
+            "genres" => ["Fantasy"]
+          }
+        })
+
+      {:ok, _} =
+        Catalog.add_book(%AddBookUsecaseDto{
+          attrs: %{"title" => "No Genre Book", "author" => "Someone"}
+        })
+
+      conn = get(conn, ~p"/api/books/genres")
+      assert json_response(conn, 200) == %{"data" => ["Fantasy", "History", "Science Fiction"]}
+    end
   end
 
   describe "GET /api/books/:id/page" do

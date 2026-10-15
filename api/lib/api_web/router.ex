@@ -27,6 +27,7 @@ defmodule ApiWeb.Router do
     put "/auth/reset_password/:token", AuthController, :reset_password
 
     get "/books", BookController, :index
+    get "/books/genres", BookController, :genres
     get "/books/:id", BookController, :show
 
     get "/posts/:post_id/comments", CommentController, :index

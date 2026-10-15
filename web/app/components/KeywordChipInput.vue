@@ -2,12 +2,7 @@
   <div class="chip-row">
     <span v-for="(keyword, index) in modelValue" :key="keyword" class="chip">
       {{ keyword }}
-      <button
-        type="button"
-        class="chip-remove"
-        :aria-label="t('posts.composer.removeKeyword', { keyword })"
-        @click="remove(index)"
-      >
+      <button type="button" class="chip-remove" :aria-label="removeLabel(keyword)" @click="remove(index)">
         ✕
       </button>
     </span>
@@ -16,8 +11,9 @@
       v-model="draft"
       type="text"
       class="chip-input"
-      :placeholder="modelValue.length === 0 ? t('posts.composer.keywordPlaceholder') : ''"
-      :aria-label="t('posts.composer.keywordAriaLabel')"
+      :list="list"
+      :placeholder="modelValue.length === 0 ? resolvedPlaceholder : ''"
+      :aria-label="resolvedAriaLabel"
       @keydown.enter.prevent="commit"
       @keydown.,.prevent="commit"
       @blur="commit"
@@ -31,6 +27,10 @@ const { t } = useI18n()
 const props = defineProps<{
   modelValue: string[]
   max?: number
+  placeholder?: string
+  ariaLabel?: string
+  removeAriaLabel?: (keyword: string) => string
+  list?: string
 }>()
 
 const emit = defineEmits<{
@@ -39,6 +39,13 @@ const emit = defineEmits<{
 
 const max = props.max ?? 8
 const draft = ref('')
+
+const resolvedPlaceholder = computed(() => props.placeholder ?? t('posts.composer.keywordPlaceholder'))
+const resolvedAriaLabel = computed(() => props.ariaLabel ?? t('posts.composer.keywordAriaLabel'))
+
+function removeLabel(keyword: string): string {
+  return props.removeAriaLabel ? props.removeAriaLabel(keyword) : t('posts.composer.removeKeyword', { keyword })
+}
 
 function commit() {
   const value = draft.value.trim()
