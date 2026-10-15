@@ -4,12 +4,14 @@ defmodule ApiWeb.ProfileController do
   alias Api.Adapters.Accounts
   alias Api.Adapters.Graphs
   alias Api.Adapters.InterestProfiles
+  alias Api.Adapters.UserBooks
   alias Api.Usecases.Graph.GetGraph.GetGraphUsecaseDto
   alias Api.Usecases.InterestProfile.GetInterestProfile.GetInterestProfileUsecaseDto
   alias Api.Usecases.User.GetCommunityHealth.GetCommunityHealthUsecaseDto
   alias Api.Usecases.User.GetUser.GetUserUsecaseDto
   alias Api.Usecases.User.UpdateAvatar.UpdateAvatarUsecaseDto
   alias Api.Usecases.User.UpdateProfile.UpdateProfileUsecaseDto
+  alias Api.Usecases.UserBook.ListUserBooks.ListUserBooksUsecaseDto
 
   action_fallback ApiWeb.FallbackController
 
@@ -45,6 +47,17 @@ defmodule ApiWeb.ProfileController do
       _user ->
         graph = Graphs.get_graph(%GetGraphUsecaseDto{user_id: id})
         render(conn, :graph, graph: graph)
+    end
+  end
+
+  def bookcase(conn, %{"id" => id}) do
+    case Accounts.get_user(%GetUserUsecaseDto{id: id, current_user: current_user(conn)}) do
+      nil ->
+        {:error, :not_found}
+
+      _user ->
+        user_books = UserBooks.list_user_books(%ListUserBooksUsecaseDto{user_id: id})
+        render(conn, :bookcase, user_books: user_books)
     end
   end
 

@@ -1,0 +1,22 @@
+{
+  "bookcase": {
+    "yourTitle": "Sua estante",
+    "title": "Estante de {name}",
+    "loading": "Carregando a estante…",
+    "empty": "Nada na estante ainda.",
+    "tabs": {
+      "all": "Todos",
+      "read": "Já Lidos",
+      "reading": "Lendo Agora",
+      "to_read": "Para Ler"
+    },
+    "status": {
+      "to_read": "Para ler",
+      "reading": "Lendo",
+      "read": "Lido"
+    },
+    "shelfControl": {
+      "label": "Colocar este livro na estante"
+    }
+  }
+}

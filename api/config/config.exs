@@ -100,6 +100,10 @@ config :api, :club_reading_progress_repository,
   adapter: Api.Adapters.Club.ClubReadingProgressRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.Club.Postgres.ClubReadingProgressRepository
 
+config :api, :user_book_repository,
+  adapter: Api.Adapters.UserBook.UserBookRepositoryAdapter,
+  adaptee: Api.Infrastructure.Repository.UserBook.Postgres.UserBookRepository
+
 config :api, :question_repository,
   adapter: Api.Adapters.Question.QuestionRepositoryAdapter,
   adaptee: Api.Infrastructure.Repository.Question.Postgres.QuestionRepository
