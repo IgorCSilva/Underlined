@@ -27,6 +27,10 @@ defmodule Api.Adapters.Club.ClubRepositoryAdapter do
     adaptee.list_clubs_for_book(book_id, current_user) |> Enum.map(&to_domain/1)
   end
 
+  def list_clubs(current_user, adaptee) do
+    adaptee.list_clubs(current_user) |> Enum.map(&to_domain/1)
+  end
+
   def join_club(user, club_id, adaptee), do: adaptee.join_club(user, club_id)
   def leave_club(user, club_id, adaptee), do: adaptee.leave_club(user, club_id)
 
@@ -48,6 +52,8 @@ defmodule Api.Adapters.Club.ClubRepositoryAdapter do
       member_count: db_club.member_count,
       members_preview: Enum.map(db_club.members_preview, &UserRepositoryAdapter.to_domain/1),
       joined_by_user: db_club.joined_by_user,
+      chapter_unit_label: db_club.chapter_unit_label,
+      current_chapter_label: db_club.current_chapter_label,
       inserted_at: db_club.inserted_at,
       updated_at: db_club.updated_at
     }

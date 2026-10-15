@@ -2,7 +2,9 @@
   "nav": {
     "feed": "Feed",
     "books": "Livros",
+    "clubs": "Clubes",
     "chains": "Cadeias",
+    "addPost": "Nova publicação",
     "addBook": "Adicionar livro",
     "profile": "Perfil",
     "saved": "Salvos",
