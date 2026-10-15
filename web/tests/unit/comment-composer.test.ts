@@ -15,7 +15,7 @@ describe('CommentComposer', () => {
     }
     vi.stubGlobal('$fetch', vi.fn().mockResolvedValue({ data: fakeComment }))
 
-    const wrapper = mount(CommentComposer, { props: { postId: 'post-1' } })
+    const wrapper = mount(CommentComposer, { props: { basePath: '/api/posts/post-1' } })
     await wrapper.find('.comment-input').setValue('Great read!')
     await wrapper.find('form').trigger('submit')
     await flushPromises()
@@ -38,7 +38,7 @@ describe('CommentComposer', () => {
     })
     vi.stubGlobal('$fetch', fetchMock)
 
-    const wrapper = mount(CommentComposer, { props: { postId: 'post-1', parentCommentId: 'c1' } })
+    const wrapper = mount(CommentComposer, { props: { basePath: '/api/posts/post-1', parentCommentId: 'c1' } })
     await wrapper.find('.comment-input').setValue('Agreed!')
     await wrapper.find('form').trigger('submit')
     await flushPromises()
@@ -56,7 +56,7 @@ describe('CommentComposer', () => {
     const fetchMock = vi.fn()
     vi.stubGlobal('$fetch', fetchMock)
 
-    const wrapper = mount(CommentComposer, { props: { postId: 'post-1' } })
+    const wrapper = mount(CommentComposer, { props: { basePath: '/api/posts/post-1' } })
     await wrapper.find('form').trigger('submit')
     await flushPromises()
 
@@ -66,7 +66,7 @@ describe('CommentComposer', () => {
   it('shows an error message when the request fails', async () => {
     vi.stubGlobal('$fetch', vi.fn().mockRejectedValue({ data: { errors: { detail: 'you are commenting too fast' } } }))
 
-    const wrapper = mount(CommentComposer, { props: { postId: 'post-1' } })
+    const wrapper = mount(CommentComposer, { props: { basePath: '/api/posts/post-1' } })
     await wrapper.find('.comment-input').setValue('Great read!')
     await wrapper.find('form').trigger('submit')
     await flushPromises()

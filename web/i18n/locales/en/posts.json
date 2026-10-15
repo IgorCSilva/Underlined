@@ -33,7 +33,8 @@
         "contradicts": "Contradicts",
         "example_of": "Provides an example of",
         "personal_connection": "Personal connection"
-      }
+      },
+      "openDebate": "Open as debate →"
     },
     "composer": {
       "published": "Published!",
