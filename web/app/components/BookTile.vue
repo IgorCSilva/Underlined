@@ -6,12 +6,15 @@
     </div>
     <h3 class="serif book-title">{{ book.title }}</h3>
     <p class="book-author">{{ book.author }}</p>
+    <div v-if="book.genres?.length" class="genre-chips">
+      <span v-for="genre in book.genres" :key="genre" class="genre-chip">{{ genre }}</span>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 defineProps<{
-  book: { title: string; author: string; cover_url: string | null }
+  book: { title: string; author: string; cover_url: string | null; genres?: string[] }
 }>()
 </script>
 
@@ -59,5 +62,22 @@ defineProps<{
   margin: 0;
   font-size: 0.85rem;
   color: var(--color-text-secondary);
+}
+
+.genre-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.genre-chip {
+  display: inline-block;
+  border: 1px solid var(--color-chip-text);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  color: var(--color-chip-text);
+  background: transparent;
+  font-size: 0.7rem;
 }
 </style>

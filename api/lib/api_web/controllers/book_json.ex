@@ -7,6 +7,8 @@ defmodule ApiWeb.BookJSON do
 
   def show(%{book: book}), do: %{data: data(book)}
 
+  def genres(%{genres: genres}), do: %{data: genres}
+
   def page(%{page: page}) do
     %{
       data:
@@ -23,7 +25,10 @@ defmodule ApiWeb.BookJSON do
       id: book.id,
       title: book.title,
       author: book.author,
-      cover_url: book.cover_url
+      cover_url: book.cover_url,
+      genres: book.genres,
+      series_name: book.series_name,
+      series_position: book.series_position
     }
   end
 end
